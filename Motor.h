@@ -68,19 +68,44 @@ public:
   {
     return m_MaxAccel;
   }
+
+  int8_t GetDir()
+  {
+    return m_Dir;
+  }
+  
+  void SetDir( int8_t dir )
+  {
+    m_Dir = dir;
+  }
+  
   
   void UpdateAccel();
-  void UpdateSpeed();
+  void UpdateSpeed( int16_t dt );
   
 private:  
-	int16_t m_Step; // in motor steps. corresponds to position_M1/2
-  int16_t m_GoalStep; // corresponds to target_position_M1/2
+  void SetSpeed( int16_t dt, int16_t goalSpeed );
 
-	int16_t m_Accel; // acceleration. corresponds to acceleration_M1/2
-  int16_t m_Speed; // corresponds to speed_M1/2
-  int16_t m_GoalSpeed; // corresponds to target_speed_M1/2
+  //////////////
+  // Position
+  //////////////
+	int16_t m_Step;       // in motor steps. corresponds to position_M1/2
+  int16_t m_GoalStep;   // corresponds to target_position_M1/2
 
-  int16_t m_MaxAccel; // max acceleration
+  //////////////
+  // Direction
+  //////////////
+  int8_t m_Dir;         // dir = 1 movepositive, dir = -1 move negative, dir = 0 , no move
+
+  ///////////////////
+  // Speed & Accel
+  ///////////////////
+	int16_t m_Accel;      // acceleration. corresponds to acceleration_M1/2
+  int16_t m_Speed;      // corresponds to speed_M1/2
+  int16_t m_GoalSpeed;  // corresponds to target_speed_M1/2
+
+  int16_t m_MaxSpeed;   // max speed
+  int16_t m_MaxAccel;   // max acceleration
 };
 
 #endif

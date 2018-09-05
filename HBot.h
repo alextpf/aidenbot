@@ -7,6 +7,8 @@
 class HBot
 {
 public:
+  enum MOTOR {M1, M2};
+  
   HBot(); // ctor
   ~HBot(); // dtor
   
@@ -14,6 +16,7 @@ public:
 	void Update(); // aka positionControl()
 private:
   void ComputePos(); // in mm
+  void UpdateTimer( MOTOR m );
   
   int16_t m_PosX; // X-pos in mm. corresponds to real_position_x
   int16_t m_PosY; // Y-pos in mm. corresponds to real_position_y

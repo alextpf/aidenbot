@@ -7,8 +7,8 @@ void HBot::ComputePos()
   m_PosX = ( m_M1.GetStep() + m_M2.GetStep() ) * 0.5 / X_AXIS_STEPS_PER_UNIT;
   m_PosY = ( m_M1.GetStep() - m_M2.GetStep() ) * 0.5 / Y_AXIS_STEPS_PER_UNIT;
 }
-//=========================================================
 
+//=========================================================
 void HBot::Update() // aka positionControl()
 {
   ComputePos(); // update m_PosX/Y
@@ -24,7 +24,31 @@ void HBot::Update() // aka positionControl()
   m_M1.UpdateAccel();
   m_M2.UpdateAccel();
   
-  m_M1.UpdateSpeed();
-  m_M2.UpdateSpeed();
+  m_M1.UpdateSpeed( dt );
+  m_M2.UpdateSpeed( dt );
   
-}
+} // Update
+
+//=========================================================
+void HBot::UpdateTimer( MOTOR m )
+{
+  int16_t s;
+  int8_t dir;
+  
+  switch (m)
+  {
+  case M1:
+  s = m_M1.GetSpeed();
+  dir = m_M1.GetDir();
+  break;
+  
+  case M2:
+  s = m_M2.GetSpeed();
+  dir = m_M2.GetDir();
+  break;
+  
+  default:
+  break;
+  }
+  
+} // UpdateTimer
