@@ -1,6 +1,14 @@
+//////////////////////////////////////////////////////
+// Original Author: Jose Julio
+// Modified by Alex Chen
+//////////////////////////////////////////////////////
 #include "Motor.h"
 #include "Configuration.h"
-#include "Util.h"
+//#include "Util.h"
+
+extern int freeRam ();
+extern int16_t myAbs(int16_t param);
+extern int sign(int val);
 
 //=========================================================
 void Motor::UpdateAccel()

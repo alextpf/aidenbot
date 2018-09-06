@@ -1,3 +1,7 @@
+//////////////////////////////////////////////////////
+// Original Author: Jose Julio
+// Modified by Alex Chen
+//////////////////////////////////////////////////////
 #ifndef HBOT_H
 #define HBOT_H
 
@@ -14,6 +18,7 @@ public:
   
   void SetPosInternal( int16_t x, int16_t y ); // in mm
   void SetPosStraight( int16_t x, int16_t y ); // in mm
+  void UpdatePosStraight();
 	void Update(); // aka positionControl()
 private:
   void ComputePos(); // in mm

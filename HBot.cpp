@@ -1,6 +1,10 @@
+//////////////////////////////////////////////////////
+// Original Author: Jose Julio
+// Modified by Alex Chen
+//////////////////////////////////////////////////////
+
 #include "HBot.h"
 #include "Configuration.h"
-
 #include "Util.h"
 
 //=========================================================
@@ -77,10 +81,8 @@ void HBot::SetPosInternal( int16_t x, int16_t y )
 } // SetPosNoStraight
 
 //=========================================================
-void HBot::SetPosStraight( int16_t x, int16_t y )
+void HBot::UpdatePosStraight()
 {  
-  SetPosInternal( x, y );
-
   // Speed adjust to draw straight lines (aproximation)
   // First, we calculate the distante to target on each axis
   int diff_M1 = myAbs( m_M1.GetGoalStep() - m_M1.GetStep() );
@@ -103,8 +105,8 @@ void HBot::SetPosStraight( int16_t x, int16_t y )
   }
   
   // Calculate the target speed (with sign) for each motor
-  long tspeed1 = sign( m_M1.GetGoalStep() - m_M1.GetStep() ) * MAX_SPEED * factor1;
-  long tspeed2 = sign( m_M2.GetGoalStep() - m_M2.GetStep() ) * MAX_SPEED * factor2;
+  long tspeed1 = sign( m_M1.GetGoalStep() - m_M1.GetStep() ) * MAX_SPEED * factor1; // arduino "long" is 32 bit
+  long tspeed2 = sign( m_M2.GetGoalStep() - m_M2.GetStep() ) * MAX_SPEED * factor2; // arduino "long" is 32 bit
   
   // Now we calculate a compensation factor. This factor depends on the acceleration of each motor (difference on speed we need to apply to each motor)
   // This factor was empirically tested (with a simulator) to reduce overshoots
@@ -122,6 +124,13 @@ void HBot::SetPosStraight( int16_t x, int16_t y )
   const int16_t target_speed_M2 = MAX_SPEED * factor2 * speedfactor2 * speedfactor2;
   
   m_M1.SetGoalSpeed(target_speed_M1);
-  m_M2.SetGoalSpeed(target_speed_M2);
+  m_M2.SetGoalSpeed(target_speed_M2);  
+} // UpdatePosStraight
+
+//=========================================================
+void HBot::SetPosStraight( int16_t x, int16_t y )
+{  
+  SetPosInternal( x, y );
+  UpdatePosStraight();
   
 } // SetPosStraight
