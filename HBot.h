@@ -12,11 +12,11 @@ public:
   HBot(); // ctor
   ~HBot(); // dtor
   
-  void SetPos( int16_t x, int16_t y, bool isGoal ); // in mm
+  void SetPosInternal( int16_t x, int16_t y ); // in mm
+  void SetPosStraight( int16_t x, int16_t y ); // in mm
 	void Update(); // aka positionControl()
 private:
   void ComputePos(); // in mm
-  void UpdateTimer( MOTOR m );
   
   int16_t m_PosX; // X-pos in mm. corresponds to real_position_x
   int16_t m_PosY; // Y-pos in mm. corresponds to real_position_y

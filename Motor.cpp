@@ -35,11 +35,11 @@ void Motor::UpdateSpeed( int16_t dt )
     goalSpeed = stopPos <= m_GoalStep ? 0 : -m_GoalSpeed;
   }
 
-  SetSpeed( dt, goalSpeed );
+  SetSpeedInternal( dt, goalSpeed );
 } // UpdateSpeed
 
 //=========================================================
-void Motor::SetSpeed( int16_t dt, int16_t goalSpeed )
+void Motor::SetSpeedInternal( int16_t dt, int16_t goalSpeed )
 {
   goalSpeed = constrain( goalSpeed, -m_MaxSpeed, m_MaxSpeed );
   
@@ -57,4 +57,37 @@ void Motor::SetSpeed( int16_t dt, int16_t goalSpeed )
   {
     m_Speed = goalSpeed;
   }  
+  
+  // Check if we need to change the direction pins
+  if ( (m_Speed == 0) && (m_Dir != 0) )
+  {
+    m_Dir = 0;
+  }
+  else if ( (m_Speed > 0) && (m_Dir != 1) )
+  {
+    m_Dir = 1;
+  }
+  else if ((m_Speed < 0) && (m_Dir != -1))
+  {
+    m_Dir = -1;
+  }
+
+  if (m_Speed == 0)
+  {
+    m_Period = ZERO_SPEED;
+  }
+  else if (m_Speed > 0)
+  {
+    m_Period = 2000000 / m_Speed; // 2Mhz timer
+  }
+  else
+  {
+    m_Period = 2000000 / -m_Speed;
+  }
+
+  if (m_Period > 65535)   // Check for minimun speed (maximun period without overflow)
+  {
+    m_Period = ZERO_SPEED;
+  }
+  
 } // SetSpeed

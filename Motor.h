@@ -78,13 +78,17 @@ public:
   {
     m_Dir = dir;
   }
-  
+
+  long GetPeriod()
+  {
+    return m_Period;
+  }
   
   void UpdateAccel();
   void UpdateSpeed( int16_t dt );
   
 private:  
-  void SetSpeed( int16_t dt, int16_t goalSpeed );
+  void SetSpeedInternal( int16_t dt, int16_t goalSpeed );
 
   //////////////
   // Position
@@ -106,6 +110,8 @@ private:
 
   int16_t m_MaxSpeed;   // max speed
   int16_t m_MaxAccel;   // max acceleration
+  long    m_Period; // for setting timer use. corresponds to timer_period
+  
 };
 
 #endif
