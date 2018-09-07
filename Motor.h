@@ -18,7 +18,7 @@ public:
   	m_Step = step;
   }
 
-  int16_t GetStep()
+  int16_t GetStep() const
   {
   	return m_Step;
   }
@@ -28,7 +28,7 @@ public:
   	m_GoalStep = step;
   }
 
-  int16_t GetGoalStep()
+  int16_t GetGoalStep() const
   {
   	return m_GoalStep;
   }
@@ -38,7 +38,7 @@ public:
     m_Speed = speed;
   }
 
-  int16_t GetSpeed()
+  int16_t GetSpeed() const
   {
     return m_Speed;
   }
@@ -48,7 +48,7 @@ public:
     m_GoalSpeed = speed;
   }
 
-  int16_t GetGoalSpeed()
+  int16_t GetGoalSpeed() const
   {
     return m_GoalSpeed;
   }
@@ -58,7 +58,7 @@ public:
     m_Accel = accel;
   }
 
-  int16_t GetAccel()
+  int16_t GetAccel() const
   {
     return m_Accel;
   }
@@ -73,7 +73,7 @@ public:
     return m_MaxAccel;
   }
 
-  int8_t GetDir()
+  int8_t GetDir() const
   {
     return m_Dir;
   }
@@ -83,7 +83,7 @@ public:
     m_Dir = dir;
   }
 
-  long GetPeriod()
+  long GetPeriod() const
   {
     return m_Period;
   }

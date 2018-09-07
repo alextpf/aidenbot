@@ -78,7 +78,7 @@ void HBot::SetPosInternal( int16_t x, int16_t y )
   m_M1.SetGoalStep( goalStepM1 );
   m_M2.SetGoalStep( goalStepM2 );
   
-} // SetPosNoStraight
+} // SetPosInternal
 
 //=========================================================
 void HBot::UpdatePosStraight()
