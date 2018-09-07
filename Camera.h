@@ -2,37 +2,18 @@
 #define CAMERA_H
 
 #include "Arduino.h"
+#include "Point2D.h"
+
+typedef Point2D<int> Point2I;   // 16 bit
+typedef Point2D<long> Point2L;  // 32 bit
+
+typedef Point2I PuckPos;        // alias
+typedef Point2I Vector;         // alias
+typedef Point2L PuckSpeed;      // alias
 
 class Camera
 {
 public:
-
-  struct PuckPos
-  {
-    PuckPos();
-    ~PuckPos();
-    
-    PuckPos(int8_t x, int8_t y)
-    : m_PosX(x),
-      m_PosY(y)
-    {}
-    
-    int8_t m_PosX; // puck position X captured by camera, in mm
-    int8_t m_PosY; // puck position Y captured by camera, in mm  
-
-    // operators
-    PuckPos operator + (const PuckPos & rhs )
-    {
-      return PuckPos(m_PosX + rhs.m_PosX, m_PosY + rhs.m_PosY );
-    }
-
-    PuckPos operator - (const PuckPos & rhs )
-    {
-      return PuckPos(m_PosX - rhs.m_PosX, m_PosY - rhs.m_PosY );
-    }
-  };
-  
-  typedef PuckPos Vector; // alias
   
   void SetCurrPuckPos( const PuckPos pos )
   {
@@ -46,8 +27,7 @@ public:
 
   void SetPrevPuckPos( const PuckPos pos )
   {
-    m_PrevPuckPos.m_PosX = pos.m_PosX;
-    m_PrevPuckPos.m_PosY = pos.m_PosY;
+    m_PrevPuckPos = pos;
   } // SetPrevPuckPos
   
   PuckPos GetPrevPuckPos() const
@@ -55,15 +35,32 @@ public:
     return m_PrevPuckPos;
   } // GetPrevPuckPos
 
-  void CamProcess();
+  void CamProcess( int dt /*ms*/ );
   
 private:
+  //////////////
   // position
-  PuckPos m_CurrPuckPos; // current pos
-  PuckPos m_PrevPuckPos; // previous pos
+  //////////////
+  PuckPos m_CurrPuckPos; // current pos. mm
+  PuckPos m_PrevPuckPos; // previous pos. mm
+  PuckPos m_CurrPredictPos;
+  PuckPos m_PrevPredictPos;
+  int m_PredictXAttack; // predicted X coordinate for attack
 
+  //////////////
   // speed
+  //////////////
+  PuckSpeed m_CurrPuckSpeed; // current speed. dm/ms
+  PuckSpeed m_PrevPuckSpeed; // previous speed. dm/ms
+  PuckSpeed m_AverageSpeed;
+
   
+  // 0 : No risk, 
+  // 1 : Puck is moving to our field directly, 
+  // 2 : Puck is moving to our field with a bounce
+  // 3 : ?
+  // -1 : error: noise
+  int8_t m_PredictStatus;
 };// Camera
 
 #endif

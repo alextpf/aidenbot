@@ -114,7 +114,7 @@ private:
 
   int16_t m_MaxSpeed;   // max speed
   int16_t m_MaxAccel;   // max acceleration
-  long    m_Period; // for setting timer use. corresponds to timer_period
+  long    m_Period;     // for setting timer use. corresponds to timer_period. arduino "long" is 32 bit
   
 };
 
