@@ -37,7 +37,18 @@ public:
 
   void CamProcess( int dt /*ms*/ );
   
+  int8_t GetPredictBounce()
+  {
+    return m_PredictBounce;
+  }
+
+  int GetPredictTime()
+  {
+    return m_PredictTime;
+  }
+  
 private:
+
   //////////////
   // position
   //////////////
@@ -53,7 +64,6 @@ private:
   PuckSpeed m_CurrPuckSpeed; // current speed. dm/ms
   PuckSpeed m_PrevPuckSpeed; // previous speed. dm/ms
   PuckSpeed m_AverageSpeed;
-
   
   // 0 : No risk, 
   // 1 : Puck is moving to our field directly, 
@@ -61,6 +71,13 @@ private:
   // 3 : ?
   // -1 : error: noise
   int8_t m_PredictStatus;
+
+  // Bounce
+  int8_t m_PredictBounce; // number of bounce predicted
+  int8_t m_PredictBounceStatus; //
+
+  // Time
+  int m_PredictTime;
 };// Camera
 
 #endif
