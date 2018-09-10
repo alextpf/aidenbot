@@ -7,6 +7,11 @@
 
 #include "Motor.h"
 #include "Arduino.h"
+#include "Point2D.h"
+
+typedef Point2D<int> Point2I;   // 16 bit
+typedef Point2D<long> Point2L;  // 32 bit
+typedef Point2I RobotPos;       // alias
 
 class HBot
 {
@@ -16,15 +21,31 @@ public:
   HBot(); // ctor
   ~HBot(); // dtor
   
-  void SetPosInternal( int16_t x, int16_t y ); // in mm
-  void SetPosStraight( int16_t x, int16_t y ); // in mm
+  void SetPosInternal( int x, int y ); // in mm
+  void SetPosStraight( int x, int y ); // in mm
   void UpdatePosStraight();
 	void Update(); // aka positionControl()
-private:
-  void ComputePos(); // in mm
+  const Motor& GetM1()
+  {
+    return m_M1;
+  }
   
-  int16_t m_PosX; // X-pos in mm. corresponds to real_position_x
-  int16_t m_PosY; // Y-pos in mm. corresponds to real_position_y
+  const Motor& GetM2()
+  {
+    return m_M2;
+  }
+
+  const RobotPos& GetRobotPos() const
+  {
+    return m_Pos;
+  }
+
+  // utility function
+  static RobotPos MotorStepToHBotPos(int m1Step, int m2Step); // in mm
+  static void HBotPosToMotorStep(const RobotPos& pos, int& m1Step, int& m2Step); // in mm
+private:  
+
+  RobotPos m_Pos;
 	Motor m_M1;
 	Motor m_M2;
 	uint32_t m_Time; // time stamp, in micro sec.

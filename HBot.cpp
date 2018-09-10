@@ -8,20 +8,29 @@
 #include "Util.h"
 
 //=========================================================
-void HBot::ComputePos()
+RobotPos HBot::MotorStepToHBotPos(int m1Step, int m2Step)
 {
-  m_PosX = ( m_M1.GetStep() + m_M2.GetStep() ) * 0.5 / X_AXIS_STEPS_PER_UNIT;
-  m_PosY = ( m_M1.GetStep() - m_M2.GetStep() ) * 0.5 / Y_AXIS_STEPS_PER_UNIT;
-} // ComputePos
+  RobotPos pos;
+  pos.m_X = ( m1Step + m2Step ) * 0.5 / X_AXIS_STEPS_PER_UNIT;
+  pos.m_Y = ( m1Step - m2Step ) * 0.5 / Y_AXIS_STEPS_PER_UNIT;
+  return pos;
+} // MotorStepToHBotPos
+
+//=========================================================
+void HBot::HBotPosToMotorStep(const RobotPos& pos, int& m1Step, int& m2Step)
+{
+  m1Step = (pos.m_X + pos.m_Y) * X_AXIS_STEPS_PER_UNIT;
+  m2Step = (pos.m_X - pos.m_Y) * Y_AXIS_STEPS_PER_UNIT;
+} // HBotPosToMotorStep
 
 //=========================================================
 void HBot::Update() // aka positionControl()
 {
-  ComputePos(); // update m_PosX/Y
+  m_Pos = MotorStepToHBotPos( m_M1.GetStep(), m_M2.GetStep() ); // update m_Pos
 
   // record time
   uint32_t currTime = micros();
-  int16_t dt = currTime - m_Time;
+  int dt = currTime - m_Time;
   dt = constrain( currTime - m_Time, 0, 2000 );
   
   m_Time = currTime; // update time
@@ -34,7 +43,7 @@ void HBot::Update() // aka positionControl()
   m_M2.UpdateSpeed( dt );
 
   int8_t dir = m_M1.GetDir();
-  int16_t s = m_M1.GetSpeed();
+  int s = m_M1.GetSpeed();
   
   if ( s > 0 && dir == 1 )
   {
@@ -64,19 +73,18 @@ void HBot::Update() // aka positionControl()
 } // Update
 
 //=========================================================
-void HBot::SetPosInternal( int16_t x, int16_t y )
-{
-  uint16_t goalX, goalY;
+void HBot::SetPosInternal( int x, int y )
+{  
+  // Constrain to robot limits...  
+  RobotPos goal(
+    constrain( x, ROBOT_MIN_X, ROBOT_MAX_X ), 
+    constrain( y, ROBOT_MIN_Y, ROBOT_MAX_Y ) ); // mm
 
-  // Constrain to robot limits...
-  goalX = constrain( x, ROBOT_MIN_X, ROBOT_MAX_X ); // mm
-  goalY = constrain( y, ROBOT_MIN_Y, ROBOT_MAX_Y ); // mm
-
-  const int16_t goalStepM1 = (goalX + goalY) * X_AXIS_STEPS_PER_UNIT;
-  const int16_t goalStepM2 = (goalX - goalY) * Y_AXIS_STEPS_PER_UNIT;
-
-  m_M1.SetGoalStep( goalStepM1 );
-  m_M2.SetGoalStep( goalStepM2 );
+  int m1s, m2s;
+  HBotPosToMotorStep(goal, m1s, m2s);
+  
+  m_M1.SetGoalStep( m1s );
+  m_M2.SetGoalStep( m2s );
   
 } // SetPosInternal
 
@@ -120,15 +128,15 @@ void HBot::UpdatePosStraight()
   speedfactor2 = constrain( speedfactor2, 0.0, 1.0 );
 
   // Set motor speeds. We apply the straight factor and the "acceleration compensation" speedfactor
-  const int16_t target_speed_M1 = MAX_SPEED * factor1 * speedfactor1 * speedfactor1;
-  const int16_t target_speed_M2 = MAX_SPEED * factor2 * speedfactor2 * speedfactor2;
+  const int target_speed_M1 = MAX_SPEED * factor1 * speedfactor1 * speedfactor1;
+  const int target_speed_M2 = MAX_SPEED * factor2 * speedfactor2 * speedfactor2;
   
   m_M1.SetGoalSpeed(target_speed_M1);
   m_M2.SetGoalSpeed(target_speed_M2);  
 } // UpdatePosStraight
 
 //=========================================================
-void HBot::SetPosStraight( int16_t x, int16_t y )
+void HBot::SetPosStraight( int x, int y )
 {  
   SetPosInternal( x, y );
   UpdatePosStraight();

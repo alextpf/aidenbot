@@ -2,9 +2,11 @@
 #include "Configuration.h"
 
 extern int freeRam ();
-extern int16_t myAbs(int16_t param);
+extern int myAbs(int param);
+extern Point2I Point2Abs(Point2I param);
 extern int sign(int val);
 
+//=========================================================
 void Camera::CamProcess( int dt /*ms*/ )
 {  
   // Speed calculation on each axis  
@@ -85,7 +87,7 @@ void Camera::CamProcess( int dt /*ms*/ )
       // bounce prediction => slope change  with the bounce, we only need to change the sign, easy!!
       slope = -slope;
       
-      m_CurrPredictPos.m_Y = ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT + PUCK_SIZE;
+      m_CurrPredictPos.m_Y = ROBOT_DEFENSE_POSITION_DEFAULT + PUCK_SIZE;
       m_CurrPredictPos.m_X = ( m_CurrPredictPos.m_Y - bouncePos.m_Y ) / slope + bouncePos.m_X;
       
       if ( m_CurrPredictPos.m_X < PUCK_SIZE || 
@@ -122,29 +124,117 @@ void Camera::CamProcess( int dt /*ms*/ )
     }
     else // No bounce, direct impact
     {
-      if (predict_bounce_status == 1)  // This is the first direct impact trajectory after a bounce
+      if (m_PredictBounceStatus == 1)  // This is the first direct impact trajectory after a bounce
       {
         // We dont predict nothing new...
-        predict_bounce_status = 0;
+        m_PredictBounceStatus = 0;
       }
       else
       {
         // average of the results (some noise filtering)
-        if (predict_x_old > 0)
+        if ( m_PrevPredictPos.m_X > 0 )
         {
-          predict_x = (predict_x_old + predict_x) >> 1;
+          m_CurrPredictPos.m_X = ( m_PrevPredictPos.m_X + m_CurrPredictPos.m_X ) >> 1;
         }
-        predict_x_old = predict_x;
+        m_PrevPredictPos.m_X = m_CurrPredictPos.m_X;
 
-        predict_time = ((defense_position + PUCK_SIZE) - puckCoordY) * 100L / puckSpeedY; // in ms
-        predict_time_attack = ((attack_position + PUCK_SIZE) - puckCoordY) * 100L / puckSpeedY; // in ms
-        predict_time -= VISION_SYSTEM_LAG;
-        predict_time_attack -= VISION_SYSTEM_LAG;
+        m_PredictTime = ( ROBOT_DEFENSE_POSITION_DEFAULT + PUCK_SIZE - m_CurrPuckPos.m_Y ) * 100L / m_CurrPuckSpeed.m_Y - VISION_SYSTEM_LAG; // in ms
+        m_PredictTimeAttack = ( ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT + PUCK_SIZE - m_CurrPuckPos.m_Y ) * 100L / m_CurrPuckSpeed.m_Y - VISION_SYSTEM_LAG; // in ms        
       }
     }
   }
   else // // Puck is moving slowly or to the other side
   {
-    
+    m_PrevPredictPos.m_X = -1;
+    m_PredictStatus = 0;
+    m_PredictBounce = 0;
+    m_PredictBounceStatus = 0;
   }//if ( m_AverageSpeed.m_Y < -50 )
 } // CamProcess
+
+//=========================================================
+PuckPos Camera::PredictPuckPos( int predictTime )
+{
+  predictTime += VISION_SYSTEM_LAG;
+  Point2L tmpPos( m_AverageSpeed * m_PredictTime / 100L );
+  PuckPos tmp(tmpPos.m_X, tmpPos.m_Y);
+  return m_CurrPuckPos + tmp;
+} // PredictPuckYPos
+
+//=========================================================
+void Camera::MissingStepsDetection( HBot& hBot )
+{
+  // if we don´t have a valid robot detection from camera => exit
+  if ( m_RobotPos == RobotPos( 0, 0 ) )
+  {
+    return;
+  }
+  
+  int robotCoordSamples = 0;
+  RobotPos robotPosAvg(0,0);
+  RobotPos robotMissingStepsError(0,0);
+  
+  // If we are stopped and robot corrdinates are OK...
+  if ( myAbs( hBot.GetM1().GetSpeed() ) < 400 && 
+       myAbs( hBot.GetM2().GetSpeed() ) < 400 && 
+       m_RobotPos.m_X < TABLE_WIDTH && 
+       m_RobotPos.m_Y < TABLE_LENGTH * 0.5 )
+  {
+    // Are we near center and near defense position?
+    if ( hBot.GetRobotPos().m_X  > ROBOT_CENTER_X - 50 && 
+         hBot.GetRobotPos().m_X  < ROBOT_CENTER_X + 50 && 
+         hBot.GetRobotPos().m_Y  >= ROBOT_MIN_Y && 
+         hBot.GetRobotPos().m_Y  < ROBOT_DEFENSE_POSITION_DEFAULT + 60 )
+    {
+      robotCoordSamples++;
+      robotPosAvg += hBot.GetRobotPos();
+      
+      // When we collect 10 samples we make the correction
+      if (robotCoordSamples == 10)
+      {        
+        robotPosAvg /= robotCoordSamples;
+        robotMissingStepsError = Point2Abs( hBot.GetRobotPos() - robotPosAvg );  // in mm
+        
+        // robot_position_y_mm += ROBOT_POSITION_CAMERA_CORRECTION_Y;   // correction because camera point of view and robot mark
+        
+        if ( robotMissingStepsError.m_X > MISSING_STEPS_MAX_ERROR_X ||
+             robotMissingStepsError.m_Y > MISSING_STEPS_MAX_ERROR_Y )
+        {
+          // Missing steps detected We need to correct this...
+#ifdef CORRECT_MISSING_STEPS
+          int m1s,m2s;
+          HBot::HBotPosToMotorStep( robotPosAvg, m1s, m2s );
+          hBot.GetM1().SetStep( m1s );
+          hBot.GetM2().SetStep( m2s );
+          
+          Serial.print("MSX:");
+          Serial.println(robotMissingStepsError.m_X);
+          Serial.print("MSY:");
+          Serial.println(robotMissingStepsError.m_Y);
+          //max_acceleration = user_max_accel / 2;          
+#endif
+        }
+        robotCoordSamples = 0; 
+        robotPosAvg.m_X = 0;
+        robotPosAvg.m_Y = 0;
+      }
+    }
+    else
+    {
+      robotCoordSamples = 0;
+      robotPosAvg.m_X = 0;
+      robotPosAvg.m_Y = 0;
+      robotMissingStepsError.m_X = 0;
+      robotMissingStepsError.m_Y = 0;
+    }
+  }
+  else
+  {
+    robotCoordSamples = 0;
+    robotPosAvg.m_X = 0;
+    robotPosAvg.m_Y = 0;
+    robotMissingStepsError.m_X = 0;
+    robotMissingStepsError.m_Y = 0;
+  }
+}
+ // MissingStepsDetection

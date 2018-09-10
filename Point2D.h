@@ -17,9 +17,19 @@ public:
   T m_Y; // puck position Y captured by camera, in mm  
 
   // operators
-  Point2D operator + (const Point2D & rhs )
+  bool operator == (const Point2D& rhs)
+  {
+    return m_X == rhs.m_X && m_Y == rhs.m_Y;
+  }
+  
+  Point2D operator + (const Point2D& rhs )
   {
     return Point2D( m_X + rhs.m_X, m_Y + rhs.m_Y );
+  }
+  
+  Point2D operator += (const Point2D & rhs )
+  {
+    return *this + rhs;
   }
 
   Point2D operator - (const Point2D & rhs )
@@ -27,15 +37,31 @@ public:
     return Point2D( m_X - rhs.m_X, m_Y - rhs.m_Y );
   }
 
+  Point2D operator -= (const Point2D & rhs )
+  {
+    return *this - rhs;
+  }
+
   Point2D operator * (const T rhs)
   {
     return Point2D( m_X * rhs, m_Y * rhs );
+  }
+  
+  Point2D operator *= (const T rhs )
+  {
+    return *this * rhs;
   }
   
   Point2D operator / (const T rhs)
   {
     return Point2D( m_X / rhs, m_Y / rhs );
   }
+  
+  Point2D operator /= (const T rhs )
+  {
+    return *this / rhs;
+  }
+  
 }; // Point2D
 
 

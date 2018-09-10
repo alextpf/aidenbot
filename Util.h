@@ -12,12 +12,19 @@ int freeRam () {
 }
 //========================================================================================================================================
 // Arduino abs function sometimes fail!
-int16_t myAbs(int16_t param)
+template <class T>
+T myAbs(T param)
 {
   if (param < 0)
     return -param;
   else
     return param;
+}
+
+template <class T>
+Point2D<T> Point2Abs( const Point2D<T>& param)
+{
+    return Point2D<T>(myAbs(param.m_X), myAbs(param.m_Y));
 }
 //========================================================================================================================================
 // Extract sign of a variable
