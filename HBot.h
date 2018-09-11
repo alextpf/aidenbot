@@ -40,6 +40,16 @@ public:
     return m_Pos;
   }
 
+  void SetMaxSpeed( int s )
+  {
+    m_MaxSpeed = s;
+  }
+
+  int GetMaxSpeed()
+  {
+    return m_MaxSpeed;
+  }
+  
   // utility function
   static RobotPos MotorStepToHBotPos(int m1Step, int m2Step); // in mm
   static void HBotPosToMotorStep(const RobotPos& pos, int& m1Step, int& m2Step); // in mm
@@ -49,5 +59,6 @@ private:
 	Motor m_M1;
 	Motor m_M2;
 	uint32_t m_Time; // time stamp, in micro sec.
+  int m_MaxSpeed;
 };
 #endif

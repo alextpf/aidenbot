@@ -112,9 +112,8 @@ private:
   int m_Speed;      // corresponds to speed_M1/2
   int m_GoalSpeed;  // corresponds to target_speed_M1/2
 
-  int m_MaxSpeed;   // max speed
   int m_MaxAccel;   // max acceleration
-  long    m_Period;     // for setting timer use. corresponds to timer_period. arduino "long" is 32 bit
+  long m_Period;    // for setting timer use. corresponds to timer_period. arduino "long" is 32 bit
   
 };
 

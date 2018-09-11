@@ -23,7 +23,7 @@ void Motor::UpdateAccel()
       m_Accel = m_MaxAccel;
     }
   }
-}
+} // UpdateAccel
 
 //=========================================================
 void Motor::UpdateSpeed( int dt )
@@ -49,7 +49,7 @@ void Motor::UpdateSpeed( int dt )
 //=========================================================
 void Motor::SetSpeedInternal( int dt, int goalSpeed )
 {
-  goalSpeed = constrain( goalSpeed, -m_MaxSpeed, m_MaxSpeed );
+  goalSpeed = constrain( goalSpeed, -MAX_SPEED, MAX_SPEED );
   
   // We limit acceleration => speed ramp
   int accel = (long)m_Accel * dt * 0.001; // We divide by 1000 because dt are in microseconds

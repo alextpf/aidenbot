@@ -113,23 +113,23 @@ void HBot::UpdatePosStraight()
   }
   
   // Calculate the target speed (with sign) for each motor
-  long tspeed1 = sign( m_M1.GetGoalStep() - m_M1.GetStep() ) * MAX_SPEED * factor1; // arduino "long" is 32 bit
-  long tspeed2 = sign( m_M2.GetGoalStep() - m_M2.GetStep() ) * MAX_SPEED * factor2; // arduino "long" is 32 bit
+  long tspeed1 = sign( m_M1.GetGoalStep() - m_M1.GetStep() ) * m_MaxSpeed * factor1; // arduino "long" is 32 bit
+  long tspeed2 = sign( m_M2.GetGoalStep() - m_M2.GetStep() ) * m_MaxSpeed * factor2; // arduino "long" is 32 bit
   
   // Now we calculate a compensation factor. This factor depends on the acceleration of each motor (difference on speed we need to apply to each motor)
   // This factor was empirically tested (with a simulator) to reduce overshoots
   long diffspeed1 = abs( m_M1.GetSpeed() - tspeed1);
   long diffspeed2 = abs( m_M2.GetSpeed() - tspeed2);
   
-  float speedfactor1 = 1.05 - (diffspeed2 - diffspeed1) / (2.0 * MAX_SPEED);  
+  float speedfactor1 = 1.05 - (diffspeed2 - diffspeed1) / (2.0 * m_MaxSpeed);  
   speedfactor1 = constrain( speedfactor1, 0.0, 1.0 );
   
-  float speedfactor2 = 1.05 - (diffspeed1 - diffspeed2) / (2.0 * MAX_SPEED);
+  float speedfactor2 = 1.05 - (diffspeed1 - diffspeed2) / (2.0 * m_MaxSpeed);
   speedfactor2 = constrain( speedfactor2, 0.0, 1.0 );
 
   // Set motor speeds. We apply the straight factor and the "acceleration compensation" speedfactor
-  const int target_speed_M1 = MAX_SPEED * factor1 * speedfactor1 * speedfactor1;
-  const int target_speed_M2 = MAX_SPEED * factor2 * speedfactor2 * speedfactor2;
+  const int target_speed_M1 = m_MaxSpeed * factor1 * speedfactor1 * speedfactor1;
+  const int target_speed_M2 = m_MaxSpeed * factor2 * speedfactor2 * speedfactor2;
   
   m_M1.SetGoalSpeed(target_speed_M1);
   m_M2.SetGoalSpeed(target_speed_M2);  
