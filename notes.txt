@@ -1,0 +1,10 @@
+Note:
+
+Speed:
+
+- max_speed is dynamically changed. It's HBot::m_MaxSpeed
+- user_max_speed is set to MAX_SPEED. It's just replaced by MAX_SPEED in aidenbot
+
+Acceleration:
+- max_acceleration: the only place that it's changed is in Camera::MissingStepsDetection(), but it's commented, so....
+- user_max_accel = MAX_ACCEL
