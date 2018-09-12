@@ -88,6 +88,16 @@ public:
     return m_Period;
   }
   
+  void SetMaxSpeed( int s )
+  {
+     m_MaxSpeed = s;
+  }
+  
+  int GetMaxSpeed()
+  {
+    return m_MaxSpeed;
+  }
+  
   void UpdateAccel();
   void UpdateSpeed( int dt );
   
@@ -111,6 +121,7 @@ private:
 	int m_Accel;      // acceleration. corresponds to acceleration_M1/2
   int m_Speed;      // corresponds to speed_M1/2
   int m_GoalSpeed;  // corresponds to target_speed_M1/2
+  int m_MaxSpeed;   // corresponds to max_speed
 
   int m_MaxAccel;   // max acceleration
   long m_Period;    // for setting timer use. corresponds to timer_period. arduino "long" is 32 bit

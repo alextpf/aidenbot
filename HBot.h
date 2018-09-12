@@ -42,12 +42,24 @@ public:
 
   void SetMaxSpeed( int s )
   {
-    m_MaxSpeed = s;
+     m_M1.SetMaxSpeed(s);
+     m_M2.SetMaxSpeed(s);
   }
 
   int GetMaxSpeed()
   {
-    return m_MaxSpeed;
+    return m_M1.GetMaxSpeed(); // assuming max speed for 2 motors are the same
+  }
+  
+  void SetMaxAccel( int accel )
+  {
+    m_M1.SetMaxAccel( accel );
+    m_M2.SetMaxAccel( accel );
+  }  
+  
+  int GetMaxAccel()
+  {
+    return m_M1.GetMaxAccel(); // assuming max accel for 2 motors are the same
   }
   
   // utility function
@@ -59,6 +71,6 @@ private:
 	Motor m_M1;
 	Motor m_M2;
 	uint32_t m_Time; // time stamp, in micro sec.
-  int m_MaxSpeed;
+  
 };
 #endif

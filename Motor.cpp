@@ -4,11 +4,20 @@
 //////////////////////////////////////////////////////
 #include "Motor.h"
 #include "Configuration.h"
-//#include "Util.h"
 
 extern int freeRam ();
 extern int myAbs(int param);
 extern int sign(int val);
+
+//=========================================================
+Motor::Motor()
+: m_MaxSpeed( MAX_SPEED / 2 )
+, m_MaxAccel( MAX_ACCEL )
+{}
+
+//=========================================================
+Motor::~Motor()
+{}
 
 //=========================================================
 void Motor::UpdateAccel()

@@ -90,8 +90,7 @@ void Robot::RobotStrategy( HBot& hBot )
 {
   long attackTime;
   hBot.SetMaxSpeed( MAX_SPEED ); // default to max robot speed and accel
-  
-  max_acceleration = user_max_accel;
+  hBot.SetMaxAccel( MAX_ACCEL );
   
   int posX, posY;
   switch (m_RobotStatus) 
