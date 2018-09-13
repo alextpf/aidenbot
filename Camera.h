@@ -82,7 +82,12 @@ public:
   {
     return m_CurrPuckSpeed;
   }
-  
+
+  int GetPredictXAttack()
+  {
+    return m_PredictXAttack;
+  }
+   
 private:
   /////////////////////////////
   // Puck

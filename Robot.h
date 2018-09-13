@@ -27,7 +27,7 @@ public:
   //   3: Attack mode
   //   4: ?? REMOVE ??
   //   5: Manual mode => User send direct commands to robot
-  void RobotStrategy( HBot& hBot );
+  void RobotStrategy( HBot& hBot, Camera& cam );
 
   
   //====================================================================================================================
@@ -41,6 +41,12 @@ private:
   // 2: Defense+Atack
   // 3: Atack
   int8_t m_RobotStatus;  
+  long m_AttackTime;
+  uint8_t m_AttackStatus;
+
+  int m_UserSpeed;
+  int m_UserAccel;
+  PuckPos m_UserPuckPos;
 }; // Robot
 
 #endif

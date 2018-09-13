@@ -86,188 +86,214 @@ void Robot::NewDataStrategy( Camera& cam )
 } // Robot::NewDataStrategy
 
 //====================================================================================================================
-void Robot::RobotStrategy( HBot& hBot )
-{
-  long attackTime;
+void Robot::RobotStrategy( HBot& hBot, Camera& cam )
+{  
   hBot.SetMaxSpeed( MAX_SPEED ); // default to max robot speed and accel
   hBot.SetMaxAccel( MAX_ACCEL );
   
   int posX, posY;
-  switch (m_RobotStatus) 
+  switch ( m_RobotStatus ) 
   {
     case 0: // Go to defense position
     {      
       posY = ROBOT_DEFENSE_POSITION_DEFAULT;
       posX = ROBOT_CENTER_X;  //center X axis
-      const int s = MAX_SPEED * 0.6667 // Return a bit more slowly...
+      const int s = MAX_SPEED * 0.6667; // Return a bit more slowly...
       hBot.SetMaxSpeed( s );
       
-      if ( CheckOwnGoal() == false )
+      if ( CheckOwnGoal( hBot, cam) )
       {
-        hBot.SetPosStraight( posX, posY );
-      }
-      else
-      {
-        hBot.SetPosStraight( hBot.GetRobotPos().m_X, hBot.GetRobotPos().m_Y ); // The robot stays on it´s position
+        posX = hBot.GetRobotPos().m_X;
+        posY = hBot.GetRobotPos().m_Y;        
       }
       
-      attack_time = 0;
+      hBot.SetPosStraight( posX, posY );
+      
+      m_AttackTime = 0;
     }
       break;
       
     case 1: // Defense mode (only move on X axis on the defense line)
     {      
-      predict_x = constrain(predict_x, (PUCK_SIZE * 3), TABLE_WIDTH - (PUCK_SIZE * 3));  // we leave some space near the borders...
-      com_pos_y = defense_position;
-      com_pos_x = predict_x;
-      setPosition_straight(com_pos_x, com_pos_y);
-      attack_time = 0;
-    }
+      PuckPos pos = cam.GetCurrPredictPos();
+      pos.m_X = constrain( pos.m_X, PUCK_SIZE * 3, TABLE_WIDTH - PUCK_SIZE * 3 );  // we leave some space near the borders...
+      cam.SetCurrPredictPos( pos );
+      
+      posY = ROBOT_DEFENSE_POSITION_DEFAULT;
+      posX = pos.m_X;
+      hBot.SetPosStraight( posX, posY );
+      
+      m_AttackTime = 0;
+    } // case 1
       break;
       
     case 2: // Defense+attack
+    {
+      if ( cam.GetPredictTimeAttack() < MIN_PREDICT_TIME ) // If time is less than 150ms we start the attack
       {
-        if ( predict_time_attack < MIN_PREDICT_TIME ) // If time is less than 150ms we start the attack
-        {
-          com_pos_y = attack_position + PUCK_SIZE * 4; // we need some override
-          com_pos_x = predict_x_attack;
-          // We supose that we start at defense position
-          //com_pos_x = ROBOT_CENTER_X + (((long)(predict_x_attack - ROBOT_CENTER_X) * (com_pos_y - defense_position)) / (attack_position - defense_position));
-          setPosition_straight(com_pos_x, com_pos_y);
-        }
-        else      // Defense position
-        {
-          com_pos_y = defense_position;
-          com_pos_x = predict_x;  // predict_x_attack;
-          setPosition_straight(com_pos_x, com_pos_y);
-          attack_time = 0;
-        }
+        posY = ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT + PUCK_SIZE * 4; // we need some override
+        posX = cam.GetPredictXAttack();
+        
+        // We supose that we start at defense position
+        //com_pos_x = ROBOT_CENTER_X + (((long)(predict_x_attack - ROBOT_CENTER_X) * (com_pos_y - defense_position)) / (attack_position - defense_position));          
       }
+      else      // Defense position
+      {          
+        posY = ROBOT_DEFENSE_POSITION_DEFAULT;
+        posX = cam.GetCurrPredictPos().m_X;  // predict_x_attack;
+        
+        m_AttackTime = 0;
+      }
+      hBot.SetPosStraight( posX, posY );
+    } // case 2
       break;
  
     case 3: // ATTACK MODE
     {
-      if (attack_time == 0)
+      PuckPos attackPredictPos;
+      
+      if ( m_AttackTime == 0 )
       {
-        attack_predict_x = predictPuckXPosition(500);
-        attack_predict_y = predictPuckYPosition(500);
+        attackPredictPos = cam.PredictPuckPos(500);
         
-        if ( ( attack_predict_x > PUCK_SIZE * 3 ) && 
-             ( attack_predict_x < TABLE_WIDTH - PUCK_SIZE * 3 ) && 
-             ( attack_predict_y > PUCK_SIZE * 4 ) && 
-             ( attack_predict_y < ROBOT_CENTER_Y - PUCK_SIZE * 5 ) )
+        if ( ( attackPredictPos.m_X > PUCK_SIZE * 3 ) && 
+             ( attackPredictPos.m_X < TABLE_WIDTH - PUCK_SIZE * 3 ) && 
+             ( attackPredictPos.m_Y > PUCK_SIZE * 4 ) && 
+             ( attackPredictPos.m_Y < ROBOT_CENTER_Y - PUCK_SIZE * 5 ) )
         {
-          attack_time = millis() + 500;  // Prepare an attack in 500ms
-          attack_pos_x = attack_predict_x;  // predict_x
-          attack_pos_y = attack_predict_y;  // predict_y
+          m_AttackTime = millis() + 500;  // Prepare an attack in 500ms
           Serial.print("AM:");
-          //Serial.print(attack_time);
+          //Serial.print(m_AttackTime);
           //Serial.print(",");
-          Serial.print(attack_pos_x);
+          Serial.print(attackPredictPos.m_X);
           Serial.print(",");
-          Serial.println(attack_pos_y);
+          Serial.println(attackPredictPos.m_Y);
           //Serial.print(" ");
+          
           // Go to pre-attack position
-          com_pos_x = attack_pos_x;
-          com_pos_y = attack_pos_y - PUCK_SIZE * 4;
-          max_speed = user_max_speed / 2;
-          if (checkOwnGoal() == false)
-            setPosition_straight(com_pos_x, com_pos_y);
-          else
-            setPosition_straight(real_position_x, real_position_y); // The robot stays on it´s position
-          attack_status = 1;
+          posX = attackPredictPos.m_X;
+          posY = attackPredictPos.m_Y - PUCK_SIZE * 4;
+          
+          const int s = MAX_SPEED * 0.5;
+          hBot.SetMaxSpeed( s );
+          
+          m_AttackStatus = 1;
         }
         else
         {
-          attack_time = 0;  // Continue waiting for the right attack moment...
-          attack_status = 0;
+          m_AttackTime = 0;  // Continue waiting for the right attack moment...
+          m_AttackStatus = 0;
+          
           // And go to defense position
-          com_pos_y = defense_position;
-          com_pos_x = ROBOT_CENTER_X;  //center X axis
-          max_speed = (user_max_speed / 3) * 2;
-          if (checkOwnGoal() == false)
-            setPosition_straight(com_pos_x, com_pos_y);
-          else
-            setPosition_straight(real_position_x, real_position_y); // The robot stays on it´s position
+          posY = ROBOT_DEFENSE_POSITION_DEFAULT;
+          posX = ROBOT_CENTER_X;  //center X axis
+          const int s = MAX_SPEED * 0.6667; // Return a bit more slowly...
+          hBot.SetMaxSpeed( s );          
         }
+      
+        if ( CheckOwnGoal( hBot, cam) )
+        {
+          posX = hBot.GetRobotPos().m_X;
+          posY = hBot.GetRobotPos().m_Y;            
+        }
+        
+        hBot.SetPosStraight( posX, posY );
       }
       else
       {
-        if (attack_status == 1)
+        if ( m_AttackStatus == 1 )
         {
-          long impact_time = attack_time - millis();
-          if ( impact_time < 170 )  // less than 150ms to start the attack
+          long impactTime = m_AttackTime - millis();
+          if ( impactTime < 170 )  // less than 150ms to start the attack
           {
             // Attack movement
-            com_pos_x = predictPuckXPosition(impact_time);
-            com_pos_y = predictPuckYPosition(impact_time);
-            setPosition_straight(com_pos_x, (com_pos_y + PUCK_SIZE * 2));
-
+            attackPredictPos = cam.PredictPuckPos( impactTime );
+            posX = attackPredictPos.m_X;
+            posY = attackPredictPos.m_Y + PUCK_SIZE * 2;
+            
             Serial.print("ATTACK:");
-            Serial.print(com_pos_x);
+            Serial.print(posX);
             Serial.print(",");
-            Serial.println(com_pos_y);
+            Serial.println(posY);
 
-            attack_status = 2; // Attacking
+            m_AttackStatus = 2; // Attacking
           }
-          else  // attack_status=1 but it´s no time to attack yet
+          else  // m_AttackStatus=1 but it´s no time to attack yet
           {
             // Go to pre-attack position
-            com_pos_x = attack_pos_x;
-            com_pos_y = attack_pos_y - PUCK_SIZE * 4;
-            max_speed = user_max_speed / 2;
-            if (checkOwnGoal() == false)
-              setPosition_straight(com_pos_x, com_pos_y);
-            else
-              setPosition_straight(real_position_x, real_position_y); // The robot stays on it´s position
+            attackPredictPos = cam.PredictPuckPos(500);
+            
+            posX = attackPredictPos.m_X;
+            posY = attackPredictPos.m_Y - PUCK_SIZE * 4;
+            
+            const int s = MAX_SPEED * 0.5;
+            hBot.SetMaxSpeed( s );          
           }
-        } // if (attack_status == 1)
+          
+          if ( CheckOwnGoal( hBot, cam) )
+          {
+            posX = hBot.GetRobotPos().m_X;
+            posY = hBot.GetRobotPos().m_Y;            
+          }
         
-        if ( attack_status == 2 )
+          hBot.SetPosStraight( posX, posY );
+          
+        } // if (m_AttackStatus == 1)
+        
+        if ( m_AttackStatus == 2 )
         {
-          if (millis() > (attack_time + 80)) // Attack move is done? => Reset to defense position
+          if (millis() > (m_AttackTime + 80)) // Attack move is done? => Reset to defense position
           {
             Serial.print("RESET");
-            attack_time = 0;
-//            robot_status = 0; // this line is probably of no use
-            attack_status = 0;
+            m_AttackTime = 0;
+            m_RobotStatus = 0;
+            m_AttackStatus = 0;
           }
-        } // if ( attack_status == 2 )
-      } // if (attack_time == 0)
-    }
+        } // if ( m_AttackStatus == 2 )
+      } // if (m_AttackTime == 0)
+    } // case 3
       break;
     case 4: // The puck came from a bounce
     {
       // Only defense now (we could improve this in future)
       // Defense mode (only move on X axis on the defense line)
-      predict_x = constrain(predict_x, (PUCK_SIZE * 3), TABLE_WIDTH - (PUCK_SIZE * 3));
-      com_pos_y = defense_position;
-      com_pos_x = predict_x;
-      setPosition_straight(com_pos_x, com_pos_y);
-      attack_time = 0;
+      PuckPos pos = cam.GetCurrPredictPos();
+      pos.m_X = constrain( pos.m_X, PUCK_SIZE * 3, TABLE_WIDTH - PUCK_SIZE * 3 );  // we leave some space near the borders...
+      cam.SetCurrPredictPos( pos );
+      
+      posY = ROBOT_DEFENSE_POSITION_DEFAULT;
+      posX = pos.m_X;
+      hBot.SetPosStraight( posX, posY );
+      
+      m_AttackTime = 0;
     }
       break;
 
     case 5:
     {
       // User manual control
-      max_speed = user_target_speed;
+      hBot.SetMaxSpeed( m_UserSpeed );  
       // Control acceleration
-      max_acceleration = user_target_accel;
-      setPosition_straight(user_target_x, user_target_y);
+      hBot.SetMaxAccel( m_UserAccel ); 
+      hBot.SetPosStraight( m_UserPuckPos.m_X, m_UserPuckPos.m_Y );
       //Serial.println(max_acceleration);
-    }
+    }// case 5
       break;
 
     default:
       // Default : go to defense position
-      com_pos_y = defense_position;
-      com_pos_x = ROBOT_CENTER_X; // center
-      if (checkOwnGoal() == false)
-        setPosition_straight(com_pos_x, com_pos_y);
-      else
-        setPosition_straight(real_position_x, real_position_y); // The robot stays on it´s position
-      attack_time = 0;
+      posY = ROBOT_DEFENSE_POSITION_DEFAULT;
+      posX = ROBOT_CENTER_X;  //center X axis
+       
+      if ( CheckOwnGoal( hBot, cam) )
+      {
+        posX = hBot.GetRobotPos().m_X;
+        posY = hBot.GetRobotPos().m_Y;            
+      }
+        
+      hBot.SetPosStraight( posX, posY );
+      
+      m_AttackTime = 0;
   }// switch
 } // Robot::RobotStrategy
 
