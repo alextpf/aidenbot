@@ -7,6 +7,20 @@ extern Point2I Point2Abs(Point2I param);
 extern int sign(int val);
 
 //=========================================================
+Camera::Camera()
+: m_PredictXAttack( 0 )
+, m_PredictStatus( 0 )
+, m_PredictBounce( 0 )
+, m_PredictBounceStatus( 0 )
+, m_PredictTime( 0 )
+, m_PredictTimeAttack( 0 )
+{}
+
+//=========================================================
+Camera::~Camera()
+{}
+
+//=========================================================
 void Camera::CamProcess( int dt /*ms*/ )
 {  
   // Speed calculation on each axis  

@@ -11,8 +11,15 @@ extern int sign(int val);
 
 //=========================================================
 Motor::Motor()
-: m_MaxSpeed( MAX_SPEED / 2 )
-, m_MaxAccel( MAX_ACCEL )
+: m_Step( 0 )
+, m_GoalStep( 0 )
+, m_Dir( 0 )
+, m_Accel( 0 )
+, m_Speed( 0 )
+, m_GoalSpeed( 0 )
+, m_MaxSpeed( 0 )
+, m_MaxAccel( 0 )
+, m_Period( 0 )
 {}
 
 //=========================================================

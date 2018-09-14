@@ -9,7 +9,10 @@
 
 //=========================================================
 HBot::HBot()
+: m_Time( 0 )
 {}
+
+//=========================================================
 HBot::~HBot()
 {}
 
@@ -145,6 +148,5 @@ void HBot::UpdatePosStraight()
 void HBot::SetPosStraight( int x, int y )
 {  
   SetPosInternal( x, y );
-  UpdatePosStraight();
-  
+  UpdatePosStraight();  
 } // SetPosStraight

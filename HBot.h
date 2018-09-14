@@ -16,7 +16,6 @@ typedef Point2I RobotPos;       // alias
 class HBot
 {
 public:
-  enum MOTOR {M1, M2};
   
   HBot(); // ctor
   ~HBot(); // dtor
@@ -70,7 +69,6 @@ private:
   RobotPos m_Pos;
 	Motor m_M1;
 	Motor m_M2;
-	uint32_t m_Time; // time stamp, in micro sec.
-  
+	uint32_t m_Time; // time stamp, in micro sec.  
 };
 #endif

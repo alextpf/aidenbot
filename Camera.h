@@ -12,6 +12,8 @@ typedef Point2L PuckSpeed;      // alias
 class Camera
 {
 public:
+  Camera();
+  ~Camera();
   
   void SetCurrPuckPos( const PuckPos pos )
   {

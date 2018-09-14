@@ -11,6 +11,19 @@ extern Point2I Point2Abs(Point2I param);
 extern int sign(int val);
 
 //====================================================================================================================
+Robot::Robot()
+: m_RobotStatus( 0 )
+, m_AttackTime( 0 )
+, m_AttackStatus( 0 )
+, m_UserSpeed( 0 )
+, m_UserAccel( 0 )
+{}
+
+//====================================================================================================================
+Robot::~Robot()
+{}
+
+//====================================================================================================================
 void Robot::NewDataStrategy( Camera& cam )
 {
   m_RobotStatus = 0; // Going to initial position (defense)

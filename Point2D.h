@@ -1,3 +1,7 @@
+//////////////////////////////////////////////////////
+// Author: Alex Chen
+// Sep. 2018
+//////////////////////////////////////////////////////
 #ifndef POINT2D_H
 #define POINT2D_H
 
@@ -5,8 +9,13 @@ template <class T>
 class Point2D
 {
 public:
-  Point2D();
-  ~Point2D();
+  Point2D()
+  : m_X(0)
+  , m_Y(0)
+  {}
+  
+  ~Point2D()
+  {}
   
   Point2D(T x, T y)
   : m_X(x),
@@ -63,6 +72,5 @@ public:
   }
   
 }; // Point2D
-
 
 #endif

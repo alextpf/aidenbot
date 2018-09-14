@@ -11,6 +11,8 @@
 class Robot
 {
 public:	
+  Robot();
+  ~Robot();
   //====================================================================================================================
   // @brief: given a predicted status (coming toward us, no risk ... etc), 
   // determine the robot status (wheter to attack, defense...etc ).
