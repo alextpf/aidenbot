@@ -15,12 +15,12 @@ public:
   
   void SetStep( int step )
   {
-  	m_Step = step;
+  	m_CurrStep = step;
   }
 
   int GetStep() const
   {
-  	return m_Step;
+  	return m_CurrStep;
   }
 
   void SetGoalStep( int step )
@@ -35,12 +35,12 @@ public:
 
   void SetSpeed( int speed )
   {
-    m_Speed = speed;
+    m_CurrSpeed = speed;
   }
 
   int GetSpeed() const
   {
-    return m_Speed;
+    return m_CurrSpeed;
   }
 
   void SetGoalSpeed( int speed )
@@ -107,8 +107,8 @@ private:
   //////////////
   // Position
   //////////////
-	int m_Step;       // in motor steps. corresponds to position_M1/2
-  int m_GoalStep;   // corresponds to target_position_M1/2
+	int m_CurrStep;       // in motor steps. corresponds to position_M1/2
+  int m_GoalStep;       // corresponds to target_position_M1/2
 
   //////////////
   // Direction
@@ -118,13 +118,14 @@ private:
   ///////////////////
   // Speed & Accel
   ///////////////////
-	int m_Accel;      // acceleration. corresponds to acceleration_M1/2
-  int m_Speed;      // corresponds to speed_M1/2
-  int m_GoalSpeed;  // corresponds to target_speed_M1/2
-  int m_MaxSpeed;   // corresponds to max_speed
+	int m_CurrSpeed;      // corresponds to speed_M1/2
+  int m_GoalSpeed;      // corresponds to target_speed_M1/2
+  int m_MaxSpeed;       // corresponds to max_speed
 
-  int m_MaxAccel;   // max acceleration
-  long m_Period;    // for setting timer use. corresponds to timer_period. arduino "long" is 32 bit  
+  int m_Accel;          // acceleration. corresponds to acceleration_M1/2
+  int m_MaxAccel;       // max acceleration
+  
+  long m_Period;        // for setting timer use. corresponds to timer_period. arduino "long" is 32 bit  
 };
 
 #endif

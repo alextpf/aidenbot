@@ -10,6 +10,11 @@
 long curr_time;                 // used in main loop
 long prev_time;
 long loop_counter;
+bool testmode = true;
+
+HBot hBot;
+Camera cam;
+Robot robot;
 
 void setup() 
 {
@@ -24,21 +29,39 @@ void setup()
 
   SetTimerInterrupt();
 
-  // init params
+  // init HBot params
+  RobotPos initPos( ROBOT_INITIAL_POSITION_X, ROBOT_INITIAL_POSITION_Y ); // mm
+    
+  int m1s, m2s;
+  HBot::HBotPosToMotorStep(initPos, m1s, m2s);
   
-  HBot hBot;
+  hBot.GetM1().SetStep( m1s ); // this sets m_Step for Motor1 & Motor2
+  hBot.GetM2().SetStep( m2s );
   
-  hBot.SetPosInternal( ROBOT_INITIAL_POSITION_X, ROBOT_INITIAL_POSITION_Y );
   hBot.SetMaxSpeed( MAX_SPEED / 2 );
   hBot.SetMaxAccel( MAX_ACCEL );
-  hBot.SetPosStraight( ROBOT_CENTER_X, ROBOT_DEFENSE_POSITION_DEFAULT );
+  hBot.SetPosStraight( ROBOT_CENTER_X, ROBOT_DEFENSE_POSITION_DEFAULT ); // this sets GoalStep for Motor1 & Motor2, and internally set GoalSpeed
   
-  Camera cam;
-  Robot robot;
-
+  prev_time = micros(); 
+  loop_counter=0;
 }
 
 void loop() 
 {
-  
+  curr_time = micros();
+  if ( curr_time - prev_time >= 1000 )  // 1Khz loop
+  {
+    loop_counter++;
+    
+    prev_time = curr_time; // update time
+    
+    if (testmode)
+    {
+      testMovements();
+    }
+    
+    hBot.Update();
+    
+//    led_test();
+  }
 }

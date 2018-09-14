@@ -59,7 +59,59 @@ void SetTimerInterrupt()
 } // SetTimerInterrupt
 
 //================================================================
+// Test sequence to check mechanics, motor drivers...
+void testMovements()
+{
+//  if (loop_counter >= 9000) {
+//    testmode = false;
+//    return;
+//  }
+//  max_speed = user_max_speed;
+//  if (loop_counter > 8000)
+//    setPosition_straight(200, 60);
+//  else if (loop_counter > 6260)
+//    setPosition_straight(100, 200);
+//  else if (loop_counter > 6000)
+//    setPosition_straight(320, 200);
+//  else if (loop_counter > 5000)
+//    setPosition_straight(200, 60);
+//  else if (loop_counter > 3250)
+//    setPosition_straight(300, 280);
+//  else if (loop_counter > 3000)
+//    setPosition_straight(200, 280);
+//  else if (loop_counter > 2500)
+//    setPosition_straight(200, 60);
+//  else if (loop_counter > 1500)
+//    setPosition_straight(200, 300);
+//  else
+//    setPosition_straight(200, 60);
+ //==========================================
+  String receivedString;
+  
+  if ( Serial.available() > 0 )
+  {
+    receivedString = Serial.readStringUntil('\n');
+  }
+  
+  if ( receivedString.equals("1") )
+  {
+    hBot.SetPosStraight(ROBOT_MAX_X, ROBOT_MAX_Y); // upper right
+  }
+  else if ( receivedString.equals("2")  )
+  {
+    hBot.SetPosStraight(ROBOT_MIN_X, ROBOT_MAX_Y); // upper left
+  }
+  else if ( receivedString.equals("3") )
+  {
+    hBot.SetPosStraight(ROBOT_MIN_X, ROBOT_MIN_Y); // lower left
+  }
+  else if ( receivedString.equals("4") )
+  {
+    hBot.SetPosStraight(ROBOT_MAX_X, ROBOT_MIN_Y); // lower right
+  }
+}
+
+//================================================================
 void InitParams()
 {
 }
-

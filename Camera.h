@@ -98,17 +98,17 @@ private:
   //////////////
   // position
   //////////////
-  PuckPos   m_CurrPuckPos;      // current pos. mm
-  PuckPos   m_PrevPuckPos;      // previous pos. mm
+  PuckPos   m_CurrPuckPos;        // current pos. mm. Corresponds to puckCoordX/Y. Updated in reading from the camera
+  PuckPos   m_PrevPuckPos;        // previous pos. mm. Corresponds to puckOldCoordX. Updated in reading from the camera, when new puck pos comes in
   PuckPos   m_CurrPredictPos;
   PuckPos   m_PrevPredictPos;
-  int       m_PredictXAttack;       // predicted X coordinate for attack
+  int       m_PredictXAttack;     // predicted X coordinate for attack
 
   //////////////
   // speed
   //////////////
-  PuckSpeed m_CurrPuckSpeed;  // current speed. dm/ms
-  PuckSpeed m_PrevPuckSpeed;  // previous speed. dm/ms
+  PuckSpeed m_CurrPuckSpeed;      // current speed. dm/ms
+  PuckSpeed m_PrevPuckSpeed;      // previous speed. dm/ms
   PuckSpeed m_AverageSpeed;
   
   // 0 : No risk, 

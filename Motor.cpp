@@ -11,11 +11,11 @@ extern int sign(int val);
 
 //=========================================================
 Motor::Motor()
-: m_Step( 0 )
+: m_CurrStep( 0 )
 , m_GoalStep( 0 )
 , m_Dir( 0 )
 , m_Accel( 0 )
-, m_Speed( 0 )
+, m_CurrSpeed( 0 )
 , m_GoalSpeed( 0 )
 , m_MaxSpeed( 0 )
 , m_MaxAccel( 0 )
@@ -29,7 +29,7 @@ Motor::~Motor()
 //=========================================================
 void Motor::UpdateAccel()
 {  
-  int absSpeed = abs( m_Speed );
+  int absSpeed = abs( m_CurrSpeed );
 
   if( absSpeed < SCURVE_LOW_SPEED )
   {
@@ -44,12 +44,12 @@ void Motor::UpdateAccel()
 //=========================================================
 void Motor::UpdateSpeed( int dt )
 {
-  int tmp = m_Speed * m_Speed / ( 1800.0 * m_Accel );
-  int stopPos = m_Step + sign(m_Speed) * tmp;
+  int tmp = m_CurrSpeed * m_CurrSpeed / ( 1800.0 * m_Accel );
+  int stopPos = m_CurrStep + sign(m_CurrSpeed) * tmp;
 
   int goalSpeed;
   
-  if( m_GoalStep > m_Step ) // Positive move
+  if( m_GoalStep > m_CurrStep ) // Positive move
   {
     // Start decelerating ?
     goalSpeed = stopPos >= m_GoalStep ? 0 : m_GoalSpeed;
@@ -69,44 +69,44 @@ void Motor::SetSpeedInternal( int dt, int goalSpeed )
   
   // We limit acceleration => speed ramp
   int accel = (long)m_Accel * dt * 0.001; // We divide by 1000 because dt are in microseconds
-  if ( (long)goalSpeed - m_Speed > accel ) // We use long here to avoid overflow on the operation
+  if ( (long)goalSpeed - m_CurrSpeed > accel ) // We use long here to avoid overflow on the operation
   { 
-    m_Speed += accel;
+    m_CurrSpeed += accel;
   }
-  else if ( (long)m_Speed - goalSpeed > accel)
+  else if ( (long)m_CurrSpeed - goalSpeed > accel)
   {
-    m_Speed -= accel;
+    m_CurrSpeed -= accel;
   }
   else
   {
-    m_Speed = goalSpeed;
+    m_CurrSpeed = goalSpeed;
   }  
   
   // Check if we need to change the direction pins
-  if ( (m_Speed == 0) && (m_Dir != 0) )
+  if ( (m_CurrSpeed == 0) && (m_Dir != 0) )
   {
     m_Dir = 0;
   }
-  else if ( (m_Speed > 0) && (m_Dir != 1) )
+  else if ( (m_CurrSpeed > 0) && (m_Dir != 1) )
   {
     m_Dir = 1;
   }
-  else if ((m_Speed < 0) && (m_Dir != -1))
+  else if ((m_CurrSpeed < 0) && (m_Dir != -1))
   {
     m_Dir = -1;
   }
 
-  if (m_Speed == 0)
+  if (m_CurrSpeed == 0)
   {
     m_Period = ZERO_SPEED;
   }
-  else if (m_Speed > 0)
+  else if (m_CurrSpeed > 0)
   {
-    m_Period = 2000000 / m_Speed; // 2Mhz timer
+    m_Period = 2000000 / m_CurrSpeed; // 2Mhz timer
   }
   else
   {
-    m_Period = 2000000 / -m_Speed;
+    m_Period = 2000000 / -m_CurrSpeed;
   }
 
   if (m_Period > 65535)   // Check for minimun speed (maximun period without overflow)
@@ -114,4 +114,4 @@ void Motor::SetSpeedInternal( int dt, int goalSpeed )
     m_Period = ZERO_SPEED;
   }
   
-} // SetSpeed
+} // SetSpeedInternal

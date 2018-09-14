@@ -24,12 +24,12 @@ public:
   void SetPosStraight( int x, int y ); // in mm
   void UpdatePosStraight();
 	void Update(); // aka positionControl()
-  const Motor& GetM1()
+  Motor& GetM1()
   {
     return m_M1;
   }
   
-  const Motor& GetM2()
+  Motor& GetM2()
   {
     return m_M2;
   }

@@ -140,8 +140,8 @@ void HBot::UpdatePosStraight()
   const int target_speed_M1 = GetMaxSpeed() * factor1 * speedfactor1 * speedfactor1;
   const int target_speed_M2 = GetMaxSpeed() * factor2 * speedfactor2 * speedfactor2;
   
-  m_M1.SetGoalSpeed(target_speed_M1);
-  m_M2.SetGoalSpeed(target_speed_M2);  
+  m_M1.SetGoalSpeed( target_speed_M1 );
+  m_M2.SetGoalSpeed( target_speed_M2 );  
 } // UpdatePosStraight
 
 //=========================================================

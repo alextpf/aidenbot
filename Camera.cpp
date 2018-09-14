@@ -207,7 +207,7 @@ void Camera::MissingStepsDetection( HBot& hBot )
       if (robotCoordSamples == 10)
       {        
         robotPosAvg /= robotCoordSamples;
-        robotMissingStepsError = Point2Abs( hBot.GetRobotPos() - robotPosAvg );  // in mm
+        robotMissingStepsError = Point2Abs( robotPosAvg - hBot.GetRobotPos() );  // in mm
         
         // robot_position_y_mm += ROBOT_POSITION_CAMERA_CORRECTION_Y;   // correction because camera point of view and robot mark
         
