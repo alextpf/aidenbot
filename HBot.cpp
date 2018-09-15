@@ -40,7 +40,7 @@ void HBot::Update() // aka positionControl()
   // record time
   uint32_t currTime = micros();
   int dt = currTime - m_Time;
-  dt = constrain( currTime - m_Time, 0, 2000 );
+  dt = constrain( dt, 0, 2000 );
   
   m_Time = currTime; // update time
 

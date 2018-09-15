@@ -35,14 +35,15 @@ void setup()
   int m1s, m2s;
   HBot::HBotPosToMotorStep(initPos, m1s, m2s);
   
-  hBot.GetM1().SetStep( m1s ); // this sets m_Step for Motor1 & Motor2
+  hBot.GetM1().SetStep( m1s ); // this sets m_CurrStep for Motor1 & Motor2
   hBot.GetM2().SetStep( m2s );
   
   hBot.SetMaxSpeed( MAX_SPEED / 2 );
   hBot.SetMaxAccel( MAX_ACCEL );
-  hBot.SetPosStraight( ROBOT_CENTER_X, ROBOT_DEFENSE_POSITION_DEFAULT ); // this sets GoalStep for Motor1 & Motor2, and internally set GoalSpeed
+  hBot.SetPosStraight( ROBOT_CENTER_X, ROBOT_DEFENSE_POSITION_DEFAULT ); // this sets m_GoalStep for Motor1 & Motor2, and internally set GoalSpeed
   
   prev_time = micros(); 
+  hBot.SetTime( prev_time );
   loop_counter=0;
 }
 

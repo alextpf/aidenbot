@@ -60,6 +60,12 @@ public:
   {
     return m_M1.GetMaxAccel(); // assuming max accel for 2 motors are the same
   }
+
+  void SetTime( long t )
+  {
+    m_Time = t;
+  }
+
   
   // utility function
   static RobotPos MotorStepToHBotPos(int m1Step, int m2Step); // in mm
@@ -69,6 +75,6 @@ private:
   RobotPos m_Pos;
 	Motor m_M1;
 	Motor m_M2;
-	uint32_t m_Time; // time stamp, in micro sec.  
+	long m_Time; // time stamp, in micro sec.  
 };
 #endif
