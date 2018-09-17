@@ -10,15 +10,17 @@
 class Motor
 {
 public:
+  enum MOTOR_NUM {M1,M2};
+  
   Motor();
   ~Motor();
   
-  void SetStep( int step )
+  void SetCurrStep( int step )
   {
   	m_CurrStep = step;
   }
 
-  int GetStep() const
+  int GetCurrStep() const
   {
   	return m_CurrStep;
   }
@@ -33,12 +35,12 @@ public:
   	return m_GoalStep;
   }
 
-  void SetSpeed( int speed )
+  void SetCurrSpeed( int speed )
   {
     m_CurrSpeed = speed;
   }
 
-  int GetSpeed() const
+  int GetCurrSpeed() const
   {
     return m_CurrSpeed;
   }
@@ -99,10 +101,10 @@ public:
   }
   
   void UpdateAccel();
-  void UpdateSpeed( int dt );
+  void UpdateSpeed( int dt, MOTOR_NUM m );
   
 private:  
-  void SetSpeedInternal( int dt, int goalSpeed );
+  void SetCurrSpeedInternal( int dt, int goalSpeed, MOTOR_NUM m );
 
   //////////////
   // Position

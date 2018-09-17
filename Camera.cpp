@@ -189,8 +189,8 @@ void Camera::MissingStepsDetection( HBot& hBot )
   RobotPos robotMissingStepsError(0,0);
   
   // If we are stopped and robot corrdinates are OK...
-  if ( myAbs( hBot.GetM1().GetSpeed() ) < 400 && 
-       myAbs( hBot.GetM2().GetSpeed() ) < 400 && 
+  if ( myAbs( hBot.GetM1().GetCurrSpeed() ) < 400 && 
+       myAbs( hBot.GetM2().GetCurrSpeed() ) < 400 && 
        m_RobotPos.m_X < TABLE_WIDTH && 
        m_RobotPos.m_Y < TABLE_LENGTH * 0.5 )
   {
@@ -218,8 +218,8 @@ void Camera::MissingStepsDetection( HBot& hBot )
 #ifdef CORRECT_MISSING_STEPS
           int m1s,m2s;
           HBot::HBotPosToMotorStep( robotPosAvg, m1s, m2s );
-          hBot.GetM1().SetStep( m1s );
-          hBot.GetM2().SetStep( m2s );
+          hBot.GetM1().SetCurrStep( m1s );
+          hBot.GetM2().SetCurrStep( m2s );
           
           Serial.print("MSX:");
           Serial.println(robotMissingStepsError.m_X);

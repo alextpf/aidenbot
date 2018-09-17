@@ -4,17 +4,17 @@
 //////////////////////////////////////////////////////
 #include "Configuration.h"
 #include "HBot.h"
-#include "Camera.h"
-#include "Robot.h"
+//#include "Camera.h"
+//#include "Robot.h"
 
 long curr_time;                 // used in main loop
 long prev_time;
-long loop_counter;
+int loop_counter;
 bool testmode = true;
-
+//
 HBot hBot;
-Camera cam;
-Robot robot;
+//Camera cam;
+//Robot robot;
 
 void setup() 
 {
@@ -26,17 +26,28 @@ void setup()
   // Enable Motors
   digitalWrite(X_ENABLE_PIN    , LOW);
   digitalWrite(Y_ENABLE_PIN    , LOW);
-
+  
   SetTimerInterrupt();
 
   // init HBot params
   RobotPos initPos( ROBOT_INITIAL_POSITION_X, ROBOT_INITIAL_POSITION_Y ); // mm
+  
+  Serial.println("AidenBot init:");
+  Serial.print("Init pos: x = ");
+  Serial.print(ROBOT_INITIAL_POSITION_X);
+  Serial.print(", y = ");
+  Serial.println(ROBOT_INITIAL_POSITION_Y);
     
   int m1s, m2s;
   HBot::HBotPosToMotorStep(initPos, m1s, m2s);
   
-  hBot.GetM1().SetStep( m1s ); // this sets m_CurrStep for Motor1 & Motor2
-  hBot.GetM2().SetStep( m2s );
+  Serial.print("Motor1 step = ");
+  Serial.print( m1s );
+  Serial.print(", Motor2 step = ");
+  Serial.println( m2s ); Serial.println("");
+  
+  hBot.GetM1().SetCurrStep( m1s ); // this sets m_CurrStep for Motor1 & Motor2
+  hBot.GetM2().SetCurrStep( m2s );
   
   hBot.SetMaxSpeed( MAX_SPEED / 2 );
   hBot.SetMaxAccel( MAX_ACCEL );
@@ -53,7 +64,10 @@ void loop()
   if ( curr_time - prev_time >= 1000 )  // 1Khz loop
   {
     loop_counter++;
-    
+//    
+//    Serial.print("Counter = ");
+//    Serial.println(loop_counter);
+//    
     prev_time = curr_time; // update time
     
     if (testmode)
@@ -61,8 +75,7 @@ void loop()
       testMovements();
     }
     
-    hBot.Update();
+    hBot.Update(); // internally update 
     
-//    led_test();
   }
 }

@@ -19,11 +19,30 @@ public:
   
   HBot(); // ctor
   ~HBot(); // dtor
-  
+
+  //==================================================================================================================
+  // @brief set m_GoalStep for M1 & M2
+  //==================================================================================================================
   void SetPosInternal( int x, int y ); // in mm
+
+  //==================================================================================================================
   void SetPosStraight( int x, int y ); // in mm
+
+  //==================================================================================================================
+  // @brief use algorithm to calculate goal speed and set m_GoalSpeed for M1 & M2
+  //==================================================================================================================
   void UpdatePosStraight();
+  
+  //==================================================================================================================
+  // @brief 
+  // 1. update accel by: the faster the current speed, the higher the accel
+  // 2. based on the target position, compute a "stopping position", based on which, decite whether we increase
+  //    or decrease current speed. The amount of in/decrement is by accel
+  // 3. based on speed, determine the update period. 
+  //==================================================================================================================
 	void Update(); // aka positionControl()
+
+  //==================================================================================================================
   Motor& GetM1()
   {
     return m_M1;

@@ -39,10 +39,17 @@ void Motor::UpdateAccel()
       m_Accel = m_MaxAccel;
     }
   }
+  //log...
+//  Serial.println("Motor::UpdateAccel: ");
+//  Serial.print("absSpeed = ");
+//  Serial.println(absSpeed);
+//  Serial.print("m_Accel = ");
+//  Serial.println(m_Accel);
+  //===========================
 } // UpdateAccel
 
 //=========================================================
-void Motor::UpdateSpeed( int dt )
+void Motor::UpdateSpeed( int dt, MOTOR_NUM m )
 {
   int tmp = m_CurrSpeed * m_CurrSpeed / ( 1800.0 * m_Accel );
   int stopPos = m_CurrStep + sign(m_CurrSpeed) * tmp;
@@ -59,11 +66,11 @@ void Motor::UpdateSpeed( int dt )
     goalSpeed = stopPos <= m_GoalStep ? 0 : -m_GoalSpeed;
   }
 
-  SetSpeedInternal( dt, goalSpeed );
+  SetCurrSpeedInternal( dt, goalSpeed, m );
 } // UpdateSpeed
 
 //=========================================================
-void Motor::SetSpeedInternal( int dt, int goalSpeed )
+void Motor::SetCurrSpeedInternal( int dt, int goalSpeed, MOTOR_NUM m )
 {
   goalSpeed = constrain( goalSpeed, -MAX_SPEED, MAX_SPEED );
   
@@ -90,12 +97,35 @@ void Motor::SetSpeedInternal( int dt, int goalSpeed )
   else if ( (m_CurrSpeed > 0) && (m_Dir != 1) )
   {
     m_Dir = 1;
+    if ( m == M1 )
+    {
+      SET(PORTF,1);
+    }
+    else if ( m == M2 )
+    {
+      SET(PORTF,7);
+    }
   }
   else if ((m_CurrSpeed < 0) && (m_Dir != -1))
   {
     m_Dir = -1;
+    if ( m == M1 )
+    {
+      CLR(PORTF,1);
+    }
+    else if ( m == M2 )
+    {
+      CLR(PORTF,7);
+    }
   }
-
+  
+  //log...
+//    Serial.print("m_CurrSpeed =  ");
+//    Serial.println(m_CurrSpeed);
+//    Serial.print("m_Dir =  ");
+//    Serial.println(m_Dir);
+  //===========================
+  
   if (m_CurrSpeed == 0)
   {
     m_Period = ZERO_SPEED;
@@ -113,5 +143,17 @@ void Motor::SetSpeedInternal( int dt, int goalSpeed )
   {
     m_Period = ZERO_SPEED;
   }
+  //log...
+//    Serial.print("m_Period =  ");
+//    Serial.println(m_Period);
+  //===========================
+  if ( m == M1 )
+  {
+    OCR1A = m_Period;
+  }
+  else if ( m == M2 )
+  {
+    OCR3A = m_Period;
+  }
   
-} // SetSpeedInternal
+} // SetCurrSpeedInternal

@@ -1,3 +1,4 @@
+
 //================================================================
 void SetPINS()
 {
@@ -58,34 +59,70 @@ void SetTimerInterrupt()
   TIMSK3 |= (1<<OCIE1A);  // Enable Timer1 interrupt
 } // SetTimerInterrupt
 
+//=========================================================
+// TIMER 1 : STEPPER MOTOR SPEED CONTROL motor1
+ISR(TIMER1_COMPA_vect)
+{
+  int8_t dir = hBot.GetM1().GetDir();
+  if ( dir == 0 )
+    return;
+
+  SET(PORTF,0); // STEP X-AXIS
+  
+  // inside Class Motor, enum [ M1, M2 ];
+  // note: motor.step(dir_M1, M1);
+
+  int currStep = hBot.GetM1().GetCurrStep();
+  hBot.GetM1().SetCurrStep( currStep + dir );
+  __asm__ __volatile__ (
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop");  // Wait 2 cycles. With the other instruction and this we ensure a more than 1 microsenconds step pulse
+  CLR(PORTF,0);
+}
+
+//====================================================================================================================
+// TIMER 3 : STEPPER MOTOR SPEED CONTROL motor2
+ISR(TIMER3_COMPA_vect)
+{
+  int8_t dir = hBot.GetM2().GetDir();
+  if ( dir == 0 )
+    return;
+
+  SET(PORTF,6); // STEP Y-AXIS
+  
+  int currStep = hBot.GetM2().GetCurrStep();
+  hBot.GetM2().SetCurrStep( currStep + dir );
+  
+  __asm__ __volatile__ (
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop" "\n\t"
+    "nop");  // Wait 2 cycles. With the other instruction and this we ensure a more than 1 microsenconds step pulse
+  CLR(PORTF,6);
+}
+
 //================================================================
 // Test sequence to check mechanics, motor drivers...
 void testMovements()
 {
-//  if (loop_counter >= 9000) {
-//    testmode = false;
-//    return;
-//  }
-//  max_speed = user_max_speed;
-//  if (loop_counter > 8000)
-//    setPosition_straight(200, 60);
-//  else if (loop_counter > 6260)
-//    setPosition_straight(100, 200);
-//  else if (loop_counter > 6000)
-//    setPosition_straight(320, 200);
-//  else if (loop_counter > 5000)
-//    setPosition_straight(200, 60);
-//  else if (loop_counter > 3250)
-//    setPosition_straight(300, 280);
-//  else if (loop_counter > 3000)
-//    setPosition_straight(200, 280);
-//  else if (loop_counter > 2500)
-//    setPosition_straight(200, 60);
-//  else if (loop_counter > 1500)
-//    setPosition_straight(200, 300);
-//  else
-//    setPosition_straight(200, 60);
- //==========================================
   String receivedString;
   
   if ( Serial.available() > 0 )
@@ -111,7 +148,3 @@ void testMovements()
   }
 }
 
-//================================================================
-void InitParams()
-{
-}
