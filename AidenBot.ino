@@ -79,6 +79,11 @@ void loop()
       testMovements();
     }
     
+    if ( loop_counter % 10 == 0 )
+    {
+      hBot.UpdatePosStraight();  // update straight line motion algorithm
+    }
+    
     hBot.Update(); // internally update 
     
   }

@@ -7,15 +7,9 @@
 #include "Configuration.h"
 #include "Util.h"
 
-//=========================================================
-HBot::HBot()
-: m_Time( 0 )
-{}
-
-//=========================================================
-HBot::~HBot()
-{}
-
+////////////////////////////////////////////
+// Utility functions
+////////////////////////////////////////////
 //=========================================================
 RobotPos HBot::MotorStepToHBotPos(int m1Step, int m2Step)
 {
@@ -32,9 +26,22 @@ void HBot::HBotPosToMotorStep(const RobotPos& pos, int& m1Step, int& m2Step)
   m2Step = (pos.m_X - pos.m_Y) * Y_AXIS_STEPS_PER_UNIT;
 } // HBotPosToMotorStep
 
+////////////////////////////////////////////
+// class functions
+////////////////////////////////////////////
+//=========================================================
+HBot::HBot()
+: m_Time( 0 )
+{}
+
+//=========================================================
+HBot::~HBot()
+{}
+
 //=========================================================
 void HBot::Update() // aka positionControl()
 {  
+  // convert from motor steps to robot position
   m_Pos = MotorStepToHBotPos( m_M1.GetCurrStep(), m_M2.GetCurrStep() ); // update m_Pos
 
       //log...
@@ -152,11 +159,13 @@ void HBot::UpdatePosStraight()
     //  Serial.println( tspeed2 );  
     //  Serial.println( "" );
       //=====================================
-      
-  float speedfactor1 = 1.05 - (diffspeed2 - diffspeed1) / (2.0 * GetMaxSpeed());  
+  
+  float tmp = (diffspeed2 - diffspeed1) / (2.0 * GetMaxSpeed());
+        
+  float speedfactor1 = 1.05 - tmp;  
   speedfactor1 = constrain( speedfactor1, 0.0, 1.0 );
   
-  float speedfactor2 = 1.05 - (diffspeed1 - diffspeed2) / (2.0 * GetMaxSpeed());
+  float speedfactor2 = 1.05 + tmp;
   speedfactor2 = constrain( speedfactor2, 0.0, 1.0 );
 
   // Set motor speeds. We apply the straight factor and the "acceleration compensation" speedfactor
