@@ -31,20 +31,24 @@ void setup()
 
   // init HBot params
   RobotPos initPos( ROBOT_INITIAL_POSITION_X, ROBOT_INITIAL_POSITION_Y ); // mm
-  
-  Serial.println("AidenBot init:");
-  Serial.print("Init pos: x = ");
-  Serial.print(ROBOT_INITIAL_POSITION_X);
-  Serial.print(", y = ");
-  Serial.println(ROBOT_INITIAL_POSITION_Y);
     
+      // log
+      Serial.println("AidenBot init:");
+      Serial.print("Init pos: x = ");
+      Serial.print(ROBOT_INITIAL_POSITION_X);
+      Serial.print(", y = ");
+      Serial.println(ROBOT_INITIAL_POSITION_Y);
+      //=============================================
+        
   int m1s, m2s;
   HBot::HBotPosToMotorStep(initPos, m1s, m2s);
-  
-  Serial.print("Motor1 step = ");
-  Serial.print( m1s );
-  Serial.print(", Motor2 step = ");
-  Serial.println( m2s ); Serial.println("");
+
+      // log
+      Serial.print("Motor1 step = ");
+      Serial.print( m1s );
+      Serial.print(", Motor2 step = ");
+      Serial.println( m2s ); Serial.println("");
+      //=============================================
   
   hBot.GetM1().SetCurrStep( m1s ); // this sets m_CurrStep for Motor1 & Motor2
   hBot.GetM2().SetCurrStep( m2s );

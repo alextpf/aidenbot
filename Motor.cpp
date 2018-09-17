@@ -39,13 +39,13 @@ void Motor::UpdateAccel()
       m_Accel = m_MaxAccel;
     }
   }
-  //log...
-//  Serial.println("Motor::UpdateAccel: ");
-//  Serial.print("absSpeed = ");
-//  Serial.println(absSpeed);
-//  Serial.print("m_Accel = ");
-//  Serial.println(m_Accel);
-  //===========================
+      //log...
+    //  Serial.println("Motor::UpdateAccel: ");
+    //  Serial.print("absSpeed = ");
+    //  Serial.println(absSpeed);
+    //  Serial.print("m_Accel = ");
+    //  Serial.println(m_Accel);
+      //===========================
 } // UpdateAccel
 
 //=========================================================
@@ -60,10 +60,27 @@ void Motor::UpdateSpeed( int dt, MOTOR_NUM m )
   {
     // Start decelerating ?
     goalSpeed = stopPos >= m_GoalStep ? 0 : m_GoalSpeed;
+    
+        //log...
+        if ( stopPos >= m_GoalStep )
+        {
+          Serial.println( "Postive move. Start deceleration: " );
+          Serial.println( "goalSpeed = " );
+          Serial.println( goalSpeed );
+        }
+        //===========================
   }
   else // negative move
   {
     goalSpeed = stopPos <= m_GoalStep ? 0 : -m_GoalSpeed;
+        //log...
+        if ( stopPos <= m_GoalStep )
+        {
+          Serial.println( "Negative move. Start deceleration: " );
+          Serial.println( "goalSpeed = " );
+          Serial.println( goalSpeed );
+        }
+        //===========================
   }
 
   SetCurrSpeedInternal( dt, goalSpeed, m );
@@ -76,6 +93,7 @@ void Motor::SetCurrSpeedInternal( int dt, int goalSpeed, MOTOR_NUM m )
   
   // We limit acceleration => speed ramp
   int accel = (long)m_Accel * dt * 0.001; // We divide by 1000 because dt are in microseconds
+  
   if ( (long)goalSpeed - m_CurrSpeed > accel ) // We use long here to avoid overflow on the operation
   { 
     m_CurrSpeed += accel;
@@ -87,14 +105,19 @@ void Motor::SetCurrSpeedInternal( int dt, int goalSpeed, MOTOR_NUM m )
   else
   {
     m_CurrSpeed = goalSpeed;
+        //log...
+        Serial.println( "SetCurrSpeedInternal: 3rd clause " );
+        Serial.println( "m_CurrSpeed = " );
+        Serial.println( m_CurrSpeed );
+        //===========================
   }  
   
   // Check if we need to change the direction pins
-  if ( (m_CurrSpeed == 0) && (m_Dir != 0) )
+  if ( m_CurrSpeed == 0 && m_Dir != 0 )
   {
     m_Dir = 0;
   }
-  else if ( (m_CurrSpeed > 0) && (m_Dir != 1) )
+  else if ( m_CurrSpeed > 0 && m_Dir != 1 )
   {
     m_Dir = 1;
     if ( m == M1 )
@@ -106,7 +129,7 @@ void Motor::SetCurrSpeedInternal( int dt, int goalSpeed, MOTOR_NUM m )
       SET(PORTF,7);
     }
   }
-  else if ((m_CurrSpeed < 0) && (m_Dir != -1))
+  else if ( m_CurrSpeed < 0 && m_Dir != -1 )
   {
     m_Dir = -1;
     if ( m == M1 )
@@ -119,13 +142,13 @@ void Motor::SetCurrSpeedInternal( int dt, int goalSpeed, MOTOR_NUM m )
     }
   }
   
-  //log...
-//    Serial.print("m_CurrSpeed =  ");
-//    Serial.println(m_CurrSpeed);
-//    Serial.print("m_Dir =  ");
-//    Serial.println(m_Dir);
-  //===========================
-  
+      //log...
+    //    Serial.print("m_CurrSpeed =  ");
+    //    Serial.println(m_CurrSpeed);
+    //    Serial.print("m_Dir =  ");
+    //    Serial.println(m_Dir);
+      //===========================
+      
   if (m_CurrSpeed == 0)
   {
     m_Period = ZERO_SPEED;
@@ -143,17 +166,28 @@ void Motor::SetCurrSpeedInternal( int dt, int goalSpeed, MOTOR_NUM m )
   {
     m_Period = ZERO_SPEED;
   }
-  //log...
-//    Serial.print("m_Period =  ");
-//    Serial.println(m_Period);
-  //===========================
+      //log...
+    //    Serial.print("m_Period =  ");
+    //    Serial.println(m_Period);
+      //===========================
+  
   if ( m == M1 )
   {
     OCR1A = m_Period;
+    // Check  if we need to reset the timer...
+    if ( TCNT1 > OCR1A )
+    {
+      TCNT1 = 0;
+    }
   }
   else if ( m == M2 )
   {
     OCR3A = m_Period;
-  }
+    // Check  if we need to reset the timer...
+    if ( TCNT3 > OCR3A )
+    {
+      TCNT3 = 0;
+    }
+  }  
   
 } // SetCurrSpeedInternal

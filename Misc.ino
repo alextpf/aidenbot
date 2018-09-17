@@ -68,12 +68,10 @@ ISR(TIMER1_COMPA_vect)
     return;
 
   SET(PORTF,0); // STEP X-AXIS
-  
-  // inside Class Motor, enum [ M1, M2 ];
-  // note: motor.step(dir_M1, M1);
 
   int currStep = hBot.GetM1().GetCurrStep();
   hBot.GetM1().SetCurrStep( currStep + dir );
+  
   __asm__ __volatile__ (
     "nop" "\n\t"
     "nop" "\n\t"
@@ -147,4 +145,3 @@ void testMovements()
     hBot.SetPosStraight(ROBOT_MAX_X, ROBOT_MIN_Y); // lower right
   }
 }
-
