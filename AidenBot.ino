@@ -55,7 +55,7 @@ void setup()
   
   hBot.SetMaxAbsSpeed( MAX_ABS_SPEED );
   hBot.SetMaxAbsAccel( MAX_ABS_ACCEL );
-  hBot.SetPosStraight( ROBOT_CENTER_X, ROBOT_DEFENSE_POSITION_DEFAULT ); // this sets m_GoalStep for Motor1 & Motor2, and internally set GoalSpeed
+  hBot.SetPosStraight( ROBOT_CENTER_X, ROBOT_DEFENSE_POSITION_DEFAULT ); // this sets m_GoalStep, and internally set m_GoalSpeed for M1 & M2
   
   prev_time = micros(); 
   hBot.SetTime( prev_time );
