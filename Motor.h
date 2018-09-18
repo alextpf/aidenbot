@@ -65,14 +65,14 @@ public:
     return m_Accel;
   }
   
-  void SetMaxAccel( int accel )
+  void SetMaxAbsAccel( int accel )
   {
-    m_MaxAccel = accel;
+    m_MaxAbsAccel = accel;
   }
 
-  int GetMaxAccel()
+  int GetMaxAbsAccel()
   {
-    return m_MaxAccel;
+    return m_MaxAbsAccel;
   }
 
   int8_t GetDir() const
@@ -90,14 +90,14 @@ public:
     return m_Period;
   }
   
-  void SetMaxSpeed( int s )
+  void SetMaxAbsSpeed( int s )
   {
-     m_MaxSpeed = s;
+     m_MaxAbsSpeed = s;
   }
   
-  int GetMaxSpeed()
+  int GetMaxAbsSpeed()
   {
-    return m_MaxSpeed;
+    return m_MaxAbsSpeed;
   }
   
   void UpdateAccel();
@@ -120,12 +120,12 @@ private:
   ///////////////////
   // Speed & Accel
   ///////////////////
-	int m_CurrSpeed;      // corresponds to speed_M1/2
-  int m_GoalSpeed;      // corresponds to target_speed_M1/2
-  int m_MaxSpeed;       // corresponds to max_speed
+	int m_CurrSpeed;      // signed speed. corresponds to speed_M1/2
+  int m_GoalSpeed;      // signed speed. corresponds to target_speed_M1/2
+  int m_MaxAbsSpeed;       // unsighed speed. corresponds to max_speed
 
-  int m_Accel;          // acceleration. corresponds to acceleration_M1/2
-  int m_MaxAccel;       // max acceleration
+  int m_Accel;          // signed acceleration. corresponds to acceleration_M1/2
+  int m_MaxAbsAccel;       // unsighed max acceleration
   
   long m_Period;        // for setting timer use. corresponds to timer_period. arduino "long" is 32 bit  
 };

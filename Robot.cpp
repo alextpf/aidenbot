@@ -101,8 +101,8 @@ void Robot::NewDataStrategy( Camera& cam )
 //====================================================================================================================
 void Robot::RobotStrategy( HBot& hBot, Camera& cam )
 {  
-  hBot.SetMaxSpeed( MAX_SPEED ); // default to max robot speed and accel
-  hBot.SetMaxAccel( MAX_ACCEL );
+  hBot.SetMaxAbsSpeed( MAX_ABS_SPEED ); // default to max robot speed and accel
+  hBot.SetMaxAbsAccel( MAX_ABS_ACCEL );
   
   int posX, posY;
   switch ( m_RobotStatus ) 
@@ -111,8 +111,8 @@ void Robot::RobotStrategy( HBot& hBot, Camera& cam )
     {      
       posY = ROBOT_DEFENSE_POSITION_DEFAULT;
       posX = ROBOT_CENTER_X;  //center X axis
-      const int s = MAX_SPEED * 0.6667; // Return a bit more slowly...
-      hBot.SetMaxSpeed( s );
+      const int s = MAX_ABS_SPEED * 0.6667; // Return a bit more slowly...
+      hBot.SetMaxAbsSpeed( s );
       
       if ( CheckOwnGoal( hBot, cam) )
       {
@@ -187,8 +187,8 @@ void Robot::RobotStrategy( HBot& hBot, Camera& cam )
           posX = attackPredictPos.m_X;
           posY = attackPredictPos.m_Y - PUCK_SIZE * 4;
           
-          const int s = MAX_SPEED * 0.5;
-          hBot.SetMaxSpeed( s );
+          const int s = MAX_ABS_SPEED * 0.5;
+          hBot.SetMaxAbsSpeed( s );
           
           m_AttackStatus = 1;
         }
@@ -200,8 +200,8 @@ void Robot::RobotStrategy( HBot& hBot, Camera& cam )
           // And go to defense position
           posY = ROBOT_DEFENSE_POSITION_DEFAULT;
           posX = ROBOT_CENTER_X;  //center X axis
-          const int s = MAX_SPEED * 0.6667; // Return a bit more slowly...
-          hBot.SetMaxSpeed( s );          
+          const int s = MAX_ABS_SPEED * 0.6667; // Return a bit more slowly...
+          hBot.SetMaxAbsSpeed( s );          
         }
       
         if ( CheckOwnGoal( hBot, cam) )
@@ -239,8 +239,8 @@ void Robot::RobotStrategy( HBot& hBot, Camera& cam )
             posX = attackPredictPos.m_X;
             posY = attackPredictPos.m_Y - PUCK_SIZE * 4;
             
-            const int s = MAX_SPEED * 0.5;
-            hBot.SetMaxSpeed( s );          
+            const int s = MAX_ABS_SPEED * 0.5;
+            hBot.SetMaxAbsSpeed( s );          
           }
           
           if ( CheckOwnGoal( hBot, cam) )
@@ -285,9 +285,9 @@ void Robot::RobotStrategy( HBot& hBot, Camera& cam )
     case 5:
     {
       // User manual control
-      hBot.SetMaxSpeed( m_UserSpeed );  
+      hBot.SetMaxAbsSpeed( m_UserSpeed );  
       // Control acceleration
-      hBot.SetMaxAccel( m_UserAccel ); 
+      hBot.SetMaxAbsAccel( m_UserAccel ); 
       hBot.SetPosStraight( m_UserPuckPos.m_X, m_UserPuckPos.m_Y );
       //Serial.println(max_acceleration);
     }// case 5

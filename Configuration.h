@@ -58,8 +58,8 @@
 
 // THIS VALUES DEPENDS ON YOUR ROBOT CONSTRUCTION (MOTORS, MECHANICS...)
 // RECOMMENDED VALUES FOR 12V POWER SUPPLY
-#define MAX_ACCEL         150//275                        // Maximun motor acceleration in (steps/seg2)/1000. Max recommended value:280
-#define MAX_SPEED         3200//32000                    // Maximun speed in steps/seg. Max absolute value: 32767!!
+#define MAX_ABS_ACCEL         150//275                        // Maximun motor acceleration in (steps/seg2)/1000. Max recommended value:280
+#define MAX_ABS_SPEED         3200//32000                    // Maximun speed in steps/seg. Max absolute value: 32767!!
 
 #define MIN_ACCEL         100//100
 #define MIN_SPEED         1000//5000

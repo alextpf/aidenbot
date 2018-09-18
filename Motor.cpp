@@ -7,6 +7,7 @@
 
 extern int freeRam ();
 extern int myAbs(int param);
+extern long myAbs(long param);
 extern int sign(int val);
 
 //=========================================================
@@ -17,8 +18,8 @@ Motor::Motor()
 , m_Accel( 0 )
 , m_CurrSpeed( 0 )
 , m_GoalSpeed( 0 )
-, m_MaxSpeed( 0 )
-, m_MaxAccel( 0 )
+, m_MaxAbsSpeed( 0 )
+, m_MaxAbsAccel( 0 )
 , m_Period( 0 )
 {}
 
@@ -29,18 +30,21 @@ Motor::~Motor()
 //=========================================================
 void Motor::UpdateAccel()
 {  
-  m_Accel = m_MaxAccel;
+  m_Accel = m_MaxAbsAccel;
   
   int absSpeed = abs( m_CurrSpeed );
 
   if( absSpeed < SCURVE_LOW_SPEED )
   {
-    m_Accel = map( absSpeed, 0, SCURVE_LOW_SPEED, MIN_ACCEL, m_MaxAccel );  
-    if( m_Accel > m_MaxAccel )
+    m_Accel = map( absSpeed, 0, SCURVE_LOW_SPEED, MIN_ACCEL, m_MaxAbsAccel );  
+    if( m_Accel > m_MaxAbsAccel )
     {
-      m_Accel = m_MaxAccel;
+      m_Accel = m_MaxAbsAccel;
     }
   }
+
+  m_Accel *= sign(m_CurrSpeed);
+  
       //log...
     //  Serial.println("Motor::UpdateAccel: ");
     //  Serial.print("absSpeed = ");
@@ -53,11 +57,14 @@ void Motor::UpdateAccel()
 //=========================================================
 void Motor::UpdateSpeed( int dt, MOTOR_NUM m )
 {
-  int tmp = m_CurrSpeed * m_CurrSpeed / ( 1800.0 * m_Accel );
-  int stopPos = m_CurrStep + sign(m_CurrSpeed) * tmp;
+  long tmp = (long)m_CurrSpeed * m_CurrSpeed / ( 1900.0 * m_Accel );
+  long stopPos = (long)m_CurrStep + sign(m_CurrSpeed) * tmp;
 
   int goalSpeed = 0;
-      
+
+  //DEBUG
+  static bool debug = false;
+  
       //log...
 //      Serial.print( "m_GoalStep= " );
 //      Serial.println( m_GoalStep );
@@ -67,11 +74,14 @@ void Motor::UpdateSpeed( int dt, MOTOR_NUM m )
       
   if( m_GoalStep > m_CurrStep ) // Positive move
   {
-              //log...
-                Serial.print( "m_GoalStep= " );
-                Serial.println( m_GoalStep );
-                Serial.print( "m_CurrStep= " );
-                Serial.println( m_CurrStep );
+                //log...
+//                Serial.print( "m_GoalStep= " );
+//                Serial.println( m_GoalStep );
+//                Serial.print( "m_CurrStep= " );
+//                Serial.println( m_CurrStep );
+                
+                Serial.print( "stopPos= " );
+                Serial.println( stopPos );
                 //=============================
     // Start decelerating ?
     goalSpeed = stopPos >= m_GoalStep ? 0 : m_GoalSpeed;
@@ -82,40 +92,46 @@ void Motor::UpdateSpeed( int dt, MOTOR_NUM m )
           Serial.println( "Postive move. Start deceleration: " );
           Serial.println( "goalSpeed = " );
           Serial.println( goalSpeed );
+          debug = true;
         }
         //===========================
   }
   else // negative move
   {
-    goalSpeed = stopPos <= m_GoalStep ? 0 : -m_GoalSpeed;
+    goalSpeed = stopPos <= m_GoalStep ? 0 : m_GoalSpeed;
         //log...
-//        if ( stopPos <= m_GoalStep )
-//        {
-//          Serial.println( "Negative move. Start deceleration: " );
-//          Serial.println( "goalSpeed = " );
-//          Serial.println( goalSpeed );
-//        }
+        if ( stopPos <= m_GoalStep )
+        {
+          Serial.println( "Negative move. Start deceleration: " );
+          Serial.println( "goalSpeed = " );
+          Serial.println( goalSpeed );
+        }
         //===========================
   }
-
+  
+        //debug
+        if (debug)
+        {
+          Serial.println( "goalSpeed = " );
+          Serial.println( goalSpeed );
+        }
+        
   SetCurrSpeedInternal( dt, goalSpeed, m );
 } // UpdateSpeed
 
 //=========================================================
 void Motor::SetCurrSpeedInternal( int dt, int goalSpeed, MOTOR_NUM m )
 {
-  goalSpeed = constrain( goalSpeed, -MAX_SPEED, MAX_SPEED );
+  goalSpeed = constrain( goalSpeed, -MAX_ABS_SPEED, MAX_ABS_SPEED );
   
   // We limit acceleration => speed ramp
   int accel = (long)m_Accel * dt * 0.001; // We divide by 1000 because dt are in microseconds
+
+  long speedDif = (long)goalSpeed - m_CurrSpeed;
   
-  if ( (long)goalSpeed - m_CurrSpeed > accel ) // We use long here to avoid overflow on the operation
+  if ( abs( speedDif ) > abs( accel ) ) // We use long here to avoid overflow on the operation
   { 
     m_CurrSpeed += accel;
-  }
-  else if ( (long)m_CurrSpeed - goalSpeed > accel)
-  {
-    m_CurrSpeed -= accel;
   }
   else
   {

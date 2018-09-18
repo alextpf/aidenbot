@@ -65,10 +65,10 @@ void HBot::Update() // aka positionControl()
 
   // update motor acceleration
   m_M1.UpdateAccel(); // update m_Accel for M1 & M2
-  m_M2.UpdateAccel();
+//  m_M2.UpdateAccel();
   
   m_M1.UpdateSpeed( dt, Motor::MOTOR_NUM::M1 ); // update m_CurrSpeed, m_Dir, m_Period for M1 & M2
-  m_M2.UpdateSpeed( dt, Motor::MOTOR_NUM::M2 );
+//  m_M2.UpdateSpeed( dt, Motor::MOTOR_NUM::M2 );
 
 } // Update
 
@@ -84,10 +84,10 @@ void HBot::SetPosInternal( int x, int y )
   HBotPosToMotorStep(goal, m1s, m2s);
 
       // log
-    //  Serial.print("SetPosInternal: Motor1 step = ");
-    //  Serial.print( m1s );
-    //  Serial.print(", Motor2 step = ");
-    //  Serial.println( m2s );
+      Serial.print("SetPosInternal: Motor1 step = ");
+      Serial.print( m1s );
+      Serial.print(", Motor2 step = ");
+      Serial.println( m2s );
       //====================================
     
   m_M1.SetGoalStep( m1s ); // set m_GoalStep
@@ -107,16 +107,26 @@ void HBot::UpdatePosStraight()
   int absDiffM2 = myAbs(diff_M2);
 
       // log
-    //  Serial.println("UpdatePosStraight: ");
-    //  Serial.print("m1 goal step = ");
-    //  Serial.print( m_M1.GetGoalStep() );
-    //  Serial.print(", m1 curr step = ");
-    //  Serial.println( m_M1.GetCurrStep() );
-    //  
-    //  Serial.print("m2 goal step = ");
-    //  Serial.print( m_M2.GetGoalStep() );
-    //  Serial.print(", m2 curr step = ");
-    //  Serial.println( m_M2.GetCurrStep() );  Serial.println("");
+      Serial.println("UpdatePosStraight: ");
+      Serial.print("m1 goal step = ");
+      Serial.print( m_M1.GetGoalStep() );
+      Serial.print(", m1 curr step = ");
+      Serial.println( m_M1.GetCurrStep() );
+      
+      Serial.print("m2 goal step = ");
+      Serial.print( m_M2.GetGoalStep() );
+      Serial.print(", m2 curr step = ");
+      Serial.println( m_M2.GetCurrStep() );  Serial.println("");
+
+      Serial.print("diff_M1 = ");
+      Serial.print( diff_M1 );
+      Serial.print(", diff_M2 = ");
+      Serial.println( diff_M2 );
+
+      Serial.print("absDiffM1 = ");
+      Serial.print( absDiffM1 );
+      Serial.print(", absDiffM2 = ");
+      Serial.println( absDiffM2 );
       //===================================
       
   // Now, we calculate the factor to apply to draw straight lines. Speed adjust based on target distance
@@ -136,34 +146,34 @@ void HBot::UpdatePosStraight()
   }
       
       // log
-    //  Serial.print("factor1 = ");
-    //  Serial.print( factor1 );
-    //  Serial.print(", factor2 = ");
-    //  Serial.println( factor2 );Serial.println( "" );
+      Serial.print("factor1 = ");
+      Serial.print( factor1 );
+      Serial.print(", factor2 = ");
+      Serial.println( factor2 );Serial.println( "" );
       //=====================================
       
   // Calculate the target speed (with sign) for each motor
-  long tspeed1 = sign( diff_M1 ) * GetMaxSpeed() * factor1; // arduino "long" is 32 bit
-  long tspeed2 = sign( diff_M2 ) * GetMaxSpeed() * factor2; // arduino "long" is 32 bit
+  long targetSpeed1 = sign( diff_M1 ) * GetMaxAbsSpeed() * factor1; // arduino "long" is 32 bit
+  long targetSpeed2 = sign( diff_M2 ) * GetMaxAbsSpeed() * factor2; // arduino "long" is 32 bit
   
   // Now we calculate a compensation factor. This factor depends on the acceleration of each motor (difference on speed we need to apply to each motor)
   // This factor was empirically tested (with a simulator) to reduce overshoots
-  long diffspeed1 = abs( m_M1.GetCurrSpeed() - tspeed1);
-  long diffspeed2 = abs( m_M2.GetCurrSpeed() - tspeed2);
+  long diffspeed1 = abs( m_M1.GetCurrSpeed() - targetSpeed1);
+  long diffspeed2 = abs( m_M2.GetCurrSpeed() - targetSpeed2);
       
       // log
-    //  Serial.print("M1 curr speed = ");
-    //  Serial.print( m_M1.GetCurrSpeed() );
-    //  Serial.print(", tspeed1 = ");
-    //  Serial.println( tspeed1 );
-    //  Serial.print("M2 curr speed = ");
-    //  Serial.print( m_M2.GetCurrSpeed() );
-    //  Serial.print(", tspeed2 = ");
-    //  Serial.println( tspeed2 );  
-    //  Serial.println( "" );
+      Serial.print("M1 curr speed = ");
+      Serial.print( m_M1.GetCurrSpeed() );
+      Serial.print(", targetSpeed1 = ");
+      Serial.println( targetSpeed1 );
+      Serial.print("M2 curr speed = ");
+      Serial.print( m_M2.GetCurrSpeed() );
+      Serial.print(", targetSpeed1 = ");
+      Serial.println( targetSpeed2 );  
+      Serial.println( "" );
       //=====================================
   
-  float tmp = (diffspeed2 - diffspeed1) / (2.0 * GetMaxSpeed());
+  float tmp = (diffspeed2 - diffspeed1) / (2.0 * GetMaxAbsSpeed());
         
   float speedfactor1 = 1.05 - tmp;  
   speedfactor1 = constrain( speedfactor1, 0.0, 1.0 );
@@ -172,19 +182,19 @@ void HBot::UpdatePosStraight()
   speedfactor2 = constrain( speedfactor2, 0.0, 1.0 );
 
   // Set motor speeds. We apply the straight factor and the "acceleration compensation" speedfactor
-  const int target_speed_M1 = GetMaxSpeed() * factor1 * speedfactor1 * speedfactor1;
-  const int target_speed_M2 = GetMaxSpeed() * factor2 * speedfactor2 * speedfactor2;
+  const int target_speed_M1 = sign( diff_M1 ) * GetMaxAbsSpeed() * factor1 * speedfactor1 * speedfactor1;
+  const int target_speed_M2 = sign( diff_M2 ) * GetMaxAbsSpeed() * factor2 * speedfactor2 * speedfactor2;
       
       // log
-    //  Serial.print("M1 target speed = ");
-    //  Serial.print( target_speed_M1 );
-    //  Serial.print(", speedfactor1 = ");
-    //  Serial.println( speedfactor1 );
-    //  Serial.print("M2 target speed = ");
-    //  Serial.print( target_speed_M2 );
-    //  Serial.print(", speedfactor2 = ");
-    //  Serial.println( speedfactor2 );  
-    //  Serial.println( "" );
+      Serial.print("M1 target speed = ");
+      Serial.print( target_speed_M1 );
+      Serial.print(", speedfactor1 = ");
+      Serial.println( speedfactor1 );
+      Serial.print("M2 target speed = ");
+      Serial.print( target_speed_M2 );
+      Serial.print(", speedfactor2 = ");
+      Serial.println( speedfactor2 );  
+      Serial.println( "" );
       //=====================================
   
   m_M1.SetGoalSpeed( target_speed_M1 ); // set m_GoalSpeed

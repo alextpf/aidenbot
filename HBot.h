@@ -58,26 +58,26 @@ public:
     return m_Pos;
   }
 
-  void SetMaxSpeed( int s )
+  void SetMaxAbsSpeed( int s )
   {
-     m_M1.SetMaxSpeed(s);
-     m_M2.SetMaxSpeed(s);
+     m_M1.SetMaxAbsSpeed(s);
+     m_M2.SetMaxAbsSpeed(s);
   }
 
-  int GetMaxSpeed()
+  int GetMaxAbsSpeed()
   {
-    return m_M1.GetMaxSpeed(); // assuming max speed for 2 motors are the same
+    return m_M1.GetMaxAbsSpeed(); // assuming max speed for 2 motors are the same
   }
   
-  void SetMaxAccel( int accel )
+  void SetMaxAbsAccel( int accel )
   {
-    m_M1.SetMaxAccel( accel );
-    m_M2.SetMaxAccel( accel );
+    m_M1.SetMaxAbsAccel( accel );
+    m_M2.SetMaxAbsAccel( accel );
   }  
   
-  int GetMaxAccel()
+  int GetMaxAbsAccel()
   {
-    return m_M1.GetMaxAccel(); // assuming max accel for 2 motors are the same
+    return m_M1.GetMaxAbsAccel(); // assuming max accel for 2 motors are the same
   }
 
   void SetTime( long t )

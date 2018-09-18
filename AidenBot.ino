@@ -53,8 +53,8 @@ void setup()
   hBot.GetM1().SetCurrStep( m1s ); // this sets m_CurrStep for Motor1 & Motor2
   hBot.GetM2().SetCurrStep( m2s );
   
-  hBot.SetMaxSpeed( MAX_SPEED / 2 );
-  hBot.SetMaxAccel( MAX_ACCEL );
+  hBot.SetMaxAbsSpeed( MAX_ABS_SPEED );
+  hBot.SetMaxAbsAccel( MAX_ABS_ACCEL );
   hBot.SetPosStraight( ROBOT_CENTER_X, ROBOT_DEFENSE_POSITION_DEFAULT ); // this sets m_GoalStep for Motor1 & Motor2, and internally set GoalSpeed
   
   prev_time = micros(); 
