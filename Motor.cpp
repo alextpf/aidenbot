@@ -29,6 +29,8 @@ Motor::~Motor()
 //=========================================================
 void Motor::UpdateAccel()
 {  
+  m_Accel = m_MaxAccel;
+  
   int absSpeed = abs( m_CurrSpeed );
 
   if( absSpeed < SCURVE_LOW_SPEED )
@@ -54,10 +56,23 @@ void Motor::UpdateSpeed( int dt, MOTOR_NUM m )
   int tmp = m_CurrSpeed * m_CurrSpeed / ( 1800.0 * m_Accel );
   int stopPos = m_CurrStep + sign(m_CurrSpeed) * tmp;
 
-  int goalSpeed;
-  
+  int goalSpeed = 0;
+      
+      //log...
+//      Serial.print( "m_GoalStep= " );
+//      Serial.println( m_GoalStep );
+//      Serial.print( "m_CurrStep= " );
+//      Serial.println( m_CurrStep );
+      //=============================
+      
   if( m_GoalStep > m_CurrStep ) // Positive move
   {
+              //log...
+                Serial.print( "m_GoalStep= " );
+                Serial.println( m_GoalStep );
+                Serial.print( "m_CurrStep= " );
+                Serial.println( m_CurrStep );
+                //=============================
     // Start decelerating ?
     goalSpeed = stopPos >= m_GoalStep ? 0 : m_GoalSpeed;
     
@@ -74,12 +89,12 @@ void Motor::UpdateSpeed( int dt, MOTOR_NUM m )
   {
     goalSpeed = stopPos <= m_GoalStep ? 0 : -m_GoalSpeed;
         //log...
-        if ( stopPos <= m_GoalStep )
-        {
-          Serial.println( "Negative move. Start deceleration: " );
-          Serial.println( "goalSpeed = " );
-          Serial.println( goalSpeed );
-        }
+//        if ( stopPos <= m_GoalStep )
+//        {
+//          Serial.println( "Negative move. Start deceleration: " );
+//          Serial.println( "goalSpeed = " );
+//          Serial.println( goalSpeed );
+//        }
         //===========================
   }
 
@@ -106,9 +121,9 @@ void Motor::SetCurrSpeedInternal( int dt, int goalSpeed, MOTOR_NUM m )
   {
     m_CurrSpeed = goalSpeed;
         //log...
-        Serial.println( "SetCurrSpeedInternal: 3rd clause " );
-        Serial.println( "m_CurrSpeed = " );
-        Serial.println( m_CurrSpeed );
+//        Serial.println( "SetCurrSpeedInternal: 3rd clause " );
+//        Serial.println( "m_CurrSpeed = " );
+//        Serial.println( m_CurrSpeed );
         //===========================
   }  
   
@@ -143,10 +158,10 @@ void Motor::SetCurrSpeedInternal( int dt, int goalSpeed, MOTOR_NUM m )
   }
   
       //log...
-    //    Serial.print("m_CurrSpeed =  ");
-    //    Serial.println(m_CurrSpeed);
-    //    Serial.print("m_Dir =  ");
-    //    Serial.println(m_Dir);
+//        Serial.print("m_CurrSpeed =  ");
+//        Serial.println(m_CurrSpeed);
+//        Serial.print("m_Dir =  ");
+//        Serial.println(m_Dir);
       //===========================
       
   if (m_CurrSpeed == 0)

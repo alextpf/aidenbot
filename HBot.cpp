@@ -100,8 +100,11 @@ void HBot::UpdatePosStraight()
 {  
   // Speed adjust to draw straight lines (aproximation)
   // First, we calculate the distante to target on each axis
-  int diff_M1 = myAbs( m_M1.GetGoalStep() - m_M1.GetCurrStep() );
-  int diff_M2 = myAbs( m_M2.GetGoalStep() - m_M2.GetCurrStep() );
+  int diff_M1 = m_M1.GetGoalStep() - m_M1.GetCurrStep();
+  int diff_M2 = m_M2.GetGoalStep() - m_M2.GetCurrStep();
+
+  int absDiffM1 = myAbs(diff_M1);
+  int absDiffM2 = myAbs(diff_M2);
 
       // log
     //  Serial.println("UpdatePosStraight: ");
@@ -119,17 +122,17 @@ void HBot::UpdatePosStraight()
   // Now, we calculate the factor to apply to draw straight lines. Speed adjust based on target distance
   float factor1 = 1.0;
   float factor2 = 1.0;
-  if (diff_M2 == 0) // to avoid division by 0
+  if ( absDiffM2 == 0 ) // to avoid division by 0
   {
     factor2 = 0.0;
   }
-  else if (diff_M1 > diff_M2)
+  else if ( absDiffM1 > absDiffM2 )
   {
-    factor2 = (float)diff_M2 / (float)diff_M1;
+    factor2 = (float)absDiffM2 / (float)absDiffM1;
   }
   else
   {
-    factor1 = (float)diff_M1 / (float)diff_M2;
+    factor1 = (float)absDiffM1 / (float)absDiffM2;
   }
       
       // log

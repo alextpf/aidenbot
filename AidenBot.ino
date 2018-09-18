@@ -81,7 +81,7 @@ void loop()
     
     if ( loop_counter % 10 == 0 )
     {
-      hBot.UpdatePosStraight();  // update straight line motion algorithm
+//      hBot.UpdatePosStraight();  // update straight line motion algorithm
     }
     
     hBot.Update(); // internally update 
