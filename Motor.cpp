@@ -36,11 +36,7 @@ void Motor::UpdateAccel()
 
   if( absSpeed < SCURVE_LOW_SPEED )
   {
-    m_Accel = map( absSpeed, 0, SCURVE_LOW_SPEED, MIN_ACCEL, m_MaxAbsAccel );  
-    if( m_Accel > m_MaxAbsAccel )
-    {
-      m_Accel = m_MaxAbsAccel;
-    }
+    m_Accel = map( absSpeed, 0, SCURVE_LOW_SPEED, MIN_ACCEL, m_MaxAbsAccel ); 
   }
 
   m_Accel *= sign(m_CurrSpeed);
