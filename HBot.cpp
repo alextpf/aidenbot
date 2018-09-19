@@ -59,7 +59,7 @@ void HBot::Update() // aka positionControl()
     //  Serial.print("dt =  ");
     //  Serial.println(dt);
       //===========================
-  dt = constrain( dt, 0, 2000 );
+//  dt = constrain( dt, 0, 2000 ); // Limit dt (it should be around 1000 most times, 1ms)
   
   m_Time = currTime; // update time
 

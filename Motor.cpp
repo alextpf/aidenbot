@@ -57,11 +57,19 @@ void Motor::UpdateAccel()
 //=========================================================
 void Motor::UpdateSpeed( int dt, MOTOR_NUM m )
 {
-  long tmp = (long)m_CurrSpeed * m_CurrSpeed / ( 1900.0 * m_Accel );
-  long stopPos = (long)m_CurrStep + sign(m_CurrSpeed) * tmp;
+  int tmp = m_Accel == 0 ? 0 : (long)m_CurrSpeed * m_CurrSpeed / ( 1900.0 * m_Accel );
+  int stopPos = m_CurrStep + sign(m_CurrSpeed) * tmp;
 
+      // log
+//      if (tmp!=0)
+      {
+      Serial.print( "tmp= " );
+      Serial.println( tmp );
+      }
+      //================================
+      
   int goalSpeed = 0;
-
+  
   //DEBUG
   static bool debug = false;
   
@@ -80,8 +88,8 @@ void Motor::UpdateSpeed( int dt, MOTOR_NUM m )
 //                Serial.print( "m_CurrStep= " );
 //                Serial.println( m_CurrStep );
                 
-                Serial.print( "stopPos= " );
-                Serial.println( stopPos );
+//                Serial.print( "stopPos= " );
+//                Serial.println( stopPos );
                 //=============================
     // Start decelerating ?
     goalSpeed = stopPos >= m_GoalStep ? 0 : m_GoalSpeed;
@@ -112,10 +120,12 @@ void Motor::UpdateSpeed( int dt, MOTOR_NUM m )
         //debug
         if (debug)
         {
-          Serial.println( "goalSpeed = " );
-          Serial.println( goalSpeed );
+//          Serial.println( "goalSpeed = " );
+//          Serial.println( goalSpeed );
         }
         
+//        Serial.println( "m_GoalSpeed = " );
+//        Serial.println( m_GoalSpeed );
   SetCurrSpeedInternal( dt, goalSpeed, m );
 } // UpdateSpeed
 
@@ -125,13 +135,22 @@ void Motor::SetCurrSpeedInternal( int dt, int goalSpeed, MOTOR_NUM m )
   goalSpeed = constrain( goalSpeed, -MAX_ABS_SPEED, MAX_ABS_SPEED );
   
   // We limit acceleration => speed ramp
-  int accel = (long)m_Accel * dt * 0.001; // We divide by 1000 because dt are in microseconds
+  int accel = ((long)m_Accel * dt) / 1000; // We divide by 1000 because dt are in microseconds
 
+        // log
+//      Serial.println( "m_Accel = " );
+//      Serial.println( m_Accel );
+//      Serial.println( "accel = " );
+//      Serial.println( accel );
+        // ==========================
+        
   long speedDif = (long)goalSpeed - m_CurrSpeed;
   
   if ( abs( speedDif ) > abs( accel ) ) // We use long here to avoid overflow on the operation
   { 
     m_CurrSpeed += accel;
+//    Serial.println( "m_CurrSpeed = " );
+//    Serial.println( m_CurrSpeed );
   }
   else
   {
