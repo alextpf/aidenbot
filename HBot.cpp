@@ -53,13 +53,12 @@ void HBot::Update() // aka positionControl()
       
   // record time
   uint32_t currTime = micros();
-  int dt = currTime - m_Time;
 
       //log...
-    //  Serial.print("dt =  ");
-    //  Serial.println(dt);
+    //  Serial.print("currTime - m_Time =  ");
+    //  Serial.println(currTime - m_Time);
       //===========================
-//  dt = constrain( dt, 0, 2000 ); // Limit dt (it should be around 1000 most times, 1ms)
+  uint16_t dt = constrain( currTime - m_Time, 0, 2000 ); // Limit dt (it should be around 1000 most times, 1ms)
   
   m_Time = currTime; // update time
 

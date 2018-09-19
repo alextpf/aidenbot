@@ -42,32 +42,35 @@ void Motor::UpdateAccel()
   m_Accel *= sign(m_CurrSpeed);
   
       //log...
-    //  Serial.println("Motor::UpdateAccel: ");
-    //  Serial.print("absSpeed = ");
-    //  Serial.println(absSpeed);
-    //  Serial.print("m_Accel = ");
-    //  Serial.println(m_Accel);
+      Serial.println("Motor::UpdateAccel: ");
+      Serial.print("absSpeed = ");
+      Serial.println(absSpeed);
+      Serial.print("m_Accel = ");
+      Serial.println(m_Accel);
       //===========================
 } // UpdateAccel
 
 //=========================================================
-void Motor::UpdateSpeed( int dt, MOTOR_NUM m )
+void Motor::UpdateSpeed( uint16_t dt, MOTOR_NUM m )
 {
-  int tmp = m_Accel == 0 ? 0 : (long)m_CurrSpeed * m_CurrSpeed / ( 1900.0 * m_Accel );
+  int tmp = m_Accel == 0 ? 0 : (long)m_CurrSpeed * m_CurrSpeed / ( STOP_COEF * (long)m_Accel );
   int stopPos = m_CurrStep + sign(m_CurrSpeed) * tmp;
 
       // log
 //      if (tmp!=0)
       {
+      Serial.print( "m_CurrStep= " );
+      Serial.println( m_CurrStep );
+      Serial.print( "m_CurrSpeed= " );
+      Serial.println( m_CurrSpeed );
       Serial.print( "tmp= " );
       Serial.println( tmp );
+      Serial.print( "sign(m_CurrSpeed) * tmp= " );
+      Serial.println( sign(m_CurrSpeed) * tmp );
       }
       //================================
       
   int goalSpeed = 0;
-  
-  //DEBUG
-  static bool debug = false;
   
       //log...
 //      Serial.print( "m_GoalStep= " );
@@ -78,66 +81,93 @@ void Motor::UpdateSpeed( int dt, MOTOR_NUM m )
       
   if( m_GoalStep > m_CurrStep ) // Positive move
   {
+      
                 //log...
-//                Serial.print( "m_GoalStep= " );
-//                Serial.println( m_GoalStep );
-//                Serial.print( "m_CurrStep= " );
-//                Serial.println( m_CurrStep );
+                Serial.println( "m_GoalStep > m_CurrStep" );
+                Serial.print( "m_GoalStep= " );
+                Serial.println( m_GoalStep );
+                Serial.print( "m_CurrStep= " );
+                Serial.println( m_CurrStep );
                 
-//                Serial.print( "stopPos= " );
-//                Serial.println( stopPos );
+                Serial.print( "stopPos= " );
+                Serial.println( stopPos );
                 //=============================
     // Start decelerating ?
-    goalSpeed = stopPos >= m_GoalStep ? 0 : m_GoalSpeed;
-    
-        //log...
-        if ( stopPos >= m_GoalStep )
-        {
-          Serial.println( "Postive move. Start deceleration: " );
+    if ( stopPos >= m_GoalStep )
+    {          
+      goalSpeed = 0;
+          //log...
+          Serial.println( "Postive move. Start deceleration1: " );
           Serial.println( "goalSpeed = " );
           Serial.println( goalSpeed );
-          debug = true;
-        }
-        //===========================
+          //================================
+    }
+    else if ( stopPos < m_GoalStep )
+    {          
+      goalSpeed = m_GoalSpeed;
+          //log...
+          Serial.println( "Postive move. Start deceleration2: " );
+          Serial.println( "goalSpeed = " );
+          Serial.println( goalSpeed );
+          //================================
+    }        
   }
   else // negative move
   {
-    goalSpeed = stopPos <= m_GoalStep ? 0 : m_GoalSpeed;
-        //log...
-        if ( stopPos <= m_GoalStep )
-        {
-          Serial.println( "Negative move. Start deceleration: " );
-          Serial.println( "goalSpeed = " );
-          Serial.println( goalSpeed );
-        }
-        //===========================
-  }
-  
-        //debug
-        if (debug)
-        {
-//          Serial.println( "goalSpeed = " );
-//          Serial.println( goalSpeed );
-        }
+                //log...  
+                Serial.println( "m_GoalStep <= m_CurrStep" );
+                Serial.print( "m_GoalStep= " );
+                Serial.println( m_GoalStep );
+                Serial.print( "m_CurrStep= " );
+                Serial.println( m_CurrStep );
+                
+                Serial.print( "stopPos= " );
+                Serial.println( stopPos );
+                //=============================
+//    goalSpeed = stopPos <= m_GoalStep ? 0 : m_GoalSpeed;
         
-//        Serial.println( "m_GoalSpeed = " );
-//        Serial.println( m_GoalSpeed );
+    if ( stopPos <= m_GoalStep )
+    {        
+      goalSpeed = 0;
+        //log...
+        Serial.println( "Negative move. Start deceleration1: " );
+        Serial.println( "goalSpeed = " );
+        Serial.println( goalSpeed );
+        //===========================
+    }
+    else if ( stopPos > m_GoalStep )
+    {        
+      goalSpeed = m_GoalSpeed;
+        //log...
+        Serial.println( "Negative move. Start deceleration2: " );
+        Serial.println( "goalSpeed = " );
+        Serial.println( goalSpeed );
+        //===========================
+    }
+  }
+        // log  
+        Serial.print( "m_GoalSpeed = " );
+        Serial.println( m_GoalSpeed );
+        //===============================
+        
   SetCurrSpeedInternal( dt, goalSpeed, m );
 } // UpdateSpeed
 
 //=========================================================
-void Motor::SetCurrSpeedInternal( int dt, int goalSpeed, MOTOR_NUM m )
+void Motor::SetCurrSpeedInternal( uint16_t dt, int goalSpeed, MOTOR_NUM m )
 {
   goalSpeed = constrain( goalSpeed, -MAX_ABS_SPEED, MAX_ABS_SPEED );
   
   // We limit acceleration => speed ramp
   int accel = ((long)m_Accel * dt) / 1000; // We divide by 1000 because dt are in microseconds
 
-        // log
-//      Serial.println( "m_Accel = " );
-//      Serial.println( m_Accel );
-//      Serial.println( "accel = " );
-//      Serial.println( accel );
+      // log
+      Serial.print( "dt = " );
+      Serial.println( dt );
+      Serial.print( "m_Accel = " );
+      Serial.println( m_Accel );
+      Serial.print( "accel = " );
+      Serial.println( accel );
         // ==========================
         
   long speedDif = (long)goalSpeed - m_CurrSpeed;
@@ -145,16 +175,16 @@ void Motor::SetCurrSpeedInternal( int dt, int goalSpeed, MOTOR_NUM m )
   if ( abs( speedDif ) > abs( accel ) ) // We use long here to avoid overflow on the operation
   { 
     m_CurrSpeed += accel;
-//    Serial.println( "m_CurrSpeed = " );
-//    Serial.println( m_CurrSpeed );
+    Serial.println( "m_CurrSpeed += accel= " );
+    Serial.println( m_CurrSpeed );
   }
   else
   {
     m_CurrSpeed = goalSpeed;
         //log...
-//        Serial.println( "SetCurrSpeedInternal: 3rd clause " );
-//        Serial.println( "m_CurrSpeed = " );
-//        Serial.println( m_CurrSpeed );
+        Serial.println( "SetCurrSpeedInternal: 3rd clause " );
+        Serial.println( "m_CurrSpeed = " );
+        Serial.println( m_CurrSpeed );
         //===========================
   }  
   

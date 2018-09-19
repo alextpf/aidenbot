@@ -94,6 +94,6 @@ private:
   RobotPos m_Pos;
 	Motor m_M1;
 	Motor m_M2;
-	long m_Time; // time stamp, in micro sec.  
+	uint32_t m_Time; // time stamp, in micro sec.  
 };
 #endif

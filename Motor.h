@@ -101,10 +101,10 @@ public:
   }
   
   void UpdateAccel();
-  void UpdateSpeed( int dt, MOTOR_NUM m );
+  void UpdateSpeed( uint16_t dt, MOTOR_NUM m );
   
 private:  
-  void SetCurrSpeedInternal( int dt, int goalSpeed, MOTOR_NUM m );
+  void SetCurrSpeedInternal( uint16_t dt, int goalSpeed, MOTOR_NUM m );
 
   //////////////
   // Position
