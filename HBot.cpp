@@ -163,8 +163,8 @@ void HBot::UpdatePosStraight()
   
   // Now we calculate a compensation factor. This factor depends on the acceleration of each motor (difference on speed we need to apply to each motor)
   // This factor was empirically tested (with a simulator) to reduce overshoots
-  long diffspeed1 = abs( m_M1.GetCurrSpeed() - targetSpeed1);
-  long diffspeed2 = abs( m_M2.GetCurrSpeed() - targetSpeed2);
+  const unsigned int diffspeed1 = abs( m_M1.GetCurrSpeed() - targetSpeed1);
+  const unsigned int diffspeed2 = abs( m_M2.GetCurrSpeed() - targetSpeed2);
 
   #ifdef SHOW_LOG
       // log
@@ -174,13 +174,13 @@ void HBot::UpdatePosStraight()
       Serial.println( targetSpeed1 );
       Serial.print("M2 curr speed = ");
       Serial.print( m_M2.GetCurrSpeed() );
-      Serial.print(", targetSpeed1 = ");
+      Serial.print(", targetSpeed2 = ");
       Serial.println( targetSpeed2 );  
       Serial.println( "" );
       //=====================================
   #endif
   
-  float tmp = (diffspeed2 - diffspeed1) / (2.0 * GetMaxAbsSpeed());
+  float tmp = ((float)diffspeed2 - (float)diffspeed1) / (2.0 * (float)GetMaxAbsSpeed());
         
   float speedfactor1 = 1.05 - tmp;  
   speedfactor1 = constrain( speedfactor1, 0.0, 1.0 );

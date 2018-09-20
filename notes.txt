@@ -6,6 +6,8 @@ int:  			16 bits, 	   -32768 ~ 	 32767 ( -2^15 ~ 2^15 - 1 )
 unsigned int: 	16 bits,       	    0 ~ 	 65535 (  0    ~ 2^16 - 1 )
 long: 			32 bits,  -2147483648 ~ 2147483647 ( -2^31 ~ 2^31 - 1 )
 unsigned long:	32 bits, 		    0 ~ 4294967295 (  0    ~ 2^32 - 1 )
+float:			32 bits
+double:			32 bits. * on Duo board, it's 64 bits
 ============
 Speed:
 

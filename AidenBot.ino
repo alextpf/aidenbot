@@ -69,7 +69,7 @@ void setup()
 void loop() 
 {
   curr_time = micros();
-  if ( curr_time - prev_time >= 1000 /*&& loop_counter < 40*/ )  // 1Khz loop
+  if ( curr_time - prev_time >= 1000 /*&& loop_counter < 100*/ )  // 1Khz loop
   {
     loop_counter++;
 //    
