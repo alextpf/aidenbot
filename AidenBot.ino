@@ -31,7 +31,8 @@ void setup()
 
   // init HBot params
   RobotPos initPos( ROBOT_INITIAL_POSITION_X, ROBOT_INITIAL_POSITION_Y ); // mm
-    
+
+  #ifdef SHOW_LOG
       // log
       Serial.println("AidenBot init:");
       Serial.print("Init pos: x = ");
@@ -39,16 +40,19 @@ void setup()
       Serial.print(", y = ");
       Serial.println(ROBOT_INITIAL_POSITION_Y);
       //=============================================
-        
+  #endif
+  
   int m1s, m2s;
   HBot::HBotPosToMotorStep(initPos, m1s, m2s);
-
+  
+  #ifdef SHOW_LOG
       // log
       Serial.print("Motor1 step = ");
       Serial.print( m1s );
       Serial.print(", Motor2 step = ");
       Serial.println( m2s ); Serial.println("");
       //=============================================
+  #endif
   
   hBot.GetM1().SetCurrStep( m1s ); // this sets m_CurrStep for Motor1 & Motor2
   hBot.GetM2().SetCurrStep( m2s );
@@ -65,7 +69,7 @@ void setup()
 void loop() 
 {
   curr_time = micros();
-  if ( curr_time - prev_time >= 1000 && loop_counter < 30 )  // 1Khz loop
+  if ( curr_time - prev_time >= 1000 /*&& loop_counter < 40*/ )  // 1Khz loop
   {
     loop_counter++;
 //    

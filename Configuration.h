@@ -4,6 +4,10 @@
 //////////////////////////////////////////////////////
 
 ////////////////////////////
+// debug
+////////////////////////////
+// #define SHOW_LOG            1 // comment it out if you don't want to show debug info
+////////////////////////////
 // Pin definition
 ////////////////////////////
 
@@ -16,7 +20,7 @@
 #define Y_ENABLE_PIN        56
 
 #define LED_PIN             13
-#define BAUD_RATE           9600
+#define BAUD_RATE           115200
 
 //========================================================================================================================================
 ////////////////////////////
@@ -58,8 +62,8 @@
 
 // THIS VALUES DEPENDS ON YOUR ROBOT CONSTRUCTION (MOTORS, MECHANICS...)
 // RECOMMENDED VALUES FOR 12V POWER SUPPLY
-#define MAX_ABS_ACCEL         100//275                        // Maximun motor acceleration in (steps/seg2)/1000. Max recommended value:280
-#define MAX_ABS_SPEED         20000//32000                    // Maximun speed in steps/seg. Max absolute value: 32767!!
+#define MAX_ABS_ACCEL         180//275                        // Maximun motor acceleration in (steps/seg2)/1000. Max recommended value:280
+#define MAX_ABS_SPEED         15000//32000                    // Maximun speed in steps/seg. Max absolute value: 32767!!
 
 #define MIN_ACCEL         50
 #define MIN_SPEED         3000//5000
