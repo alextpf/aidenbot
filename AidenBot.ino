@@ -59,7 +59,7 @@ void setup()
   
   hBot.SetMaxAbsSpeed( MAX_ABS_SPEED );
   hBot.SetMaxAbsAccel( MAX_ABS_ACCEL );
-  hBot.SetPosStraight( ROBOT_CENTER_X, ROBOT_DEFENSE_POSITION_DEFAULT ); // this sets m_GoalStep, and internally set m_GoalSpeed for M1 & M2
+  hBot.SetPosStraight( ROBOT_CENTER_X, ROBOT_DEFENSE_POSITION_DEFAULT ); // this sets m_GoalStep, and internally set m_AbsGoalSpeed for M1 & M2
   
   prev_time = micros(); 
   hBot.SetTime( prev_time );
@@ -69,7 +69,7 @@ void setup()
 void loop() 
 {
   curr_time = micros();
-  if ( curr_time - prev_time >= 1000 /*&& loop_counter < 100*/ )  // 1Khz loop
+  if ( curr_time - prev_time >= 1000 /*&& loop_counter < 50*/ )  // 1Khz loop
   {
     loop_counter++;
 //    

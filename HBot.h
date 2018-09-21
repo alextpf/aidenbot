@@ -29,7 +29,7 @@ public:
   void SetPosStraight( int x, int y ); // in mm
 
   //==================================================================================================================
-  // @brief use algorithm to calculate goal speed and set m_GoalSpeed for M1 & M2
+  // @brief use algorithm to calculate goal speed and set m_AbsGoalSpeed for M1 & M2
   //==================================================================================================================
   void UpdatePosStraight();
   

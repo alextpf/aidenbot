@@ -58,12 +58,34 @@ void HBot::Update() // aka positionControl()
     //  Serial.print("currTime - m_Time =  ");
     //  Serial.println(currTime - m_Time);
       //===========================
-  uint16_t dt = constrain( currTime - m_Time, 0, 2000 ); // Limit dt (it should be around 1000 most times, 1ms)
+  long delta = currTime - m_Time;
+  // uint16_t dt = constrain( , 0, 2000 ); // Limit dt (it should be around 1000 most times, 1ms)
+
+  #ifdef SHOW_LOG
+    Serial.print("delta =  ");
+    Serial.println( delta );
+    Serial.println("");
+  #endif
+
+  uint16_t dt;
+  if( delta < 0 )
+  {
+    dt = 2000;
+
+//    #ifdef SHOW_LOG
+      Serial.print("delta < 0 !! ");
+      Serial.println("");
+//    #endif
+  }
+  else
+  {
+    dt = delta;
+  }
   
   m_Time = currTime; // update time
 
   // update motor acceleration
-  m_M1.UpdateAccel(); // update m_Accel for M1 & M2
+  m_M1.UpdateAccel(); // update m_AbsAccel for M1 & M2
   m_M2.UpdateAccel();
   
   m_M1.UpdateSpeed( dt, Motor::MOTOR_NUM::M1 ); // update m_CurrSpeed, m_Dir, m_Period for M1 & M2
@@ -163,8 +185,11 @@ void HBot::UpdatePosStraight()
   
   // Now we calculate a compensation factor. This factor depends on the acceleration of each motor (difference on speed we need to apply to each motor)
   // This factor was empirically tested (with a simulator) to reduce overshoots
-  const unsigned int diffspeed1 = abs( m_M1.GetCurrSpeed() - targetSpeed1);
-  const unsigned int diffspeed2 = abs( m_M2.GetCurrSpeed() - targetSpeed2);
+  const int difS1 = m_M1.GetCurrSpeed() - targetSpeed1;
+  const int difS2 = m_M2.GetCurrSpeed() - targetSpeed2;
+
+  const unsigned int diffspeed1 = abs( difS1 );
+  const unsigned int diffspeed2 = abs( difS2 );
 
   #ifdef SHOW_LOG
       // log
@@ -189,8 +214,8 @@ void HBot::UpdatePosStraight()
   speedfactor2 = constrain( speedfactor2, 0.0, 1.0 );
 
   // Set motor speeds. We apply the straight factor and the "acceleration compensation" speedfactor
-  const int target_speed_M1 = sign( diff_M1 ) * GetMaxAbsSpeed() * factor1 * speedfactor1 * speedfactor1;
-  const int target_speed_M2 = sign( diff_M2 ) * GetMaxAbsSpeed() * factor2 * speedfactor2 * speedfactor2;
+  const int target_speed_M1 = GetMaxAbsSpeed() * factor1 * speedfactor1 * speedfactor1; // unsigned speed
+  const int target_speed_M2 = GetMaxAbsSpeed() * factor2 * speedfactor2 * speedfactor2;
 
   #ifdef SHOW_LOG
       // log
@@ -206,8 +231,8 @@ void HBot::UpdatePosStraight()
       //=====================================
   #endif
   
-  m_M1.SetGoalSpeed( target_speed_M1 ); // set m_GoalSpeed
-  m_M2.SetGoalSpeed( target_speed_M2 );  
+  m_M1.SetAbsGoalSpeed( target_speed_M1 ); // set m_AbsGoalSpeed
+  m_M2.SetAbsGoalSpeed( target_speed_M2 );  
 } // UpdatePosStraight
 
 //=========================================================
@@ -223,5 +248,5 @@ void HBot::SetPosStraight( int x, int y )
   #endif
       
   SetPosInternal( x, y ); // set m_GoalStep for M1 & M2
-  UpdatePosStraight(); // use algorithm to calculate goal speed and set m_GoalSpeed for M1 & M2
+  UpdatePosStraight(); // use algorithm to calculate goal speed and set m_AbsGoalSpeed for M1 & M2
 } // SetPosStraight

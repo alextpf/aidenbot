@@ -15,9 +15,9 @@ Motor::Motor()
 : m_CurrStep( 0 )
 , m_GoalStep( 0 )
 , m_Dir( 0 )
-, m_Accel( 0 )
+, m_AbsAccel( 0 )
 , m_CurrSpeed( 0 )
-, m_GoalSpeed( 0 )
+, m_AbsGoalSpeed( 0 )
 , m_MaxAbsSpeed( 0 )
 , m_MaxAbsAccel( 0 )
 , m_Period( 0 )
@@ -30,24 +30,22 @@ Motor::~Motor()
 //=========================================================
 void Motor::UpdateAccel()
 {  
-  m_Accel = m_MaxAbsAccel;
+  m_AbsAccel = m_MaxAbsAccel;
   
-  int absSpeed = abs( m_CurrSpeed );
+  const unsigned int absSpeed = abs( m_CurrSpeed );
 
   if( absSpeed < SCURVE_LOW_SPEED )
   {
-    m_Accel = map( absSpeed, 0, SCURVE_LOW_SPEED, MIN_ACCEL, m_MaxAbsAccel ); 
+    m_AbsAccel = map( absSpeed, 0, SCURVE_LOW_SPEED, MIN_ACCEL, m_MaxAbsAccel ); 
   }
-
-  m_Accel *= sign(m_GoalSpeed);
 
   #ifdef SHOW_LOG
       //log...
       Serial.println("Motor::UpdateAccel: ");
       Serial.print("absSpeed = ");
       Serial.println(absSpeed);
-      Serial.print("m_Accel = ");
-      Serial.println(m_Accel);
+      Serial.print("m_AbsAccel = ");
+      Serial.println(m_AbsAccel);
       //===========================
   #endif
   
@@ -56,18 +54,19 @@ void Motor::UpdateAccel()
 //=========================================================
 void Motor::UpdateSpeed( uint16_t dt, MOTOR_NUM m )
 {
-  const int tmp = m_Accel == 0 ? 0 : (long)m_CurrSpeed * m_CurrSpeed / ( STOP_COEF * (long)m_Accel );
-  const int stopPos = m_CurrStep + tmp;
+  const int tmp = sign( m_CurrSpeed ) * ( (long)m_CurrSpeed * (long)m_CurrSpeed / ( STOP_COEF * (long)m_AbsAccel ) );
+  const int stepsToGoal = m_GoalStep - m_CurrStep; // error term
 
   #ifdef SHOW_LOG
-      // log
       Serial.print( "m_CurrStep= " );
       Serial.println( m_CurrStep );
+      Serial.print( "stepsToGoal= " );
+      Serial.println( stepsToGoal );
       Serial.print( "m_CurrSpeed= " );
       Serial.println( m_CurrSpeed );
       Serial.print( "tmp= " );
       Serial.println( tmp );
-      //================================
+      Serial.println( "" );
   #endif
       
   int goalSpeed = 0;
@@ -75,39 +74,32 @@ void Motor::UpdateSpeed( uint16_t dt, MOTOR_NUM m )
   if( m_GoalStep > m_CurrStep ) // Positive move
   {
     #ifdef SHOW_LOG
-                //log...
                 Serial.println( "m_GoalStep > m_CurrStep" );
                 Serial.print( "m_GoalStep= " );
                 Serial.println( m_GoalStep );
                 Serial.print( "m_CurrStep= " );
                 Serial.println( m_CurrStep );
-                
-                Serial.print( "stopPos= " );
-                Serial.println( stopPos );
-                //=============================
     #endif
     
     // Start decelerating ?
-    if ( stopPos >= m_GoalStep )
+    if ( tmp >= stepsToGoal )
     {          
       goalSpeed = 0;
 
       #ifdef SHOW_LOG
-          //log...
-          Serial.println( "Postive move. Start deceleration1: stopPos >= m_GoalStep" );
+          Serial.println( "Postive move. tmp >= stepsToGoal: " );
           Serial.print( "goalSpeed = " );
           Serial.println( goalSpeed );
-          //================================
      #endif
      
     }
     else
     {          
-      goalSpeed = abs( m_GoalSpeed );
+      goalSpeed = m_AbsGoalSpeed;
 
       #ifdef SHOW_LOG
           //log...
-          Serial.println( "Postive move. Start deceleration2: stopPos < m_GoalStep" );
+          Serial.println( "Postive move. tmp < stepsToGoal" );
           Serial.print( "goalSpeed = " );
           Serial.println( goalSpeed );
           //================================
@@ -124,21 +116,16 @@ void Motor::UpdateSpeed( uint16_t dt, MOTOR_NUM m )
                 Serial.println( m_GoalStep );
                 Serial.print( "m_CurrStep= " );
                 Serial.println( m_CurrStep );
-                
-                Serial.print( "stopPos= " );
-                Serial.println( stopPos );
                 //=============================
     #endif
-    
-//    goalSpeed = stopPos <= m_GoalStep ? 0 : m_GoalSpeed;
-        
-    if ( stopPos <= m_GoalStep )
+            
+    if ( tmp <= stepsToGoal )
     {              
       goalSpeed = 0;
 
       #ifdef SHOW_LOG
         //log...
-        Serial.println( "Negative move. Start deceleration1: stopPos <= m_GoalStep" );
+        Serial.println( "Negative move. tmp <= stepsToGoal" );
         Serial.print( "goalSpeed = " );
         Serial.println( goalSpeed );
         //===========================
@@ -146,11 +133,11 @@ void Motor::UpdateSpeed( uint16_t dt, MOTOR_NUM m )
     }
     else
     {        
-      goalSpeed = -abs( m_GoalSpeed );
+      goalSpeed = -m_AbsGoalSpeed;
 
       #ifdef SHOW_LOG
         //log...
-        Serial.println( "Negative move. Start deceleration2: stopPos > m_GoalStep" );
+        Serial.println( "Negative move. tmp > stepsToGoal" );
         Serial.print( "goalSpeed = " );
         Serial.println( goalSpeed );
         //===========================
@@ -158,18 +145,9 @@ void Motor::UpdateSpeed( uint16_t dt, MOTOR_NUM m )
     }
   }
   
-  if (goalSpeed != 0 )
-  {
-    const unsigned int dir = sign( goalSpeed );
-    m_GoalSpeed = dir * abs( m_GoalSpeed );
-    m_Accel = dir * abs( m_Accel ); // direction may change
-  }
-
   #ifdef SHOW_LOG
-        // log  
-        Serial.print( "m_GoalSpeed = " );
-        Serial.println( m_GoalSpeed );
-        //===============================
+        Serial.print( "m_AbsGoalSpeed = " );
+        Serial.println( m_AbsGoalSpeed );
   #endif
   
   SetCurrSpeedInternal( dt, goalSpeed, m );
@@ -181,28 +159,40 @@ void Motor::SetCurrSpeedInternal( uint16_t dt, int goalSpeed, MOTOR_NUM m )
   goalSpeed = constrain( goalSpeed, -MAX_ABS_SPEED, MAX_ABS_SPEED );
   
   // We limit acceleration => speed ramp
-  int accel = ((long)m_Accel * dt) / 1000; // We divide by 1000 because dt are in microseconds
+  const int absAccel = ((long)m_AbsAccel * (long)dt) / 1000; // We divide by 1000 because dt are in microseconds
 
+  const int speedDif = goalSpeed - m_CurrSpeed;
+  
   #ifdef SHOW_LOG
-      // log
       Serial.print( "dt = " );
       Serial.println( dt );
-      Serial.print( "m_Accel = " );
-      Serial.println( m_Accel );
-      Serial.print( "accel = " );
-      Serial.println( accel );
-      // ==========================
+      Serial.print( "m_AbsAccel = " );
+      Serial.println( m_AbsAccel );
+      Serial.print( "absAccel = " );
+      Serial.println( absAccel );
+      Serial.print( "speedDif = " );
+      Serial.println( speedDif );
+      Serial.println("");
   #endif
         
-  int speedDif = goalSpeed - m_CurrSpeed;
-  
-  if ( abs( speedDif ) > abs( accel ) ) // We use long here to avoid overflow on the operation
+  if ( speedDif > absAccel ) // We use long here to avoid overflow on the operation
   { 
-    m_CurrSpeed += accel;
+    m_CurrSpeed += absAccel;
     
     #ifdef SHOW_LOG
-      Serial.print( "m_CurrSpeed += accel= " );
+      Serial.print( "m_CurrSpeed += absAccel= " );
       Serial.println( m_CurrSpeed );
+      Serial.println("");
+    #endif
+  }
+  else if ( speedDif < -absAccel )
+  {
+    m_CurrSpeed -= absAccel;
+    
+    #ifdef SHOW_LOG
+      Serial.print( "m_CurrSpeed -= absAccel= " );
+      Serial.println( m_CurrSpeed );
+      Serial.println("");
     #endif
   }
   else
@@ -210,21 +200,19 @@ void Motor::SetCurrSpeedInternal( uint16_t dt, int goalSpeed, MOTOR_NUM m )
     m_CurrSpeed = goalSpeed;
 
     #ifdef SHOW_LOG
-        //log...
         Serial.println( "SetCurrSpeedInternal: 3rd clause " );
         Serial.print( "m_CurrSpeed = " );
         Serial.println( m_CurrSpeed );
-        //===========================
-    #endif
-    
+        Serial.println("");
+    #endif    
   }  
   
   // Check if we need to change the direction pins
-  if ( m_CurrSpeed == 0 && m_Dir != 0 )
+  if ( ( m_CurrSpeed == 0 ) && ( m_Dir != 0 ) )
   {
     m_Dir = 0;
   }
-  else if ( m_CurrSpeed > 0 && m_Dir != 1 )
+  else if ( ( m_CurrSpeed > 0 ) && ( m_Dir != 1 ) )
   {
     m_Dir = 1;
     if ( m == M1 )
@@ -236,7 +224,7 @@ void Motor::SetCurrSpeedInternal( uint16_t dt, int goalSpeed, MOTOR_NUM m )
       SET(PORTF,7);
     }
   }
-  else if ( m_CurrSpeed < 0 && m_Dir != -1 )
+  else if ( ( m_CurrSpeed < 0 ) && ( m_Dir != -1 ) )
   {
     m_Dir = -1;
     if ( m == M1 )
@@ -250,12 +238,11 @@ void Motor::SetCurrSpeedInternal( uint16_t dt, int goalSpeed, MOTOR_NUM m )
   }
 
   #ifdef SHOW_LOG
-      //log...
         Serial.print("m_CurrSpeed =  ");
         Serial.println(m_CurrSpeed);
         Serial.print("m_Dir =  ");
         Serial.println(m_Dir);
-      //===========================
+        Serial.println("");
   #endif
       
   if (m_CurrSpeed == 0)

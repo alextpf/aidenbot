@@ -62,13 +62,13 @@
 
 // THIS VALUES DEPENDS ON YOUR ROBOT CONSTRUCTION (MOTORS, MECHANICS...)
 // RECOMMENDED VALUES FOR 12V POWER SUPPLY
-#define MAX_ABS_ACCEL         140//275                        // Maximun motor acceleration in (steps/seg2)/1000. Max recommended value:280
+#define MAX_ABS_ACCEL         90//275                        // Maximun motor acceleration in (steps/seg2)/1000. Max recommended value:280
 #define MAX_ABS_SPEED         17000//32000                    // Maximun speed in steps/seg. Max absolute value: 32767!!
 
-#define MIN_ACCEL         80//100
+#define MIN_ACCEL         30//100						// make sure this is not 0
 #define MIN_SPEED         5000//5000
 
-#define SCURVE_LOW_SPEED  1800//2500
+#define SCURVE_LOW_SPEED  2500//2500
 
 #define ZERO_SPEED        65535
 
@@ -78,7 +78,7 @@
 #define MIN_ABS_Y_SPEED           60
 #define MIN_ABS_X_SPEED           100
 #define MIN_PREDICT_TIME          150                   // used in Robot::robotStrategy()
-#define STOP_COEF         1200//1800
+#define STOP_COEF         1000//1800
 //========================================================================================================================================
 //////////////////////////////////
 // Geometric calibration

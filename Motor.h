@@ -45,24 +45,24 @@ public:
     return m_CurrSpeed;
   }
 
-  void SetGoalSpeed( int speed )
+  void SetAbsGoalSpeed( int speed )
   {
-    m_GoalSpeed = speed;
+    m_AbsGoalSpeed = speed;
   }
 
-  int GetGoalSpeed() const
+  int GetAbsGoalSpeed() const
   {
-    return m_GoalSpeed;
+    return m_AbsGoalSpeed;
   }
   
-  void SetAccel( int accel )
+  void SetAbsAccel( int accel )
   {
-    m_Accel = accel;
+    m_AbsAccel = accel;
   }
 
-  int GetAccel() const
+  int GetAbsAccel() const
   {
-    return m_Accel;
+    return m_AbsAccel;
   }
   
   void SetMaxAbsAccel( int accel )
@@ -121,11 +121,11 @@ private:
   // Speed & Accel
   ///////////////////
 	int m_CurrSpeed;      // signed speed. corresponds to speed_M1/2
-  int m_GoalSpeed;      // signed speed. corresponds to target_speed_M1/2
-  int m_MaxAbsSpeed;       // unsighed speed. corresponds to max_speed
+  int m_AbsGoalSpeed;      // signed speed. corresponds to target_speed_M1/2
+  int m_MaxAbsSpeed;    // unsighed speed. corresponds to max_speed
 
-  int m_Accel;          // signed acceleration. corresponds to acceleration_M1/2
-  int m_MaxAbsAccel;       // unsighed max acceleration
+  int m_AbsAccel;       // unsigned acceleration. corresponds to acceleration_M1/2
+  int m_MaxAbsAccel;    // unsighed max acceleration
   
   long m_Period;        // for setting timer use. corresponds to timer_period. arduino "long" is 32 bit  
 };
