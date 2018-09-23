@@ -216,7 +216,7 @@ void Camera::MissingStepsDetection( HBot& hBot )
         {
           // Missing steps detected We need to correct this...
 #ifdef CORRECT_MISSING_STEPS
-          int m1s,m2s;
+          long m1s,m2s;
           HBot::HBotPosToMotorStep( robotPosAvg, m1s, m2s );
           hBot.GetM1().SetCurrStep( m1s );
           hBot.GetM2().SetCurrStep( m2s );

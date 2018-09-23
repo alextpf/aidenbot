@@ -11,7 +11,7 @@
 // Utility functions
 ////////////////////////////////////////////
 //=========================================================
-RobotPos HBot::MotorStepToHBotPos(int m1Step, int m2Step)
+RobotPos HBot::MotorStepToHBotPos(long m1Step, long m2Step)
 {
   RobotPos pos;
   pos.m_X = ( m1Step + m2Step ) * 0.5 / X_AXIS_STEPS_PER_UNIT;
@@ -20,10 +20,10 @@ RobotPos HBot::MotorStepToHBotPos(int m1Step, int m2Step)
 } // MotorStepToHBotPos
 
 //=========================================================
-void HBot::HBotPosToMotorStep(const RobotPos& pos, int& m1Step, int& m2Step)
+void HBot::HBotPosToMotorStep(const RobotPos& pos, long& m1Step, long& m2Step)
 {
-  m1Step = (pos.m_X + pos.m_Y) * X_AXIS_STEPS_PER_UNIT;
-  m2Step = (pos.m_X - pos.m_Y) * Y_AXIS_STEPS_PER_UNIT;
+  m1Step = (long)(pos.m_X + pos.m_Y) * (long)X_AXIS_STEPS_PER_UNIT;
+  m2Step = (long)(pos.m_X - pos.m_Y) * (long)Y_AXIS_STEPS_PER_UNIT;
 } // HBotPosToMotorStep
 
 ////////////////////////////////////////////
@@ -32,6 +32,7 @@ void HBot::HBotPosToMotorStep(const RobotPos& pos, int& m1Step, int& m2Step)
 //=========================================================
 HBot::HBot()
 : m_Time( 0 )
+, m_LoopCounter( 0 )
 {}
 
 //=========================================================
@@ -41,26 +42,26 @@ HBot::~HBot()
 //=========================================================
 void HBot::Update() // aka positionControl()
 {  
+  m_LoopCounter++;
+  
   // convert from motor steps to robot position
   m_Pos = MotorStepToHBotPos( m_M1.GetCurrStep(), m_M2.GetCurrStep() ); // update m_Pos
 
-      //log...
-    //  Serial.print("Current BotPos: x = ");
-    //  Serial.print(m_Pos.m_X);
-    //  Serial.print(", y = ");
-    //  Serial.println(m_Pos.m_Y);
-      //===========================
-      
+//  if (m_LoopCounter % 100 == 0 )
+  {
+  #ifdef SHOW_LOG      
+      Serial.print("Current BotPos: x = ");
+      Serial.print(m_Pos.m_X);
+      Serial.print(", y = ");
+      Serial.println(m_Pos.m_Y); Serial.println("");
+  #endif
+  }   
+
   // record time
   uint32_t currTime = micros();
 
-      //log...
-    //  Serial.print("currTime - m_Time =  ");
-    //  Serial.println(currTime - m_Time);
-      //===========================
   long delta = currTime - m_Time;
-  // uint16_t dt = constrain( , 0, 2000 ); // Limit dt (it should be around 1000 most times, 1ms)
-
+  
   #ifdef SHOW_LOG
     Serial.print("delta =  ");
     Serial.println( delta );
@@ -101,16 +102,14 @@ void HBot::SetPosInternal( int x, int y )
     constrain( x, ROBOT_MIN_X, ROBOT_MAX_X ), 
     constrain( y, ROBOT_MIN_Y, ROBOT_MAX_Y ) ); // mm
 
-  int m1s, m2s;
+  long m1s, m2s;
   HBotPosToMotorStep(goal, m1s, m2s);
 
   #ifdef SHOW_LOG
-      // log
       Serial.print("SetPosInternal: Motor1 step = ");
       Serial.print( m1s );
       Serial.print(", Motor2 step = ");
       Serial.println( m2s );
-      //====================================
   #endif
     
   m_M1.SetGoalStep( m1s ); // set m_GoalStep
@@ -123,11 +122,11 @@ void HBot::UpdatePosStraight()
 {  
   // Speed adjust to draw straight lines (aproximation)
   // First, we calculate the distante to target on each axis
-  const int diff_M1 = m_M1.GetGoalStep() - m_M1.GetCurrStep();
-  const int diff_M2 = m_M2.GetGoalStep() - m_M2.GetCurrStep();
+  const long diff_M1 = m_M1.GetGoalStep() - m_M1.GetCurrStep();
+  const long diff_M2 = m_M2.GetGoalStep() - m_M2.GetCurrStep();
 
-  const unsigned int absDiffM1 = abs( diff_M1 );
-  const unsigned int absDiffM2 = abs( diff_M2 );
+  const unsigned long absDiffM1 = abs( diff_M1 );
+  const unsigned long absDiffM2 = abs( diff_M2 );
 
   #ifdef SHOW_LOG
       // log
@@ -239,12 +238,14 @@ void HBot::UpdatePosStraight()
 void HBot::SetPosStraight( int x, int y )
 {  
   #ifdef SHOW_LOG
-      //log  
-      Serial.println("SetPosStraight: x = ");
+      Serial.print("Current Pos: x = ");
+      Serial.print( m_Pos.m_X );
+      Serial.print(", y = ");
+      Serial.println( m_Pos.m_Y ); Serial.println("");
+      Serial.print("SetPosStraight: x = ");
       Serial.print( x );
       Serial.print(", y = ");
       Serial.println( y ); Serial.println("");
-      //========================
   #endif
       
   SetPosInternal( x, y ); // set m_GoalStep for M1 & M2

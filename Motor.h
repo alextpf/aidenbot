@@ -15,22 +15,22 @@ public:
   Motor();
   ~Motor();
   
-  void SetCurrStep( int step )
+  void SetCurrStep( long step )
   {
   	m_CurrStep = step;
   }
 
-  int GetCurrStep() const
+  long GetCurrStep() const
   {
   	return m_CurrStep;
   }
 
-  void SetGoalStep( int step )
+  void SetGoalStep( long step )
   {
   	m_GoalStep = step;
   }
 
-  int GetGoalStep() const
+  long GetGoalStep() const
   {
   	return m_GoalStep;
   }
@@ -109,8 +109,8 @@ private:
   //////////////
   // Position
   //////////////
-	int m_CurrStep;       // in motor steps. corresponds to position_M1/2
-  int m_GoalStep;       // corresponds to target_position_M1/2
+	long m_CurrStep;       // in motor steps. corresponds to position_M1/2
+  long m_GoalStep;       // corresponds to target_position_M1/2
 
   //////////////
   // Direction

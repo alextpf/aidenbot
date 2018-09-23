@@ -31,12 +31,12 @@
 // This are custum dimensions
 #define TABLE_LENGTH    1003                      // 39.5''
 #define TABLE_WIDTH     597                       // 23.5''
-#define ROBOT_CENTER_X  TABLE_WIDTH/2             // Center of robot.
+#define ROBOT_CENTER_X  TABLE_WIDTH/2             // Center of robot = 298.5
 #define ROBOT_CENTER_Y  TABLE_LENGTH/2
 
 // Absolute Min and Max robot positions in mm (measured from center of robot pusher)
-#define ROBOT_MIN_X     200
-#define ROBOT_MIN_Y     200
+#define ROBOT_MIN_X     50
+#define ROBOT_MIN_Y     80
 #define ROBOT_MAX_X     TABLE_WIDTH-ROBOT_MIN_X
 #define ROBOT_MAX_Y     ROBOT_CENTER_Y-120
 
@@ -62,11 +62,11 @@
 
 // THIS VALUES DEPENDS ON YOUR ROBOT CONSTRUCTION (MOTORS, MECHANICS...)
 // RECOMMENDED VALUES FOR 12V POWER SUPPLY
-#define MAX_ABS_ACCEL         90//275                        // Maximun motor acceleration in (steps/seg2)/1000. Max recommended value:280
-#define MAX_ABS_SPEED         17000//32000                    // Maximun speed in steps/seg. Max absolute value: 32767!!
+#define MAX_ABS_ACCEL         50//90                        // Maximun motor acceleration in (steps/seg2)/1000. Max recommended value:280
+#define MAX_ABS_SPEED         6000//17000                    // Maximun speed in steps/seg. Max absolute value: 32767!!
 
-#define MIN_ACCEL         30//100						// make sure this is not 0
-#define MIN_SPEED         5000//5000
+#define MIN_ACCEL         20//30						// make sure this is not 0
+#define MIN_SPEED         500//5000
 
 #define SCURVE_LOW_SPEED  2500//2500
 
@@ -86,8 +86,8 @@
 
 // This depends on the pulley teeth. DEFAULT: 200(steps/rev)*8(microstepping) = 1600 steps/rev. 1600/32teeth*2mm(GT2) = 25 steps/mm
 // Alex note: I got 20 teeth pully. Due to the dimension of my table, the move can be wobbling, and so this factor doesn't need to be super accurate, it will be off slightly (~1-2cm) anyway.
-#define X_AXIS_STEPS_PER_UNIT 25  
-#define Y_AXIS_STEPS_PER_UNIT 25
+#define X_AXIS_STEPS_PER_UNIT 41//36//41
+#define Y_AXIS_STEPS_PER_UNIT 41//36//41
 
 // CORRECTION FOR VISION SYSTEM LAG
 #define VISION_SYSTEM_LAG 60   // in miliseconds

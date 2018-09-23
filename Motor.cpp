@@ -55,7 +55,7 @@ void Motor::UpdateAccel()
 void Motor::UpdateSpeed( uint16_t dt, MOTOR_NUM m )
 {
   const int tmp = sign( m_CurrSpeed ) * ( (long)m_CurrSpeed * (long)m_CurrSpeed / ( STOP_COEF * (long)m_AbsAccel ) );
-  const int stepsToGoal = m_GoalStep - m_CurrStep; // error term
+  const long stepsToGoal = m_GoalStep - m_CurrStep; // error term
 
   #ifdef SHOW_LOG
       Serial.print( "m_CurrStep= " );

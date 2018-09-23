@@ -9,7 +9,6 @@
 
 long curr_time;                 // used in main loop
 long prev_time;
-int loop_counter;
 bool testmode = true;
 //
 HBot hBot;
@@ -31,7 +30,8 @@ void setup()
 
   // init HBot params
   RobotPos initPos( ROBOT_INITIAL_POSITION_X, ROBOT_INITIAL_POSITION_Y ); // mm
-
+  hBot.SetRobotPos( initPos );
+  
   #ifdef SHOW_LOG
       // log
       Serial.println("AidenBot init:");
@@ -42,7 +42,7 @@ void setup()
       //=============================================
   #endif
   
-  int m1s, m2s;
+  long m1s, m2s;
   HBot::HBotPosToMotorStep(initPos, m1s, m2s);
   
   #ifdef SHOW_LOG
@@ -60,22 +60,17 @@ void setup()
   hBot.SetMaxAbsSpeed( MAX_ABS_SPEED );
   hBot.SetMaxAbsAccel( MAX_ABS_ACCEL );
   hBot.SetPosStraight( ROBOT_CENTER_X, ROBOT_DEFENSE_POSITION_DEFAULT ); // this sets m_GoalStep, and internally set m_AbsGoalSpeed for M1 & M2
+//  hBot.SetPosStraight(ROBOT_MAX_X, ROBOT_MAX_Y); // upper right
   
   prev_time = micros(); 
   hBot.SetTime( prev_time );
-  loop_counter=0;
 }
 
 void loop() 
 {
   curr_time = micros();
-  if ( curr_time - prev_time >= 1000 /*&& loop_counter < 50*/ )  // 1Khz loop
+  if ( curr_time - prev_time >= 1000  /*&& hBot.GetLoopCounter()< 20*/ )  // 1Khz loop
   {
-    loop_counter++;
-//    
-//    Serial.print("Counter = ");
-//    Serial.println(loop_counter);
-//    
     prev_time = curr_time; // update time
     
     if (testmode)
@@ -83,9 +78,9 @@ void loop()
       testMovements();
     }
     
-    if ( loop_counter % 10 == 0 )
+    if ( hBot.GetLoopCounter() % 10 == 0 )
     {
-//      hBot.UpdatePosStraight();  // update straight line motion algorithm
+      hBot.UpdatePosStraight();  // update straight line motion algorithm
     }
     
     hBot.Update(); // internally update 

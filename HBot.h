@@ -53,11 +53,16 @@ public:
     return m_M2;
   }
 
+  void SetRobotPos(const RobotPos& pos)
+  {
+    m_Pos = pos;
+  }
+  
   const RobotPos& GetRobotPos() const
   {
     return m_Pos;
   }
-
+  
   void SetMaxAbsSpeed( int s )
   {
      m_M1.SetMaxAbsSpeed(s);
@@ -85,15 +90,20 @@ public:
     m_Time = t;
   }
 
+  unsigned long GetLoopCounter()
+  {
+    return m_LoopCounter; 
+  }
   
   // utility function
-  static RobotPos MotorStepToHBotPos(int m1Step, int m2Step); // in mm
-  static void HBotPosToMotorStep(const RobotPos& pos, int& m1Step, int& m2Step); // in mm
+  static RobotPos MotorStepToHBotPos(long m1Step, long m2Step); // in mm
+  static void HBotPosToMotorStep(const RobotPos& pos, long& m1Step, long& m2Step); // in mm
 private:  
 
   RobotPos m_Pos;
 	Motor m_M1;
 	Motor m_M2;
-	uint32_t m_Time; // time stamp, in micro sec.  
+	uint32_t m_Time; // time stamp, in micro sec. 
+  unsigned long m_LoopCounter; 
 };
 #endif

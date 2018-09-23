@@ -69,7 +69,7 @@ ISR(TIMER1_COMPA_vect)
 
   SET(PORTF,0); // STEP X-AXIS
 
-  int currStep = hBot.GetM1().GetCurrStep();
+  long currStep = hBot.GetM1().GetCurrStep();
   hBot.GetM1().SetCurrStep( currStep + dir );
   
   __asm__ __volatile__ (
@@ -100,7 +100,7 @@ ISR(TIMER3_COMPA_vect)
 
   SET(PORTF,6); // STEP Y-AXIS
   
-  int currStep = hBot.GetM2().GetCurrStep();
+  long currStep = hBot.GetM2().GetCurrStep();
   hBot.GetM2().SetCurrStep( currStep + dir );
   
   __asm__ __volatile__ (
@@ -144,4 +144,48 @@ void testMovements()
   {
     hBot.SetPosStraight(ROBOT_MAX_X, ROBOT_MIN_Y); // lower right
   }
+  else if ( receivedString.equals("5") )
+  {
+    // x + 5
+    RobotPos pos = hBot.GetRobotPos();
+    RobotPos d(5,0);
+    RobotPos newPos = pos + d;
+    hBot.SetPosStraight( newPos.m_X, newPos.m_Y );
+  }
+  else if ( receivedString.equals("6") )
+  {
+    // x - 5
+    RobotPos pos = hBot.GetRobotPos();
+    RobotPos d(5,0);
+    
+    RobotPos newPos = pos - d;
+    hBot.SetPosStraight( newPos.m_X, newPos.m_Y );
+  }
+  else if ( receivedString.equals("7") )
+  {
+    // y + 5
+    RobotPos pos = hBot.GetRobotPos();
+    RobotPos d(0,5);
+    
+    RobotPos newPos = pos + d;
+    hBot.SetPosStraight( newPos.m_X, newPos.m_Y );
+  }
+  else if ( receivedString.equals("8") )
+  {
+    // y - 5
+    RobotPos pos = hBot.GetRobotPos();
+    RobotPos d(0,5);
+    
+    RobotPos newPos = pos - d;
+    hBot.SetPosStraight( newPos.m_X, newPos.m_Y );
+  }
+  else if ( receivedString.equals("9") )
+  {
+    hBot.SetPosStraight( ROBOT_CENTER_X,ROBOT_MAX_Y );
+  }
+  else if ( receivedString.equals("10") )
+  {
+    hBot.SetPosStraight( ROBOT_CENTER_X,ROBOT_MIN_Y );
+  }
+  
 }
