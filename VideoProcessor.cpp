@@ -1,464 +1,446 @@
 #include "VideoProcessor.h"
 
 //=======================================================================
-VideoProcessor::VideoProcessor() :
-callIt(false),
-delay(-1),
-fnumber(0),
-totalFrame(0),
-stop(false),
-digits(0),
-frameToStop(-1),
-Process(0),
-frameProcessor(0),
-initPosX(-1),
-initPosY(-1),
-offsetX(-1),
-offsetY(-1)
+VideoProcessor::VideoProcessor()
+: m_CallIt( false )
+, m_Delay( -1 )
+, m_Fnumber( 0 )
+, m_TotalFrame( 0 )
+, m_Stop( false )
+, m_Digits( 0 )
+, m_FrameToStop( -1 )
+, m_Process( 0 )
+, m_FrameProcessor( 0 )
+, m_InitPosX( -1 )
+, m_InitPosY( -1 )
+, m_OffsetX( -1 )
+, m_OffsetY( -1 )
 {}
 
 //=======================================================================
-bool VideoProcessor::readNextFrame(cv::Mat& frame)
+bool VideoProcessor::ReadNextFrame( cv::Mat& frame )
 {
-	bool ok = false;
+    bool ok = false;
 
-	if (images.size() == 0)
-	{
-		////////////////
-		// it's video
-		////////////////
-		ok = capture.read(tmpFrame);
-	}
-	else
-	{
-		////////////////
-		// it's images
-		////////////////
-		if (itImg != images.end())
-		{
-			printf("%s\n", (*itImg).c_str());
-			tmpFrame = cv::imread(*itImg);
-			itImg++;
+    if( m_Images.size() == 0 )
+    {
+        ////////////////
+        // it's video
+        ////////////////
+        ok = m_Capture.read( m_TmpFrame );
+    }
+    else
+    {
+        ////////////////
+        // it's m_Images
+        ////////////////
+        if( m_ItImg != m_Images.end() )
+        {
+            printf( "%s\n", ( *m_ItImg ).c_str() );
+            m_TmpFrame = cv::imread( *m_ItImg );
+            m_ItImg++;
 
-			ok = tmpFrame.data != 0;
-		}
-	}
+            ok = m_TmpFrame.data != 0;
+        }
+    }
 
-	// whether we extract only portion of the image
-	if (offsetX > 0 && offsetY > 0 && initPosX >= 0 && initPosY >= 0)
-	{
-		frame = tmpFrame(cv::Rect(initPosX, initPosY, offsetX, offsetY)).clone();
-	}
-	else
-	{
-		frame = tmpFrame;
-	}
+    // whether we extract only portion of the image
+    if( m_OffsetX > 0 && m_OffsetY > 0 && m_InitPosX >= 0 && m_InitPosY >= 0 )
+    {
+        frame = m_TmpFrame( cv::Rect( m_InitPosX, m_InitPosY, m_OffsetX, m_OffsetY ) ).clone();
+    }
+    else
+    {
+        frame = m_TmpFrame;
+    }
 
-	return ok;
+    return ok;
 }
 
 //=======================================================================
-void VideoProcessor::writeNextFrame(cv::Mat& frame)
+void VideoProcessor::WriteNextFrame( cv::Mat& frame )
 {
-	if (extension.length())
-	{
-		////////////////
-		// it's images
-		////////////////
+    if( m_Extension.length() )
+    {
+        ////////////////
+        // it's m_Images
+        ////////////////
 
-		std::stringstream ss;
-		ss << outputFile << std::setfill('0') << std::setw(digits) << currentIndex++ << extension;
-		cv::imwrite(ss.str(), frame);
+        std::stringstream ss;
+        ss << m_OutputFile << std::setfill( '0' ) << std::setw( m_Digits ) << m_CurrentIndex++ << m_Extension;
+        cv::imwrite( ss.str(), frame );
 
-	}
-	else
-	{
-		////////////////
-		// it's video
-		////////////////
-		writer.write(frame);
-	}
-}
-
-//=======================================================================      
-bool VideoProcessor::SetInput(std::string filename)
-{
-	fnumber = 0;
-	totalFrame = 0;
-	// In case a resource was already
-	// associated with the VideoCapture instance
-	capture.release();
-	images.clear();
-
-	// Open the video file
-	return capture.open(filename);
+    }
+    else
+    {
+        ////////////////
+        // it's video
+        ////////////////
+        writer.write( frame );
+    }
 }
 
 //=======================================================================
-bool VideoProcessor::SetInput(int id)
+bool VideoProcessor::SetInput( std::string filename )
 {
-	fnumber = 0;
-	totalFrame = 0;
-	// In case a resource was already
-	// associated with the VideoCapture instance
-	capture.release();
-	images.clear();
+    m_FNumber = 0;
+    m_TotalFrame = 0;
+    // In case a resource was already
+    // associated with the VideoCapture instance
+    m_Capture.release();
+    m_Images.clear();
 
-	// Open the video file
-	return capture.open(id);
+    // Open the video file
+    return m_Capture.open( filename );
 }
 
 //=======================================================================
-bool VideoProcessor::SetInput(const std::vector<std::string>& imgs)
+bool VideoProcessor::SetInput( int id )
 {
-	fnumber = 0;
-	totalFrame = 0;
-	// In case a resource was already
-	// associated with the VideoCapture instance
-	capture.release();
+    m_FNumber = 0;
+    m_TotalFrame = 0;
+    // In case a resource was already
+    // associated with the VideoCapture instance
+    m_Capture.release();
+    m_Images.clear();
 
-	// the input will be this vector of images
-	images = imgs;
-	itImg = images.begin();
-
-	return true;
+    // Open the video file
+    return m_Capture.open( id );
 }
 
 //=======================================================================
-bool VideoProcessor::setOutput(
-	const std::string &filename, 
-	int codec,
-	double framerate,
-	bool isColor)
+void VideoProcessor::SetInput( const std::vector<std::string>& imgs )
 {
-	outputFile = filename;
-	extension.clear();
+    m_FNumber = 0;
+    m_TotalFrame = 0;
+    // In case a resource was already
+    // associated with the VideoCapture instance
+    m_Capture.release();
 
-	if (framerate == 0.0)
-	{
-		framerate = getFrameRate(); // same as input
-	}
-
-	char c[4];
-	// use same codec as input
-	if (codec == 0)
-	{
-		codec = getCodec(c);
-	}
-
-	// Open output video
-	return writer.open(outputFile, // filename
-		codec, // codec to be used
-		framerate,      // frame rate of the video
-		getFrameSize(), // frame size
-		isColor);       // color video?
+    // the input will be this vector of m_Images
+    m_Images = imgs;
+    m_ItImg = m_Images.begin();
 }
 
 //=======================================================================
-bool VideoProcessor::setOutput(
-	const std::string &filename, // filename prefix
-	const std::string &ext, // image file extension
-	int numberOfDigits,   // number of digits
-	int startIndex)
-{     
+bool VideoProcessor::SetOutput(
+    const std::string& filename,
+    int codec,
+    double framerate,
+    bool isColor )
+{
+    m_OutputFile = filename;
+    m_Extension.clear();
 
-	// number of digits must be positive
-	if (numberOfDigits < 0)
-		return false;
+    if( framerate == 0.0 )
+    {
+        framerate = GetFrameRate(); // same as input
+    }
 
-	// filenames and their common extension
-	outputFile = filename;
-	extension = ext;
+    char c[4];
+    // use same codec as input
+    if( codec == 0 )
+    {
+        codec = GetCodec( c );
+    }
 
-	// number of digits in the file numbering scheme
-	digits = numberOfDigits;
-	// start numbering at this index
-	currentIndex = startIndex;
-
-	return true;
+    // Open output video
+    return writer.open( m_OutputFile, // filename
+        codec, // codec to be used
+        framerate,      // frame rate of the video
+        getFrameSize(), // frame size
+        isColor );       // color video?
 }
 
 //=======================================================================
-void VideoProcessor::setFrameProcessor(void(*frameProcessingCallback)(cv::Mat&, cv::Mat&)) 
+void VideoProcessor::SetOutput(
+    const std::string& filename, // filename prefix
+    const std::string& ext, // image file m_Extension
+    int numberOfDigits,   // number of digits
+    int startIndex )
 {
-	// invalidate frame processor class instance
-	frameProcessor = 0;
-	// this is the frame processor function that will be called
-	Process = frameProcessingCallback;
-	callProcess();
+    // number of m_Digits must be positive
+    if( numberOfDigits < 0 )
+    {
+        return false;
+    }
+
+    // filenames and their common m_Extension
+    m_OutputFile = filename;
+    m_Extension = ext;
+
+    // number of m_Digits in the file numbering scheme
+    m_Digits = numberOfDigits;
+    // start numbering at this index
+    m_CurrentIndex = startIndex;
 }
 
 //=======================================================================
-void VideoProcessor::setFrameProcessor(FrameProcessor* frameProcessorPtr) 
+void VideoProcessor::SetFrameProcessor( void( *frameProcessingCallback )( cv::Mat&, cv::Mat& ) )
 {
-	// invalidate callback function
-	Process = 0;
-	// this is the frame processor instance that will be called
-	frameProcessor = frameProcessorPtr;
-	callProcess();
+    // invalidate frame processor class instance
+    m_FrameProcessor = 0;
+    // this is the frame processor function that will be called
+    m_Process = frameProcessingCallback;
+    CallProcess();
 }
 
 //=======================================================================
-cv::Size VideoProcessor::getFrameSize() 
+void VideoProcessor::SetFrameProcessor( FrameProcessor* frameProcessorPtr )
 {
-	if (images.size() == 0) {
-
-		// get size of from the capture device
-		int w = static_cast<int>(capture.get(CV_CAP_PROP_FRAME_WIDTH));
-		int h = static_cast<int>(capture.get(CV_CAP_PROP_FRAME_HEIGHT));
-
-		return cv::Size(w, h);
-
-	}
-	else { // if input is vector of images
-
-		cv::Mat tmp = cv::imread(images[0]);
-		if (!tmp.data) return cv::Size(0, 0);
-		else return tmp.size();
-	}
+    // invalidate callback function
+    m_Process = 0;
+    // this is the frame processor instance that will be called
+    m_FrameProcessor = frameProcessorPtr;
+    CallProcess();
 }
 
 //=======================================================================
-long VideoProcessor::getFrameNumber()
+cv::Size VideoProcessor::GetFrameSize()
 {
-	if (images.size() == 0) {
+    if( m_Images.size() == 0 )
+    {
+        // get size of from the m_Capture device
+        int w = static_cast<int>( m_Capture.get( CV_CAP_PROP_FRAME_WIDTH ) );
+        int h = static_cast<int>( m_Capture.get( CV_CAP_PROP_FRAME_HEIGHT ) );
 
-		// get info of from the capture device
-		long f = static_cast<long>(capture.get(CV_CAP_PROP_POS_FRAMES));
-		return f;
+        return cv::Size( w, h );
 
-	}
-	else { // if input is vector of images
-
-		return static_cast<long>(itImg - images.begin());
-	}
+    }
+    else
+    {
+        // if input is vector of m_Images
+        cv::Mat tmp = cv::imread( m_Images[0] );
+        if( !tmp.data )
+        {
+            return cv::Size( 0, 0 );
+        }
+        else
+        {
+            return tmp.size();
+        }
+    }
 }
 
 //=======================================================================
-double VideoProcessor::getPositionMS()
+long VideoProcessor::GetFrameNumber()
 {
-	// undefined for vector of images
-	if (images.size() != 0) return 0.0;
+    if( m_Images.size() == 0 )
+    {
+        // get info of from the m_Capture device
+        long f = static_cast<long>( m_Capture.get( CV_CAP_PROP_POS_FRAMES ) );
+        return f;
 
-	double t = capture.get(CV_CAP_PROP_POS_MSEC);
-	return t;
+    }
+    else
+    {
+        // if input is vector of m_Images
+        return static_cast<long>( m_ItImg - m_Images.begin() );
+    }
 }
 
 //=======================================================================
-double VideoProcessor::getFrameRate() 
+double VideoProcessor::GetPositionMS()
 {
-	// undefined for vector of images
-	if (images.size() != 0) return 0;
+    // undefined for vector of m_Images
+    if( m_Images.size() != 0 )
+    {
+        return 0.0;
+    }
 
-	double r = capture.get(CV_CAP_PROP_FPS);
-	return r;
+    double t = m_Capture.get( CV_CAP_PROP_POS_MSEC );
+    return t;
 }
 
 //=======================================================================
-long VideoProcessor::getTotalFrameCount()
+double VideoProcessor::GetFrameRate()
 {
-	// for vector of images
-	if (images.size() != 0) return images.size();
+    // undefined for vector of m_Images
+    if( m_Images.size() != 0 )
+    {
+        return 0;
+    }
 
-	long t = capture.get(CV_CAP_PROP_FRAME_COUNT);
-	return t;
+    double r = m_Capture.get( CV_CAP_PROP_FPS );
+    return r;
 }
 
 //=======================================================================
-int VideoProcessor::getCodec(char codec[4])
+long VideoProcessor::GetTotalFrameCount()
 {
-	// undefined for vector of images
-	if (images.size() != 0) return -1;
+    // for vector of m_Images
+    if( m_Images.size() != 0 )
+    {
+        return m_Images.size();
+    }
 
-	union {
-		int value;
-		char code[4];
-	} returned;
-
-	returned.value = static_cast<int>(capture.get(CV_CAP_PROP_FOURCC));
-
-	codec[0] = returned.code[0];
-	codec[1] = returned.code[1];
-	codec[2] = returned.code[2];
-	codec[3] = returned.code[3];
-
-	return returned.value;
+    long t = m_Capture.get( CV_CAP_PROP_FRAME_COUNT );
+    return t;
 }
 
 //=======================================================================
-bool VideoProcessor::setFrameNumber(long pos)
+int VideoProcessor::GetCodec( char codec[4] )
 {
-	// for vector of images
-	if (images.size() != 0)
-	{
-		// move to position in vector
-		itImg = images.begin() + pos;
+    // undefined for vector of m_Images
+    if( m_Images.size() != 0 )
+    {
+        return -1;
+    }
 
-		// is it a valid position?
-		return (pos < images.size());
-	}
-	else
-	{
-		// if input is a capture device
-		return capture.set(CV_CAP_PROP_POS_FRAMES, pos);
-	}
+    union
+    {
+        int value;
+        char code[4];
+    } returned;
+
+    returned.value = static_cast<int>( m_Capture.get( CV_CAP_PROP_FOURCC ) );
+
+    codec[0] = returned.code[0];
+    codec[1] = returned.code[1];
+    codec[2] = returned.code[2];
+    codec[3] = returned.code[3];
+
+    return returned.value;
 }
 
 //=======================================================================
-bool VideoProcessor::setPositionMS(double pos)
+bool VideoProcessor::SetFrameNumber( long pos )
 {
-	// not defined in vector of images
-	if (images.size() != 0)
-		return false;
-	else
-		return capture.set(CV_CAP_PROP_POS_MSEC, pos);
+    // for vector of m_Images
+    if( m_Images.size() != 0 )
+    {
+        // move to position in vector
+        m_ItImg = m_Images.begin() + pos;
+
+        // is it a valid position?
+        return ( pos < m_Images.size() );
+    }
+    else
+    {
+        // if input is a m_Capture device
+        return m_Capture.set( CV_CAP_PROP_POS_FRAMES, pos );
+    }
 }
 
 //=======================================================================
-bool VideoProcessor::setRelativePosition(double pos)
+bool VideoProcessor::SetPositionMS( double pos )
 {
-	// for vector of images
-	if (images.size() != 0) {
-
-		// move to position in vector
-		long posI = static_cast<long>(pos*images.size() + 0.5);
-		itImg = images.begin() + posI;
-		// is it a valid position?
-		if (posI < images.size())
-			return true;
-		else
-			return false;
-
-	}
-	else { // if input is a capture device
-
-		return capture.set(CV_CAP_PROP_POS_AVI_RATIO, pos);
-	}
+    // not defined in vector of m_Images
+    if( m_Images.size() != 0 )
+    {
+        return false;
+    }
+    else
+    {
+        return m_Capture.set( CV_CAP_PROP_POS_MSEC, pos );
+    }
 }
 
+//=======================================================================
+bool VideoProcessor::SetRelativePosition( double pos )
+{
+    // for vector of m_Images
+    if( m_Images.size() != 0 )
+    {
+        // move to position in vector
+        long posI = static_cast<long>( pos*m_Images.size() + 0.5 );
+        m_ItImg = m_Images.begin() + posI;
+
+        // is it a valid position?
+        return posI < m_Images.size();
+    }
+    else
+    {
+        // if input is a m_Capture device
+        return m_Capture.set( CV_CAP_PROP_POS_AVI_RATIO, pos );
+    }
+}
 
 //=======================================================================
-void VideoProcessor::run()
+void VideoProcessor::Run()
 {
-	/*
-	sf::SoundBuffer buffer;
-	if (!buffer.loadFromFile("test2.wav"))
-	{
-	return;
-	}
-	sf::Sound sound;
-	sound.setBuffer(buffer);
-	*/
-	/*
-	sound.stop();
-	sound.setBuffer(buffer);
-	sound.play();*/
+    // current frame
+    cv::Mat frame;
+    // output frame
+    cv::Mat output;
 
-	// current frame
-	cv::Mat frame;
-	// output frame
-	cv::Mat output;
+    // if no m_Capture device has been set
+    if( !IsOpened() )
+    {
+        return;
+    }
 
-	// if no capture device has been set
-	if (!isOpened())
-	{
-		return;
-	}
+    m_Stop = false;
 
-	stop = false;
+    while( !IsStopped() )
+    {
+        // read next frame if any
+        if( !ReadNextFrame( frame ) )
+        {
+            break;
+        }
 
-	while (!isStopped())
-	{
-		// read next frame if any
-		if (!readNextFrame(frame))
-		{
-			break;
-		}
+        // display input frame
+        if( m_WindowNameInput.length() != 0 )
+        {
+            cv::imshow( m_WindowNameInput, frame );
+        }
 
-		// display input frame
-		if (windowNameInput.length() != 0)
-		{
-			cv::imshow(windowNameInput, frame);
-		}
+        // calling the m_Process function or method
+        if( m_CallIt )
+        {
+            // m_Process the frame
+            if( m_Process )
+            {
+                m_Process( frame, output );
+            }
+            else if( m_FrameProcessor )
+            {
+                m_FrameProcessor->m_Process( frame, output );
+            }
 
-		// calling the Process function or method
-		if (callIt)
-		{
-			// Process the frame
-			if (Process)
-			{
-				Process(frame, output);
-			}
-			else if (frameProcessor)
-			{
-				frameProcessor->Process(frame, output);
-			}
-			// increment frame number
-			fnumber++;	
-			std::cout << fnumber << std::endl;//print the number for debug
-		}
-		else
-		{
-			output = frame;
-		}
-		
-		totalFrame++;
-		std::cout << totalFrame << std::endl;//print the number for debug
+            // increment frame number
+            m_FNumber++;
+            std::cout << m_FNumber << std::endl;//print the number for debug
+        }
+        else
+        {
+            output = frame;
+        }
 
-		// write output sequence
-		if (outputFile.length() != 0)
-		{
-			writeNextFrame(output);
-		}
+        m_TotalFrame++;
+        std::cout << m_TotalFrame << std::endl;//print the number for debug
 
-		// display output frame
-		if (windowNameOutput.length() != 0)
-		{
-			cv::imshow(windowNameOutput, output);
-		}
+        // write output sequence
+        if( m_OutputFile.length() != 0 )
+        {
+            WriteNextFrame( output );
+        }
 
-		//double a = cv::sum (output)[0];
-		//
-		//if ( a > 5000000.0 )
-		//{
-		// //std::cout << '\a';
-		// sf::Sound::Status s = sound.getStatus();
+        // display output frame
+        if( m_WindowNameOutput.length() != 0 )
+        {
+            cv::imshow( m_WindowNameOutput, output );
+        }
 
-		// if ( s != sf::Sound::Status::Playing )
-		// {
-		//  // sound.setBuffer(buffer);
-		//  sound.play();
-		// }
-		//}
+        // introduce a delay
+        if( m_Delay >= 0 )
+        {
+            int ret = cv::waitKey( m_Delay );
+            if( ret > 0 )
+            {
+                //StopIt();
+            }
+        }
+        else
+        {
+            cv::waitKey( m_Delay );
+        }
 
-		// introduce a delay
-		if (delay >= 0 )
-		{
-			int ret = cv::waitKey(delay);
-			if (ret > 0)
-			{
-				//stopIt();
-			}
-		}
-		else
-		{
-			cv::waitKey(delay);
-		}
-
-		// check if we should stop
-		if (frameToStop >= 0 && getFrameNumber() == frameToStop)
-		{
-			stopIt();
-		}
-	}
-	/*
-	sf::SoundBuffer buffer;
-	if (!buffer.loadFromFile("test1.wav"))
-	{
-	return;
-	}
-	sf::Sound sound;
-	sound.stop();
-	sound.setBuffer(buffer);
-	sound.play();*/
+        // check if we should stop
+        if( m_FrameToStop >= 0 && getFrameNumber() == m_FrameToStop )
+        {
+            StopIt();
+        }
+    }
 }
