@@ -45,7 +45,7 @@ public:
 
     // set the output as a series of image files
     // extension must be ".jpg", ".bmp" ...
-    void SetOutput(
+    bool SetOutput(
         const std::string& filename, // filename prefix
         const std::string& ext, // image file extension
         int numberOfDigits = 3,   // number of digits
@@ -131,13 +131,13 @@ public:
     int GetCodec( char codec[4] );
 
     // go to this frame number
-    bool GetFrameNumber( long pos );
+    bool SetFrameNumber( long pos );
 
     // go to this position
-    bool GetPositionMS( double pos );
+    bool SetPositionMS( double pos );
 
     // go to this position expressed in fraction of total film length
-    bool GetRelativePosition( double pos );
+    bool SetRelativePosition( double pos );
 
     // Stop the processing
     void StopIt()
@@ -146,15 +146,15 @@ public:
     }
 
     // Is the Process stopped?
-    bool GsStopped()
+    bool IsStopped()
     {
         return m_Stop;
     }
 
-    // Is a capture device opened?
-    bool GsOpened()
+    // Is a m_Capture device opened?
+    bool IsOpened()
     {
-        return capture.isOpened() || !m_Images.empty();
+        return m_Capture.isOpened() || !m_Images.empty();
     }
 
     void SetInitPosX( int x )
@@ -182,7 +182,7 @@ public:
 
 private:
 
-    // the OpenCV video capture object
+    // the OpenCV video m_Capture object
     cv::VideoCapture m_Capture;
 
     // the callback function to be called
@@ -256,6 +256,7 @@ private:
     // to write the output frame
     // could be: video file or m_Images
     void WriteNextFrame( cv::Mat& frame );
+
 }; // class VideoProcessor
 
 #endif

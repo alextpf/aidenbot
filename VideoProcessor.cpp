@@ -4,7 +4,7 @@
 VideoProcessor::VideoProcessor()
 : m_CallIt( false )
 , m_Delay( -1 )
-, m_Fnumber( 0 )
+, m_FNumber( 0 )
 , m_TotalFrame( 0 )
 , m_Stop( false )
 , m_Digits( 0 )
@@ -69,14 +69,13 @@ void VideoProcessor::WriteNextFrame( cv::Mat& frame )
         std::stringstream ss;
         ss << m_OutputFile << std::setfill( '0' ) << std::setw( m_Digits ) << m_CurrentIndex++ << m_Extension;
         cv::imwrite( ss.str(), frame );
-
     }
     else
     {
         ////////////////
         // it's video
         ////////////////
-        writer.write( frame );
+        m_Writer.write( frame );
     }
 }
 
@@ -145,15 +144,15 @@ bool VideoProcessor::SetOutput(
     }
 
     // Open output video
-    return writer.open( m_OutputFile, // filename
+    return m_Writer.open( m_OutputFile, // filename
         codec, // codec to be used
         framerate,      // frame rate of the video
-        getFrameSize(), // frame size
+        GetFrameSize(), // frame size
         isColor );       // color video?
 }
 
 //=======================================================================
-void VideoProcessor::SetOutput(
+bool VideoProcessor::SetOutput(
     const std::string& filename, // filename prefix
     const std::string& ext, // image file m_Extension
     int numberOfDigits,   // number of digits
@@ -173,6 +172,8 @@ void VideoProcessor::SetOutput(
     m_Digits = numberOfDigits;
     // start numbering at this index
     m_CurrentIndex = startIndex;
+
+	return true;
 }
 
 //=======================================================================
@@ -271,10 +272,10 @@ long VideoProcessor::GetTotalFrameCount()
     // for vector of m_Images
     if( m_Images.size() != 0 )
     {
-        return m_Images.size();
+        return static_cast<long>( m_Images.size() );
     }
 
-    long t = m_Capture.get( CV_CAP_PROP_FRAME_COUNT );
+    long t = static_cast<long>( m_Capture.get( CV_CAP_PROP_FRAME_COUNT ) );
     return t;
 }
 
@@ -354,7 +355,7 @@ bool VideoProcessor::SetRelativePosition( double pos )
         // if input is a m_Capture device
         return m_Capture.set( CV_CAP_PROP_POS_AVI_RATIO, pos );
     }
-}
+}// SetRelativePosition
 
 //=======================================================================
 void VideoProcessor::Run()
@@ -396,7 +397,7 @@ void VideoProcessor::Run()
             }
             else if( m_FrameProcessor )
             {
-                m_FrameProcessor->m_Process( frame, output );
+                m_FrameProcessor->Process( frame, output );
             }
 
             // increment frame number
@@ -429,7 +430,7 @@ void VideoProcessor::Run()
             int ret = cv::waitKey( m_Delay );
             if( ret > 0 )
             {
-                //StopIt();
+                StopIt();
             }
         }
         else
@@ -438,9 +439,9 @@ void VideoProcessor::Run()
         }
 
         // check if we should stop
-        if( m_FrameToStop >= 0 && getFrameNumber() == m_FrameToStop )
+        if( m_FrameToStop >= 0 && GetFrameNumber() == m_FrameToStop )
         {
             StopIt();
         }
     }
-}
+} // Run
