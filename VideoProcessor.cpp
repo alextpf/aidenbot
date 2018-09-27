@@ -4,6 +4,7 @@
 VideoProcessor::VideoProcessor()
 : m_CallIt( false )
 , m_Delay( -1 )
+, m_DownSampleRate( 1 ) // no downsample
 , m_FNumber( 0 )
 , m_TotalFrame( 0 )
 , m_Stop( false )
@@ -63,7 +64,7 @@ void VideoProcessor::WriteNextFrame( cv::Mat& frame )
     if( m_Extension.length() )
     {
         ////////////////
-        // it's m_Images
+        // it's images
         ////////////////
 
         std::stringstream ss;
@@ -210,7 +211,7 @@ cv::Size VideoProcessor::GetFrameSize()
     }
     else
     {
-        // if input is vector of m_Images
+        // if input is vector of images
         cv::Mat tmp = cv::imread( m_Images[0] );
         if( !tmp.data )
         {

@@ -180,6 +180,18 @@ public:
     // to grab (and Process) the frames of the sequence
     void Run();
 
+    // the image will be down-sampled by 1/t in both width and height
+    void SetDownSampleRate( unsigned int t )
+    {
+        m_DownSampleRate = t;
+    }
+
+    // Get down-sample rate. The image is down-sampled by 1/t in both width and height
+    unsigned int GetDownSampleRate()
+    {
+        return m_DownSampleRate;
+    }
+
 private:
 
     // the OpenCV video m_Capture object
@@ -205,6 +217,9 @@ private:
 
     // delay between each frame processing
     int m_Delay;
+
+    // whether to down sample the image to save computation power
+    unsigned int m_DownSampleRate;
 
     // number of processed frames
     long m_FNumber;
