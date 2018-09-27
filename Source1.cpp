@@ -21,9 +21,9 @@ int main()
 	//////////////////
 
 	char path[] = "C:/tmp/";
-	char filename[] = "test1";
-	int num = 91;		
-	int startFrame = 1;// frame number we want to start at
+	char filename[] = "vid2";
+	int num = 755;		
+	int startFrame = 754;// frame number we want to start at
 	char inputMode[] = "";
 	char outputMode[] = "";
 
@@ -32,10 +32,10 @@ int main()
 	/////////////////////
 	// 0: imgs, 1: video, 2: webcam
 	static int inputType = 0;
-	int webCamId = 0; // 0: default
+	int webCamId = 1; // 0: default
 
 	// 0: imgs, 1: video, 2: no output written
-	static int outputType = 1;
+	static int outputType = 2;
 
 	/////////////////
 	// Frame Rate:
@@ -139,11 +139,17 @@ int main()
 	// Declare a window to display the input
 	processor.DisplayInput("Input");
 
-	processor.SetFrameNumber(startFrame);
+	if (!processor.SetFrameNumber(startFrame))
+	{
+		std::cout << "err";
+		return -1;
+	}
+
 	processor.SetDelay(delay);
 
 	// Start the Process
 	processor.Run();
 
+	cv::waitKey();
 	return 0;
 }

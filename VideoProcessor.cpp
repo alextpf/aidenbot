@@ -32,7 +32,7 @@ bool VideoProcessor::ReadNextFrame( cv::Mat& frame )
     else
     {
         ////////////////
-        // it's m_Images
+        // it's images
         ////////////////
         if( m_ItImg != m_Images.end() )
         {
@@ -310,11 +310,16 @@ bool VideoProcessor::SetFrameNumber( long pos )
     // for vector of m_Images
     if( m_Images.size() != 0 )
     {
-        // move to position in vector
-        m_ItImg = m_Images.begin() + pos;
-
-        // is it a valid position?
-        return ( pos < m_Images.size() );
+		if (pos > m_Images.size())
+		{
+			return false;
+		}
+		else
+		{
+			// move to position in vector
+			m_ItImg = m_Images.begin() + pos;
+			return true;
+		}        
     }
     else
     {
