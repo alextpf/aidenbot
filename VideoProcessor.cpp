@@ -55,6 +55,11 @@ bool VideoProcessor::ReadNextFrame( cv::Mat& frame )
         frame = m_TmpFrame;
     }
 
+	if (m_DownSampleRate > 1)
+	{
+		cv::resize(frame, frame, cv::Size(), 1.0 / m_DownSampleRate, 1.0 / m_DownSampleRate);
+	}
+
     return ok;
 }
 
@@ -206,8 +211,13 @@ cv::Size VideoProcessor::GetFrameSize()
         int w = static_cast<int>( m_Capture.get( CV_CAP_PROP_FRAME_WIDTH ) );
         int h = static_cast<int>( m_Capture.get( CV_CAP_PROP_FRAME_HEIGHT ) );
 
-        return cv::Size( w, h );
+		if (m_DownSampleRate > 1)
+		{
+			w /= m_DownSampleRate;
+			h /= m_DownSampleRate;
+		}
 
+        return cv::Size( w, h );
     }
     else
     {
@@ -219,7 +229,15 @@ cv::Size VideoProcessor::GetFrameSize()
         }
         else
         {
-            return tmp.size();
+			int w = tmp.size().width;
+			int h = tmp.size().height;
+
+			if (m_DownSampleRate > 1)
+			{
+				w /= m_DownSampleRate;
+				h /= m_DownSampleRate;
+			}
+			return cv::Size(w, h);
         }
     }
 }
@@ -232,7 +250,6 @@ long VideoProcessor::GetFrameNumber()
         // get info of from the m_Capture device
         long f = static_cast<long>( m_Capture.get( CV_CAP_PROP_POS_FRAMES ) );
         return f;
-
     }
     else
     {

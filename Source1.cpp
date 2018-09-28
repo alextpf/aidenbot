@@ -7,6 +7,7 @@
 #include <opencv2/imgproc.hpp>
 
 #include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\VideoProcessor.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\Segmentor.h"
 
 using namespace cv;
 using namespace std;
@@ -15,7 +16,7 @@ int main()
 {
 	// Create video procesor instance
 	VideoProcessor processor;
-
+	Segmentor segmentor;
 	//////////////////
 	// variables
 	//////////////////
@@ -103,35 +104,37 @@ int main()
 	 /////////////////////////////////////////////////////
 	switch (outputType)
 	{
-	case 0:
-	{
-		/////////////////////////
-		// output: images
-		/////////////////////////
-		char buffer[100];
-		sprintf_s(buffer, "%s%s", path, filename);
+		case 0:
+		{
+			/////////////////////////
+			// output: images
+			/////////////////////////
+			char buffer[100];
+			sprintf_s(buffer, "%s%s", path, filename);
 
-		processor.SetOutput(buffer, ".jpg");
-	}
-	break;
-
-	case 1:
-	{
-		/////////////////////////
-		// output: video
-		/////////////////////////
-		char buffer[100];
-		sprintf_s(buffer, "%s%s.mp4", path, filename );
-
-		processor.SetOutput(buffer);
-	}
-	break;
-
-	// case 2:// no output
-
-	default:
+			processor.SetOutput(buffer, ".jpg");
+		}
 		break;
+
+		case 1:
+		{
+			/////////////////////////
+			// output: video
+			/////////////////////////
+			char buffer[100];
+			sprintf_s(buffer, "%s%s.mp4", path, filename );
+
+			processor.SetOutput(buffer);
+		}
+		break;
+
+		// case 2:// no output
+
+		default:
+			break;
 	}//switch (outputType)
+
+	processor.SetFrameProcessor( &segmentor );
 
 	// Declare a window to display the video
 	processor.DisplayOutput("Test Output");
@@ -146,6 +149,7 @@ int main()
 	}
 
 	processor.SetDelay(delay);
+	processor.SetDownSampleRate(3);
 
 	// Start the Process
 	processor.Run();
