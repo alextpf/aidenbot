@@ -193,6 +193,11 @@ public:
         return m_DownSampleRate;
     }
 
+	std::string GetInputWinName()
+	{
+		return m_WindowNameInput;
+	}
+
 private:
 
     // the OpenCV video m_Capture object

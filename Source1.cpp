@@ -12,11 +12,17 @@
 using namespace cv;
 using namespace std;
 
+//========================================
 int main()
 {
 	// Create video procesor instance
 	VideoProcessor processor;
 	Segmentor segmentor;
+
+	segmentor.SetXOutterOffset(10);
+	segmentor.SetYOutterOffset(10);
+	segmentor.SetXInnerOffset(70);
+	segmentor.SetYInnerOffset(70);
 	//////////////////
 	// variables
 	//////////////////

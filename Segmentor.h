@@ -11,12 +11,25 @@
 class Segmentor : public FrameProcessor
 {
 public:
-	Segmentor() {}
-
+	Segmentor();
 	~Segmentor() {}
 
 	virtual void Process(cv::Mat & input, cv::Mat & output);	
+	void SetXOutterOffset(unsigned int x);
+	void SetYOutterOffset(unsigned int y);
+	void SetXInnerOffset(unsigned int x);
+	void SetYInnerOffset(unsigned int y);
+
+	static void OnMouse(int event, int x, int y, int f, void* data);
 
 private:
+	bool m_TableFound;
 	
+	// user picked 4 corners of table
+	std::vector<cv::Point> m_Corners;
+
+	unsigned int m_OuterXOffset;
+	unsigned int m_OuterYOffset;
+	unsigned int m_InnerXOffset;
+	unsigned int m_InnerYOffset;
 };
