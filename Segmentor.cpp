@@ -257,9 +257,9 @@ void Segmentor::OrderCorners()
 float GetSlope(const cv::Point& p1, const cv::Point& p2)
 {
 	int dx = p2.x - p1.x;
-	int dy = p1.y - p2.y;
+	int dy = p1.y - p2.y; // reversed y
 
-	if (dy == 0)
+	if (dx == 0)
 	{
 		return 100000.0f;
 	}
@@ -268,6 +268,22 @@ float GetSlope(const cv::Point& p1, const cv::Point& p2)
 		return (float)dy / (float)dx; // line equation: y = x * slope
 	}
 } // GetSlope
+
+//=======================================================================
+float GetInvSlope(const cv::Point& p1, const cv::Point& p2)
+{
+	int dx = p2.x - p1.x;
+	int dy = p1.y - p2.y; // reversed y
+
+	if (dy == 0)
+	{
+		return 100000.0f;
+	}
+	else
+	{
+		return (float)dx / (float)dy; // line equation: x = y * slope
+	}
+} // GetInvSlope
 
 //=======================================================================
 bool Segmentor::IsOutsideOuter(
@@ -280,31 +296,11 @@ bool Segmentor::IsOutsideOuter(
 {
 	//-------------------------------------------------
 	// Outer left
-	//-------------------------------------------------
-	bool isLeftToOuterLeftEdge = false;
-
+	//-------------------------------------------------	 
 	// check outer left edge;origin at lower left
-	if (o_l > 10000)
-	{
-		//vertical edge
-		isLeftToOuterLeftEdge = x < m_o_ll.x;
-	}
-	else
-	{
-		x = x - m_o_ll.x;
-		y = m_o_ll.y - y;
-
-		if (o_l > 0)
-		{
-			// upper_left is to the right of lower_left
-			isLeftToOuterLeftEdge = y > x * o_l;
-		}
-		else
-		{
-			// upper_left is to the left of lower_left
-			isLeftToOuterLeftEdge = y < x * o_l;
-		}
-	}
+	x = x - m_o_ll.x;
+	y = m_o_ll.y - y;
+	const bool isLeftToOuterLeftEdge = x > y * o_l;
 
 	if (isLeftToOuterLeftEdge)
 	{
@@ -314,29 +310,11 @@ bool Segmentor::IsOutsideOuter(
 	//-------------------------------------------------
 	// Outer right
 	//-------------------------------------------------
-	bool isRightToOuterRightEdge = false;
-
 	// check outer right edge;origin at lower right
-	if (o_r > 10000)
-	{
-		isRightToOuterRightEdge = x > m_o_lr.x;
-	}
-	else
-	{
-		x = x - m_o_lr.x;
-		y = m_o_lr.y - y;
+	x = x - m_o_lr.x;
+	y = m_o_lr.y - y;
 
-		if (o_r > 0)
-		{
-			// upper_right is to the right of lower_right
-			isRightToOuterRightEdge = y < x * o_r;
-		}
-		else
-		{
-			// upper_right is to the left of lower_right
-			isRightToOuterRightEdge = y > x * o_r;
-		}
-	}
+	const bool isRightToOuterRightEdge = y < x * o_r;
 
 	if (isRightToOuterRightEdge)
 	{
@@ -345,9 +323,8 @@ bool Segmentor::IsOutsideOuter(
 
 	//-------------------------------------------------
 	// Outer top
-	//-------------------------------------------------
-	
-	// check outer top edge;origin at lower right
+	//------------------------------------------------	
+	// check outer top edge;origin at upper right
 	x = x - m_o_ur.x;
 	y = m_o_ur.y - y;
 	bool isHigherThanOuterTopEdge = y > x * o_u;
@@ -380,10 +357,10 @@ void Segmentor::MaskCanny(cv::Mat & img)
 	// Outer
 	//-------------------------------------------
 	// outer left edge; origin at lower left, Y-axis going upward
-	float o_l = GetSlope(m_o_ul, m_o_ul);
+	float o_l = GetInvSlope(m_o_ul, m_o_ll);
 	
 	// outer right edge; origin at lower right, Y-axis going upward
-	float o_r = GetSlope(m_o_ur, m_o_lr);
+	float o_r = GetInvSlope(m_o_ur, m_o_lr);
 
 	// outer upper edge; origin at upper right, Y-axis going upwar	
 	float o_u = GetSlope(m_o_ul, m_o_ur);
@@ -395,10 +372,10 @@ void Segmentor::MaskCanny(cv::Mat & img)
 	// Inner
 	//-------------------------------------------
 	// inner left edge; origin at lower left, Y-axis going upward	
-	float i_l = GetSlope(m_i_ul, m_i_ll);
+	float i_l = GetInvSlope(m_i_ul, m_i_ll);
 
 	// inner right edge; origin at lower right, Y-axis going upward	
-	float i_r = GetSlope(m_i_ur, m_i_lr);
+	float i_r = GetInvSlope(m_i_ur, m_i_lr);
 
 	// inner upper edge; origin at upper right, Y-axis going upward	
 	float i_u = GetSlope(m_i_ul, m_i_ur);
