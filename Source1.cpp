@@ -24,7 +24,7 @@ int main()
 	// variables
 	//////////////////
 
-	char path[] = "C:/tmp/";
+	char path[] = "E:/alex/Air Hockey Robot/aidenbot2/AidenBot/data/";
 	char filename[] = "vid2";
 	int num = 755;
 	int startFrame = 754;// frame number we want to start at

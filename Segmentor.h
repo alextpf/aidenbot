@@ -31,10 +31,10 @@ private:
 	void MaskCanny(cv::Mat & img);
 
 	// is the point (in image coordiante) outside outer bound
-	bool IsOutsideOuter(unsigned int x, unsigned int y, float o_l, float o_r, float o_u, float o_d);
+	bool IsOutsideOuter(int x, int y, float o_l, float o_r, float o_u, float o_d);
 
     // is the point (in image coordiante) inside inner bound
-    bool IsInsideInner( unsigned int x, unsigned int y, float i_l, float i_r, float i_u, float i_d );
+    bool IsInsideInner( int x, int y, float i_l, float i_r, float i_u, float i_d );
 
     bool m_TableFound;
 

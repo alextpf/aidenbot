@@ -254,10 +254,11 @@ void Segmentor::OrderCorners()
 }// OrderCorners
 
 //=======================================================================
+// p2 is the origin, X postive right-ward, Y positive going up-ward
 float GetSlope(const cv::Point& p1, const cv::Point& p2)
 {
-	int dx = p2.x - p1.x;
-	int dy = p1.y - p2.y; // reversed y
+	int dx = p1.x - p2.x;
+	int dy = p2.y - p1.y; // reversed y
 
 	if (dx == 0)
 	{
@@ -270,10 +271,11 @@ float GetSlope(const cv::Point& p1, const cv::Point& p2)
 } // GetSlope
 
 //=======================================================================
+// p2 is the origin, X postive left-ward, Y positive going up-ward
 float GetInvSlope(const cv::Point& p1, const cv::Point& p2)
 {
 	int dx = p2.x - p1.x;
-	int dy = p1.y - p2.y; // reversed y
+	int dy = p2.y - p1.y; // reversed y
 
 	if (dy == 0)
 	{
@@ -287,8 +289,8 @@ float GetInvSlope(const cv::Point& p1, const cv::Point& p2)
 
 //=======================================================================
 bool Segmentor::IsOutsideOuter(
-	unsigned int x,
-	unsigned int y,
+	int x,
+	int y,
 	float o_l,
 	float o_r,
 	float o_t,
@@ -298,7 +300,7 @@ bool Segmentor::IsOutsideOuter(
 	// Outer left
 	//-------------------------------------------------
 	// check outer left edge;origin at lower left
-	x = x - m_o_ll.x;
+	x = m_o_ll.x - x;
 	y = m_o_ll.y - y;
 	const bool isLeftToOuterLeftEdge = x > y * o_l;
 
@@ -353,8 +355,8 @@ bool Segmentor::IsOutsideOuter(
 
  //=======================================================================
 bool Segmentor::IsInsideInner(
-    unsigned int x,
-    unsigned int y,
+    int x,
+    int y,
     float i_l,
     float i_r,
     float i_t,
