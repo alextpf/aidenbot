@@ -99,24 +99,24 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 			cv::imshow("adaptiveThreshold:", tmp1);
 #endif // DEBUG
 		}//if (doThreshold)
-				
+
 		cv::imshow("Input", input);
 		cv::setMouseCallback("Input", OnMouse, &m_Corners);
 		while (m_Corners.size() < 4)
-		{	
+		{
 			unsigned m = m_Corners.size();
 			if ( m > 0)
 			{
 				cv::circle(input, m_Corners[m - 1], 3, GREEN, 2);
 			}
-			
+
 			cv::imshow("Input", input);
 			cv::waitKey(10);
 		}
 
 		// last point
 		cv::circle(input, m_Corners[3], 3, GREEN, 2);
-		
+
 		cv::imshow("Input", input);
 		cv::waitKey(10);
 
@@ -176,7 +176,7 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 
 //=======================================================================
 void Segmentor::OrderCorners()
-{	
+{
 	if (m_Corners.size() != 4)
 	{
 		return;
@@ -240,7 +240,7 @@ void Segmentor::OrderCorners()
 	}
 
 	// m_Corners is arranged by: ul, ur, ll, lr
-	
+
 	m_o_ul = cv::Point(m_Corners[0].x - m_BandWidth, m_Corners[0].y - m_BandWidth);
 	m_o_ur = cv::Point(m_Corners[1].x + m_BandWidth, m_Corners[1].y - m_BandWidth);
 	m_o_ll = cv::Point(m_Corners[2].x - m_BandWidth, m_Corners[2].y + m_BandWidth);
@@ -287,16 +287,16 @@ float GetInvSlope(const cv::Point& p1, const cv::Point& p2)
 
 //=======================================================================
 bool Segmentor::IsOutsideOuter(
-	unsigned int x, 
-	unsigned int y, 
-	float o_l, 
-	float o_r, 
-	float o_u, 
-	float o_d)
+	unsigned int x,
+	unsigned int y,
+	float o_l,
+	float o_r,
+	float o_t,
+	float o_b)
 {
 	//-------------------------------------------------
 	// Outer left
-	//-------------------------------------------------	 
+	//-------------------------------------------------
 	// check outer left edge;origin at lower left
 	x = x - m_o_ll.x;
 	y = m_o_ll.y - y;
@@ -323,11 +323,11 @@ bool Segmentor::IsOutsideOuter(
 
 	//-------------------------------------------------
 	// Outer top
-	//------------------------------------------------	
+	//------------------------------------------------
 	// check outer top edge;origin at upper right
 	x = x - m_o_ur.x;
 	y = m_o_ur.y - y;
-	bool isHigherThanOuterTopEdge = y > x * o_u;
+    const bool isHigherThanOuterTopEdge = y > x * o_t;
 
 	if (isHigherThanOuterTopEdge)
 	{
@@ -341,66 +341,133 @@ bool Segmentor::IsOutsideOuter(
 	// check outer top edge;origin at lower right
 	x = x - m_o_lr.x;
 	y = m_o_lr.y - y;
-	bool isLowerThanOuterBottomEdge = y < x * o_d;
+    const bool isLowerThanOuterBottomEdge = y < x * o_b;
 
 	if (isLowerThanOuterBottomEdge)
 	{
 		return true;
 	}
 
+    return false;
 }// IsOutsideOuter
+
+ //=======================================================================
+bool Segmentor::IsInsideInner(
+    unsigned int x,
+    unsigned int y,
+    float i_l,
+    float i_r,
+    float i_t,
+    float i_b )
+{
+    //-------------------------------------------------
+    // Inner left
+    //-------------------------------------------------
+    // check inner left edge;origin at lower left
+    x = x - m_i_ll.x;
+    y = m_i_ll.y - y;
+    const bool isRightToInnerLeftEdge = x < y * i_l;
+
+    if( !isRightToInnerLeftEdge )
+    {
+        return false;
+    }
+
+    //-------------------------------------------------
+    // Inner right
+    //-------------------------------------------------
+    // check inner right edge;origin at lower right
+    x = x - m_i_ll.x;
+    y = m_i_ll.y - y;
+    const bool isLeftToInnerRightEdge = x > y * i_r;
+
+    if( !isLeftToInnerRightEdge )
+    {
+        return false;
+    }
+
+    //-------------------------------------------------
+    // Inner top
+    //-------------------------------------------------
+    // check inner top edge;origin at upper right
+    x = x - m_i_ur.x;
+    y = m_i_ur.y - y;
+    const bool isHigherThanInnerTopEdge = y > x * i_t;
+
+    if( isHigherThanInnerTopEdge )
+    {
+        return false;
+    }
+
+    //-------------------------------------------------
+    // Inner bottom
+    //-------------------------------------------------
+    // check inner bottom edge;origin at lower right
+    x = x - m_i_lr.x;
+    y = m_i_lr.y - y;
+    const bool isHigherThanInnerBottomEdge = y > x * i_b;
+
+    if( !isHigherThanInnerBottomEdge )
+    {
+        return false;
+    }
+
+    return true;
+
+} // IsInsideInner
 
 //=======================================================================
 void Segmentor::MaskCanny(cv::Mat & img)
-{	
+{
 	//-------------------------------------------
 	// Outer
 	//-------------------------------------------
 	// outer left edge; origin at lower left, Y-axis going upward
 	float o_l = GetInvSlope(m_o_ul, m_o_ll);
-	
+
 	// outer right edge; origin at lower right, Y-axis going upward
 	float o_r = GetInvSlope(m_o_ur, m_o_lr);
 
-	// outer upper edge; origin at upper right, Y-axis going upwar	
-	float o_u = GetSlope(m_o_ul, m_o_ur);
+	// outer upper edge; origin at upper right, Y-axis going upwar
+	float o_t = GetSlope(m_o_ul, m_o_ur);
 
-	// outer lower edge; origin at lower right, Y-axis going upward	
-	float o_d = GetSlope(m_o_ll, m_o_lr);
+	// outer lower edge; origin at lower right, Y-axis going upward
+	float o_b = GetSlope(m_o_ll, m_o_lr);
 
 	//-------------------------------------------
 	// Inner
 	//-------------------------------------------
-	// inner left edge; origin at lower left, Y-axis going upward	
+	// inner left edge; origin at lower left, Y-axis going upward
 	float i_l = GetInvSlope(m_i_ul, m_i_ll);
 
-	// inner right edge; origin at lower right, Y-axis going upward	
+	// inner right edge; origin at lower right, Y-axis going upward
 	float i_r = GetInvSlope(m_i_ur, m_i_lr);
 
-	// inner upper edge; origin at upper right, Y-axis going upward	
-	float i_u = GetSlope(m_i_ul, m_i_ur);
+	// inner upper edge; origin at upper right, Y-axis going upward
+	float i_t = GetSlope(m_i_ul, m_i_ur);
 
-	// inner lower edge; origin at lower right, Y-axis going upwar	
-	float i_d = GetSlope(m_i_ll, m_i_lr);
+	// inner lower edge; origin at lower right, Y-axis going upwar
+	float i_b = GetSlope(m_i_ll, m_i_lr);
 	//-------------------------------------------
 	cv::Size s = img.size();
 
 	int x, y;// converted coordinate
-	
+
 	for (unsigned int i = 0; i < static_cast<unsigned int>(s.width); i++)
 	{
 		for (unsigned int j = 0; j < static_cast<unsigned int>(s.height); j++)
 		{
-			bool isOutSideOuter = IsOutsideOuter(i, j, o_l, o_r, o_u, o_d);
-			
-			if (isOutOfBound)
-			{
-				output.at<uchar>(j, i) = 0;
-			}
+			const bool isOutSideOuter = IsOutsideOuter( i, j, o_l, o_r, o_t, o_b );
+            const bool isInsideInner  = IsInsideInner ( i, j, i_l, i_r, i_t, i_b );
+            if( isOutSideOuter || isInsideInner )
+            {
+                img.at<uchar>( i, j ) = 0;
+            }
 		}
 	}
+
 #ifdef DEBUG
-	cv::imshow("masked canny:", output);
+	cv::imshow("masked canny:", img );
 #endif // DEBUG
-	
+
 }//void MaskCanny(cv::Mat & img);

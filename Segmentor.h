@@ -14,11 +14,7 @@ public:
 	Segmentor();
 	~Segmentor() {}
 
-	virtual void Process(cv::Mat & input, cv::Mat & output);	
-	void SetXOutterOffset(unsigned int x);
-	void SetYOutterOffset(unsigned int y);
-	void SetXInnerOffset(unsigned int x);
-	void SetYInnerOffset(unsigned int y);
+	virtual void Process(cv::Mat & input, cv::Mat & output);
 
 	static void OnMouse(int event, int x, int y, int f, void* data);
 
@@ -33,18 +29,21 @@ private:
 
 	// use the user-picked band to zero out the result of Canny
 	void MaskCanny(cv::Mat & img);
-	
-	// is the point (in image coordiante) out side outer bound
+
+	// is the point (in image coordiante) outside outer bound
 	bool IsOutsideOuter(unsigned int x, unsigned int y, float o_l, float o_r, float o_u, float o_d);
 
-	bool m_TableFound;
-	
+    // is the point (in image coordiante) inside inner bound
+    bool IsInsideInner( unsigned int x, unsigned int y, float i_l, float i_r, float i_u, float i_d );
+
+    bool m_TableFound;
+
 	// user picked 4 corners of table
 	std::vector<cv::Point> m_Corners;
 
 	// offset around the quadrilateral
 	unsigned int m_BandWidth;
-	
+
 	// outer 4 corners
 	cv::Point m_o_ul;
 	cv::Point m_o_ur;
@@ -57,5 +56,5 @@ private:
 	cv::Point m_i_ll;
 	cv::Point m_i_lr;
 
-	
+
 };

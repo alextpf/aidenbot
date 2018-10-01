@@ -6,8 +6,8 @@
 #include <opencv2/video.hpp>
 #include <opencv2/imgproc.hpp>
 
-#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\VideoProcessor.h"
-#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\Segmentor.h"
+#include "E:\alex\Air Hockey Robot\aidenbot2\AidenBot\VideoProcessor.h"
+#include "E:\alex\Air Hockey Robot\aidenbot2\AidenBot\Segmentor.h"
 
 using namespace cv;
 using namespace std;
@@ -26,7 +26,7 @@ int main()
 
 	char path[] = "C:/tmp/";
 	char filename[] = "vid2";
-	int num = 755;		
+	int num = 755;
 	int startFrame = 754;// frame number we want to start at
 	char inputMode[] = "";
 	char outputMode[] = "";
