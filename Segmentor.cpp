@@ -313,7 +313,7 @@ bool Segmentor::IsOutsideOuter(
 	// Outer right
 	//-------------------------------------------------
 	// check outer right edge;origin at lower right
-	x = x - m_o_lr.x;
+	x = m_o_lr.x - x;
 	y = m_o_lr.y - y;
 
 	const bool isRightToOuterRightEdge = y < x * o_r;
@@ -366,7 +366,7 @@ bool Segmentor::IsInsideInner(
     // Inner left
     //-------------------------------------------------
     // check inner left edge;origin at lower left
-    x = x - m_i_ll.x;
+    x = m_i_ll.x - x;
     y = m_i_ll.y - y;
     const bool isRightToInnerLeftEdge = x < y * i_l;
 
@@ -379,7 +379,7 @@ bool Segmentor::IsInsideInner(
     // Inner right
     //-------------------------------------------------
     // check inner right edge;origin at lower right
-    x = x - m_i_ll.x;
+    x = m_i_ll.x - x;
     y = m_i_ll.y - y;
     const bool isLeftToInnerRightEdge = x > y * i_r;
 
@@ -463,7 +463,7 @@ void Segmentor::MaskCanny(cv::Mat & img)
             const bool isInsideInner  = IsInsideInner ( i, j, i_l, i_r, i_t, i_b );
             if( isOutSideOuter || isInsideInner )
             {
-                img.at<uchar>( i, j ) = 0;
+                img.at<uchar>( j, i ) = 0;
             }
 		}
 	}
