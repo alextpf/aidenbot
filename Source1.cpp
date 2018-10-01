@@ -19,10 +19,7 @@ int main()
 	VideoProcessor processor;
 	Segmentor segmentor;
 
-	segmentor.SetXOutterOffset(10);
-	segmentor.SetYOutterOffset(10);
-	segmentor.SetXInnerOffset(70);
-	segmentor.SetYInnerOffset(70);
+	segmentor.SetBandWidth(8);
 	//////////////////
 	// variables
 	//////////////////

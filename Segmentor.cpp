@@ -42,31 +42,8 @@ std::string type2str(int type)
 //=======================================================================
 Segmentor::Segmentor()
 : m_TableFound( false )
-, m_OuterXOffset( 0 )
-, m_OuterYOffset( 0 )
-, m_InnerXOffset( 0 )
-, m_InnerYOffset( 0 )
+, m_BandWidth( 0 )
 {}
-
-void Segmentor::SetXOutterOffset(unsigned int x)
-{
-	m_OuterXOffset = x;
-}
-
-void Segmentor::SetYOutterOffset(unsigned int y)
-{
-	m_OuterYOffset = y;
-}
-
-void Segmentor::SetXInnerOffset(unsigned int x)
-{
-	m_InnerXOffset = x;
-}
-
-void Segmentor::SetYInnerOffset(unsigned int y)
-{
-	m_InnerYOffset = y;
-}
 
 //=======================================================================
 void Segmentor::OnMouse(int event, int x, int y, int f, void* data)
@@ -126,96 +103,327 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		cv::imshow("Input", input);
 		cv::setMouseCallback("Input", OnMouse, &m_Corners);
 		while (m_Corners.size() < 4)
-		{			
-			for (int i = 0; i < m_Corners.size(); i++)
+		{	
+			unsigned m = m_Corners.size();
+			if ( m > 0)
 			{
-				cv::circle(input, m_Corners[i], 3, GREEN, 2);
+				cv::circle(input, m_Corners[m - 1], 3, GREEN, 2);
 			}
+			
 			cv::imshow("Input", input);
 			cv::waitKey(10);
 		}
 
+		// last point
 		cv::circle(input, m_Corners[3], 3, GREEN, 2);
 		
 		cv::imshow("Input", input);
 		cv::waitKey(10);
-		
-//
-//		// canny low & heigh threshold
-//		int low = 50;
-//		int high = 100;
-//
-//
-//		//typeName = type2str(tmp.type());
-//		//printf("%s\n", typeName.c_str());
-//
-//		cv::Canny(tmp, output, low, high);
-//
-//#ifdef DEBUG
-//		cv::imshow("canny:", output);
-//#endif // DEBUG
-//
-//#ifdef DEBUG
-//		// draw bounds
-//		//cv::Mat clone = input.clone();
-//
-//		cv::Scalar color = GREEN; // green
-//		cv::Size s = input.size();
-//
-//		// outer
-//		cv::Point u_ul( m_OuterXOffset,				m_OuterYOffset );
-//		cv::Point u_ur( s.width - m_OuterXOffset,	m_OuterYOffset);
-//		cv::Point u_ll( m_OuterXOffset,				s.height - m_OuterYOffset);
-//		cv::Point u_lr( s.width - m_OuterXOffset,	s.height - m_OuterYOffset);
-//		
-//		cv::line(input, u_ul, u_ur, color);
-//		cv::line(input, u_ul, u_ll, color);
-//		cv::line(input, u_ur, u_lr, color);
-//		cv::line(input, u_ll, u_lr, color);
-//
-//		// inner
-//		cv::Point i_ul( m_InnerXOffset,				m_InnerYOffset );
-//		cv::Point i_ur( s.width - m_InnerXOffset,	m_InnerYOffset );
-//		cv::Point i_ll( m_InnerXOffset,				s.height - m_InnerYOffset );
-//		cv::Point i_lr( s.width - m_InnerXOffset,	s.height - m_InnerYOffset );
-//
-//		cv::line(input, i_ul, i_ur, color);
-//		cv::line(input, i_ul, i_ll, color);
-//		cv::line(input, i_ur, i_lr, color);
-//		cv::line(input, i_ll, i_lr, color);
-//
-//		cv::imshow("bound:", input );
-//#endif // DEBUG
-//
-//		// do masking
-//		if (m_OuterXOffset != 0 || m_OuterYOffset != 0 ||
-//			m_InnerXOffset != 0 || m_InnerYOffset != 0)
-//		{
-//			cv::Size s = input.size();
-//
-//			for (unsigned int i = 0; i < static_cast<unsigned int>(s.width); i++)
-//			{
-//				for (unsigned int j = 0; j < static_cast<unsigned int>(s.height); j++)
-//				{
-//					bool isOutOfBound = 
-//						( i < m_OuterXOffset || i > s.width - m_OuterXOffset || // outer region
-//						  j < m_OuterYOffset || j > s.height - m_OuterYOffset ) ||
-//					    ( i > m_InnerXOffset && i < s.width - m_InnerXOffset && // inner region
-//						  j > m_InnerYOffset && j < s.height - m_InnerYOffset );
-//
-//					if ( isOutOfBound )
-//					{
-//						output.at<uchar>(j,i) = 0;
-//					}
-//				}
-//			}
-//		}
-//
-//#ifdef DEBUG
-//		cv::imshow("masked canny:", output);
-//#endif // DEBUG
-//
+
+		// order the 4 corners
+		OrderCorners();
+
+#ifdef DEBUG
+		// draw the bands around 4 picked corners
+		// m_Corners is arranged by: ul, ur, ll, lr
+		cv::circle(input, m_Corners[0], 3, GREEN, 2);
+		cv::circle(input, m_Corners[1], 3, RED, 2);
+		cv::circle(input, m_Corners[2], 3, BLUE, 2);
+		cv::circle(input, m_Corners[3], 3, WHITE, 2);
+
+		cv::imshow("ORder:", input);
+#endif // DEBUG
+
+
+#ifdef DEBUG
+		// draw bounds
+		cv::Scalar color = GREEN; // green
+
+		cv::line(input, m_o_ul, m_o_ur, color);
+		cv::line(input, m_o_ul, m_o_ll, color);
+		cv::line(input, m_o_ur, m_o_lr, color);
+		cv::line(input, m_o_ll, m_o_lr, color);
+
+		cv::line(input, m_i_ul, m_i_ur, color);
+		cv::line(input, m_i_ul, m_i_ll, color);
+		cv::line(input, m_i_ur, m_i_lr, color);
+		cv::line(input, m_i_ll, m_i_lr, color);
+
+		cv::imshow("bound:", input);
+#endif // DEBUG
+
+		// canny low & heigh threshold
+		int low = 50;
+		int high = 100;
+
+
+		// convert to gray scale
+		cv::Mat tmp;
+		cv::cvtColor(output, tmp, cv::COLOR_RGB2GRAY);
+
+		cv::Canny(tmp, output, low, high);
+
+#ifdef DEBUG
+		cv::imshow("canny:", output);
+#endif // DEBUG
+
+		MaskCanny(output);
+
 		m_TableFound = true;
 	}
 
 }//Process
+
+//=======================================================================
+void Segmentor::OrderCorners()
+{	
+	if (m_Corners.size() != 4)
+	{
+		return;
+	}
+
+	cv::Point left1(100000, 0); // left most
+	cv::Point left2(100000, 0); // 2nd to left most
+	cv::Point right1(-1, 0); // right most
+	cv::Point right2(-1, 0); // 2nd to right most
+
+	for (int i = 0; i < 4; i++)
+	{
+		if (m_Corners[i].x < left1.x)
+		{
+			left2 = left1;
+			left1 = m_Corners[i];
+		}
+		else if (m_Corners[i].x < left2.x)
+		{
+			left2 = m_Corners[i];
+		}
+
+		if (m_Corners[i].x > right1.x)
+		{
+			right2 = right1;
+			right1 = m_Corners[i];
+		}
+		else if (m_Corners[i].x > right2.x)
+		{
+			right2 = m_Corners[i];
+		}
+	} // for i = 1 - 4
+
+	// determine upper and lower
+	// m_Corners is arranged by: ul, ur, ll, lr
+
+	if (left1.y > left2.y)
+	{
+		// left1 is lower left, left2 is upper left
+		m_Corners[0] = left2;
+		m_Corners[2] = left1;
+	}
+	else
+	{
+		// left2 is lower left, left1 is upper left
+		m_Corners[0] = left1;
+		m_Corners[2] = left2;
+	}
+
+	if (right1.y > right2.y)
+	{
+		// right1 is lower right, right2 is upper right
+		m_Corners[1] = right2;
+		m_Corners[3] = right1;
+	}
+	else
+	{
+		// right2 is lower right, right1 is upper right
+		m_Corners[1] = right1;
+		m_Corners[3] = right2;
+	}
+
+	// m_Corners is arranged by: ul, ur, ll, lr
+	
+	m_o_ul = cv::Point(m_Corners[0].x - m_BandWidth, m_Corners[0].y - m_BandWidth);
+	m_o_ur = cv::Point(m_Corners[1].x + m_BandWidth, m_Corners[1].y - m_BandWidth);
+	m_o_ll = cv::Point(m_Corners[2].x - m_BandWidth, m_Corners[2].y + m_BandWidth);
+	m_o_lr = cv::Point(m_Corners[3].x + m_BandWidth, m_Corners[3].y + m_BandWidth);
+
+	m_i_ul = cv::Point(m_Corners[0].x + m_BandWidth, m_Corners[0].y + m_BandWidth);
+	m_i_ur = cv::Point(m_Corners[1].x - m_BandWidth, m_Corners[1].y + m_BandWidth);
+	m_i_ll = cv::Point(m_Corners[2].x + m_BandWidth, m_Corners[2].y - m_BandWidth);
+	m_i_lr = cv::Point(m_Corners[3].x - m_BandWidth, m_Corners[3].y - m_BandWidth);
+
+}// OrderCorners
+
+//=======================================================================
+float GetSlope(const cv::Point& p1, const cv::Point& p2)
+{
+	int dx = p2.x - p1.x;
+	int dy = p1.y - p2.y;
+
+	if (dy == 0)
+	{
+		return 100000.0f;
+	}
+	else
+	{
+		return (float)dy / (float)dx; // line equation: y = x * slope
+	}
+} // GetSlope
+
+//=======================================================================
+bool Segmentor::IsOutsideOuter(
+	unsigned int x, 
+	unsigned int y, 
+	float o_l, 
+	float o_r, 
+	float o_u, 
+	float o_d)
+{
+	//-------------------------------------------------
+	// Outer left
+	//-------------------------------------------------
+	bool isLeftToOuterLeftEdge = false;
+
+	// check outer left edge;origin at lower left
+	if (o_l > 10000)
+	{
+		//vertical edge
+		isLeftToOuterLeftEdge = x < m_o_ll.x;
+	}
+	else
+	{
+		x = x - m_o_ll.x;
+		y = m_o_ll.y - y;
+
+		if (o_l > 0)
+		{
+			// upper_left is to the right of lower_left
+			isLeftToOuterLeftEdge = y > x * o_l;
+		}
+		else
+		{
+			// upper_left is to the left of lower_left
+			isLeftToOuterLeftEdge = y < x * o_l;
+		}
+	}
+
+	if (isLeftToOuterLeftEdge)
+	{
+		return true;
+	}
+
+	//-------------------------------------------------
+	// Outer right
+	//-------------------------------------------------
+	bool isRightToOuterRightEdge = false;
+
+	// check outer right edge;origin at lower right
+	if (o_r > 10000)
+	{
+		isRightToOuterRightEdge = x > m_o_lr.x;
+	}
+	else
+	{
+		x = x - m_o_lr.x;
+		y = m_o_lr.y - y;
+
+		if (o_r > 0)
+		{
+			// upper_right is to the right of lower_right
+			isRightToOuterRightEdge = y < x * o_r;
+		}
+		else
+		{
+			// upper_right is to the left of lower_right
+			isRightToOuterRightEdge = y > x * o_r;
+		}
+	}
+
+	if (isRightToOuterRightEdge)
+	{
+		return true;
+	}
+
+	//-------------------------------------------------
+	// Outer top
+	//-------------------------------------------------
+	
+	// check outer top edge;origin at lower right
+	x = x - m_o_ur.x;
+	y = m_o_ur.y - y;
+	bool isHigherThanOuterTopEdge = y > x * o_u;
+
+	if (isHigherThanOuterTopEdge)
+	{
+		return true;
+	}
+
+	//-------------------------------------------------
+	// Outer bottom
+	//-------------------------------------------------
+
+	// check outer top edge;origin at lower right
+	x = x - m_o_lr.x;
+	y = m_o_lr.y - y;
+	bool isLowerThanOuterBottomEdge = y < x * o_d;
+
+	if (isLowerThanOuterBottomEdge)
+	{
+		return true;
+	}
+
+}// IsOutsideOuter
+
+//=======================================================================
+void Segmentor::MaskCanny(cv::Mat & img)
+{	
+	//-------------------------------------------
+	// Outer
+	//-------------------------------------------
+	// outer left edge; origin at lower left, Y-axis going upward
+	float o_l = GetSlope(m_o_ul, m_o_ul);
+	
+	// outer right edge; origin at lower right, Y-axis going upward
+	float o_r = GetSlope(m_o_ur, m_o_lr);
+
+	// outer upper edge; origin at upper right, Y-axis going upwar	
+	float o_u = GetSlope(m_o_ul, m_o_ur);
+
+	// outer lower edge; origin at lower right, Y-axis going upward	
+	float o_d = GetSlope(m_o_ll, m_o_lr);
+
+	//-------------------------------------------
+	// Inner
+	//-------------------------------------------
+	// inner left edge; origin at lower left, Y-axis going upward	
+	float i_l = GetSlope(m_i_ul, m_i_ll);
+
+	// inner right edge; origin at lower right, Y-axis going upward	
+	float i_r = GetSlope(m_i_ur, m_i_lr);
+
+	// inner upper edge; origin at upper right, Y-axis going upward	
+	float i_u = GetSlope(m_i_ul, m_i_ur);
+
+	// inner lower edge; origin at lower right, Y-axis going upwar	
+	float i_d = GetSlope(m_i_ll, m_i_lr);
+	//-------------------------------------------
+	cv::Size s = img.size();
+
+	int x, y;// converted coordinate
+	
+	for (unsigned int i = 0; i < static_cast<unsigned int>(s.width); i++)
+	{
+		for (unsigned int j = 0; j < static_cast<unsigned int>(s.height); j++)
+		{
+			bool isOutSideOuter = IsOutsideOuter(i, j, o_l, o_r, o_u, o_d);
+			
+			if (isOutOfBound)
+			{
+				output.at<uchar>(j, i) = 0;
+			}
+		}
+	}
+#ifdef DEBUG
+	cv::imshow("masked canny:", output);
+#endif // DEBUG
+	
+}//void MaskCanny(cv::Mat & img);
