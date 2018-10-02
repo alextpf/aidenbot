@@ -289,20 +289,21 @@ float GetInvSlope(const cv::Point& p1, const cv::Point& p2)
 
 //=======================================================================
 bool Segmentor::IsOutsideOuter(
-	int x,
-	int y,
+	unsigned int x,
+	unsigned int y,
 	float o_l,
 	float o_r,
 	float o_t,
 	float o_b)
 {
+	int X, Y;
 	//-------------------------------------------------
 	// Outer left
 	//-------------------------------------------------
 	// check outer left edge;origin at lower left
-	x = m_o_ll.x - x;
-	y = m_o_ll.y - y;
-	const bool isLeftToOuterLeftEdge = x > y * o_l;
+	X = m_o_ll.x - x;
+	Y = m_o_ll.y - y;
+	const bool isLeftToOuterLeftEdge = X > Y * o_l;
 
 	if (isLeftToOuterLeftEdge)
 	{
@@ -313,10 +314,10 @@ bool Segmentor::IsOutsideOuter(
 	// Outer right
 	//-------------------------------------------------
 	// check outer right edge;origin at lower right
-	x = m_o_lr.x - x;
-	y = m_o_lr.y - y;
+	X = m_o_lr.x - x;
+	Y = m_o_lr.y - y;
 
-	const bool isRightToOuterRightEdge = y < x * o_r;
+	const bool isRightToOuterRightEdge = X < Y * o_r;
 
 	if (isRightToOuterRightEdge)
 	{
@@ -327,9 +328,9 @@ bool Segmentor::IsOutsideOuter(
 	// Outer top
 	//------------------------------------------------
 	// check outer top edge;origin at upper right
-	x = x - m_o_ur.x;
-	y = m_o_ur.y - y;
-    const bool isHigherThanOuterTopEdge = y > x * o_t;
+	X = x - m_o_ur.x;
+	Y = m_o_ur.y - y;
+    const bool isHigherThanOuterTopEdge = Y > X * o_t;
 
 	if (isHigherThanOuterTopEdge)
 	{
@@ -341,9 +342,9 @@ bool Segmentor::IsOutsideOuter(
 	//-------------------------------------------------
 
 	// check outer top edge;origin at lower right
-	x = x - m_o_lr.x;
-	y = m_o_lr.y - y;
-    const bool isLowerThanOuterBottomEdge = y < x * o_b;
+	X = x - m_o_lr.x;
+	Y = m_o_lr.y - y;
+    const bool isLowerThanOuterBottomEdge = Y < X * o_b;
 
 	if (isLowerThanOuterBottomEdge)
 	{
@@ -355,20 +356,21 @@ bool Segmentor::IsOutsideOuter(
 
  //=======================================================================
 bool Segmentor::IsInsideInner(
-    int x,
-    int y,
+	unsigned int x,
+	unsigned int y,
     float i_l,
     float i_r,
     float i_t,
     float i_b )
 {
+	int X, Y;
     //-------------------------------------------------
     // Inner left
     //-------------------------------------------------
     // check inner left edge;origin at lower left
-    x = m_i_ll.x - x;
-    y = m_i_ll.y - y;
-    const bool isRightToInnerLeftEdge = x < y * i_l;
+    X = m_i_ll.x - x;
+    Y = m_i_ll.y - y;
+    const bool isRightToInnerLeftEdge = X < Y * i_l;
 
     if( !isRightToInnerLeftEdge )
     {
@@ -379,9 +381,9 @@ bool Segmentor::IsInsideInner(
     // Inner right
     //-------------------------------------------------
     // check inner right edge;origin at lower right
-    x = m_i_ll.x - x;
-    y = m_i_ll.y - y;
-    const bool isLeftToInnerRightEdge = x > y * i_r;
+    X = m_i_lr.x - x;
+    Y = m_i_lr.y - y;
+    const bool isLeftToInnerRightEdge = X > Y * i_r;
 
     if( !isLeftToInnerRightEdge )
     {
@@ -392,9 +394,9 @@ bool Segmentor::IsInsideInner(
     // Inner top
     //-------------------------------------------------
     // check inner top edge;origin at upper right
-    x = x - m_i_ur.x;
-    y = m_i_ur.y - y;
-    const bool isHigherThanInnerTopEdge = y > x * i_t;
+    X = x - m_i_ur.x;
+    Y = m_i_ur.y - y;
+    const bool isHigherThanInnerTopEdge = Y > X * i_t;
 
     if( isHigherThanInnerTopEdge )
     {
@@ -405,9 +407,9 @@ bool Segmentor::IsInsideInner(
     // Inner bottom
     //-------------------------------------------------
     // check inner bottom edge;origin at lower right
-    x = x - m_i_lr.x;
-    y = m_i_lr.y - y;
-    const bool isHigherThanInnerBottomEdge = y > x * i_b;
+    X = x - m_i_lr.x;
+    Y = m_i_lr.y - y;
+    const bool isHigherThanInnerBottomEdge = Y > X * i_b;
 
     if( !isHigherThanInnerBottomEdge )
     {
@@ -456,15 +458,24 @@ void Segmentor::MaskCanny(cv::Mat & img)
 	int x, y;// converted coordinate
 
 	for (unsigned int i = 0; i < static_cast<unsigned int>(s.width); i++)
+		//for (unsigned int i = static_cast<unsigned int>(s.width)-1; i < static_cast<unsigned int>(s.width); i++)
 	{
 		for (unsigned int j = 0; j < static_cast<unsigned int>(s.height); j++)
+			//for (unsigned int j = static_cast<unsigned int>(s.height)-1; j < static_cast<unsigned int>(s.height); j++)
 		{
 			const bool isOutSideOuter = IsOutsideOuter( i, j, o_l, o_r, o_t, o_b );
-            const bool isInsideInner  = IsInsideInner ( i, j, i_l, i_r, i_t, i_b );
-            if( isOutSideOuter || isInsideInner )
-            {
-                img.at<uchar>( j, i ) = 0;
-            }
+			if ( isOutSideOuter )
+			{
+				img.at<uchar>(j, i) = 0;
+			}
+			else
+			{
+				const bool isInsideInner = IsInsideInner(i, j, i_l, i_r, i_t, i_b);
+				if ( isInsideInner )
+				{
+					img.at<uchar>(j, i) = 0;
+				}
+			}
 		}
 	}
 
