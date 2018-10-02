@@ -23,18 +23,17 @@ public:
 		m_BandWidth = w;
 	}
 
+    unsigned int GetBandWidth()
+    {
+        return m_BandWidth;
+    }
+
 private:
 	// find ul, ur, ll, lr corners of user input
 	void OrderCorners();
 
 	// use the user-picked band to zero out the result of Canny
 	void MaskCanny(cv::Mat & img);
-
-	// is the point (in image coordiante) outside outer bound
-	bool IsOutsideOuter(unsigned int x, unsigned int y, float o_l, float o_r, float o_u, float o_d);
-
-    // is the point (in image coordiante) inside inner bound
-    bool IsInsideInner(unsigned int x, unsigned int y, float i_l, float i_r, float i_u, float i_d );
 
     bool m_TableFound;
 

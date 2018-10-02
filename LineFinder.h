@@ -17,7 +17,7 @@ public:
 		unsigned int minVote,
 		float minLength,
 		float maxGap);
-	
+
 	~LineFinder();
 
 	// set d_rho
@@ -63,11 +63,17 @@ public:
 		m_Method = m;
 	}
 
+    // remove unwanted lines by the mask
+    void FilterDetectedLines(
+        const std::vector<cv::Point> & corners,
+        unsigned int bandWidth,
+        cv::Size s );
+
 private:
 	// whether to use traditional or probalistic Hough transform
 	METHOD m_Method;
-		
-	// vector containing the end points 
+
+	// vector containing the end points
 	// of the detected lines
 	// probalistic method
 	std::vector<cv::Vec4i> m_LinesP;
@@ -79,7 +85,7 @@ private:
 	double m_DeltaRho;
 	double m_DeltaTheta;
 
-	// minimum number of votes that a line 
+	// minimum number of votes that a line
 	// must receive before being considered
 	unsigned int m_MinVote;
 
