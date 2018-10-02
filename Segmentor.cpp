@@ -187,7 +187,7 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		float dTheta = CV_PI / 180.0f;
 		unsigned int minVote = 60;//360 / 2;
 		float minLength = 30;// 360 / 2;
-		float maxGap = 10;
+		float maxGap = 60;
 		//LineFinder::METHOD m = LineFinder::METHOD::TRAD;
         LineFinder::METHOD m = LineFinder::METHOD::PROB;
 
