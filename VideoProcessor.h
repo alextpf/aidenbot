@@ -1,6 +1,4 @@
-
-#ifndef VPROCESSOR
-#define VPROCESSOR
+#pragma once
 
 #include <iostream>
 #include <iomanip>
@@ -280,4 +278,3 @@ private:
 
 }; // class VideoProcessor
 
-#endif

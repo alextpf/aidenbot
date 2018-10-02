@@ -1,4 +1,5 @@
 #include "Segmentor.h"
+#include "LineFinder.h"
 
 #define PI							3.1415926
 #define DEG_TO_RAD					PI / 180.0f
@@ -133,8 +134,7 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 
 		cv::imshow("ORder:", input);
 #endif // DEBUG
-
-
+		
 #ifdef DEBUG
 		// draw bounds
 		cv::Scalar color = GREEN; // green
@@ -155,8 +155,7 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		// canny low & heigh threshold
 		int low = 50;
 		int high = 100;
-
-
+		
 		// convert to gray scale
 		cv::Mat tmp;
 		cv::cvtColor(output, tmp, cv::COLOR_RGB2GRAY);
@@ -167,7 +166,25 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		cv::imshow("canny:", output);
 #endif // DEBUG
 
+		// mask out anything that's outside of the user-picked band
 		MaskCanny(output);
+
+		// Hough line transform
+		float dRho = 1.0f;
+		float dTheta = CV_PI / 180.0f;
+		unsigned int minVote = 90;//360 / 2;
+		float minLength = 30;// 360 / 2;
+		float maxGap = 10;
+		LineFinder::METHOD m = LineFinder::METHOD::TRAD;
+
+		LineFinder lineFinder(m, dRho, dTheta, minVote, minLength, maxGap);
+		
+		const std::vector<cv::Vec2f>& lines = lineFinder.FindLines( output );
+		lineFinder.DrawDetectedLines( input, RED );
+
+#ifdef DEBUG
+		cv::imshow("HoughLine:", input);
+#endif // DEBUG
 
 		m_TableFound = true;
 	}
@@ -458,10 +475,8 @@ void Segmentor::MaskCanny(cv::Mat & img)
 	int x, y;// converted coordinate
 
 	for (unsigned int i = 0; i < static_cast<unsigned int>(s.width); i++)
-		//for (unsigned int i = static_cast<unsigned int>(s.width)-1; i < static_cast<unsigned int>(s.width); i++)
 	{
 		for (unsigned int j = 0; j < static_cast<unsigned int>(s.height); j++)
-			//for (unsigned int j = static_cast<unsigned int>(s.height)-1; j < static_cast<unsigned int>(s.height); j++)
 		{
 			const bool isOutSideOuter = IsOutsideOuter( i, j, o_l, o_r, o_t, o_b );
 			if ( isOutSideOuter )
