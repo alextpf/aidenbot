@@ -12,8 +12,8 @@ public:
 
 	LineFinder(
 		METHOD m,
-		float dRho,
-		float dTheta,
+		double dRho,
+		double dTheta,
 		unsigned int minVote,
 		float minLength,
 		float maxGap);
@@ -21,13 +21,13 @@ public:
 	~LineFinder();
 
 	// set d_rho
-	void SetDeltaRho(float r)
+	void SetDeltaRho(double r)
 	{
 		m_DeltaRho = r;
 	}
 
 	// set d_theta
-	void SetDeltaTheta(float d)
+	void SetDeltaTheta(double d)
 	{
 		m_DeltaTheta = d;
 	}
@@ -76,8 +76,8 @@ private:
 	std::vector<cv::Vec2f> m_Lines;
 
 	// accumulator resolution parameters
-	float m_DeltaRho;
-	float m_DeltaTheta;
+	double m_DeltaRho;
+	double m_DeltaTheta;
 
 	// minimum number of votes that a line 
 	// must receive before being considered

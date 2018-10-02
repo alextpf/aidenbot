@@ -15,8 +15,8 @@ LineFinder::LineFinder()
 //===================================================================================
 LineFinder::LineFinder(
 	METHOD method,
-	float dRho,
-	float dTheta,
+	double dRho,
+	double dTheta,
 	unsigned int minVote,
 	float minLength,
 	float maxGap)

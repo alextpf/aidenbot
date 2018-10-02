@@ -13,6 +13,7 @@
 #define BLACK  cv::Scalar(0,0,0)
 
 #define DEBUG
+#define DEBUG_CORNER
 
 //=======================================================================
 // helper function to show type
@@ -101,6 +102,7 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 #endif // DEBUG
 		}//if (doThreshold)
 
+#ifndef DEBUG_CORNER
 		cv::imshow("Input", input);
 		cv::setMouseCallback("Input", OnMouse, &m_Corners);
 		while (m_Corners.size() < 4)
@@ -120,7 +122,17 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 
 		cv::imshow("Input", input);
 		cv::waitKey(10);
+#else
+		cv::Point pt1(69, 26);
+		cv::Point pt2(21, 324);
+		cv::Point pt3(632, 312);
+		cv::Point pt4(572, 18);
 
+		m_Corners.push_back(pt1);
+		m_Corners.push_back(pt2);
+		m_Corners.push_back(pt3);
+		m_Corners.push_back(pt4);
+#endif
 		// order the 4 corners
 		OrderCorners();
 
