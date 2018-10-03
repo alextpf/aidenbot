@@ -65,7 +65,7 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 	if (!m_TableFound)
 	{
 		// blur image first by Gaussian
-		int kernelSize = 5;
+		int kernelSize = 3;
 		double std = 2.0;
 
 		cv::GaussianBlur(input, output, cv::Size(kernelSize, kernelSize), std, std);
@@ -158,6 +158,9 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 
 		cv::Canny(tmp, output, low, high);
 
+        // dilate Canny results
+        cv::dilate(output, output, cv::Mat(), cv::Point( -1, -1 ), 1 /*num iteration*/ );
+
 #ifdef DEBUG
 		cv::imshow("canny:", output);
 #endif // DEBUG
@@ -166,27 +169,29 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		MaskCanny(output);
 
 #ifdef DEBUG
+        cv::Mat copy = input.clone();
+
         // draw bounds
         cv::Scalar color = GREEN; // green
 
-        cv::line( input, m_o_ul, m_o_ur, color );
-        cv::line( input, m_o_ul, m_o_ll, color );
-        cv::line( input, m_o_ur, m_o_lr, color );
-        cv::line( input, m_o_ll, m_o_lr, color );
+        cv::line( copy, m_o_ul, m_o_ur, color );
+        cv::line( copy, m_o_ul, m_o_ll, color );
+        cv::line( copy, m_o_ur, m_o_lr, color );
+        cv::line( copy, m_o_ll, m_o_lr, color );
 
-        cv::line( input, m_i_ul, m_i_ur, color );
-        cv::line( input, m_i_ul, m_i_ll, color );
-        cv::line( input, m_i_ur, m_i_lr, color );
-        cv::line( input, m_i_ll, m_i_lr, color );
+        cv::line( copy, m_i_ul, m_i_ur, color );
+        cv::line( copy, m_i_ul, m_i_ll, color );
+        cv::line( copy, m_i_ur, m_i_lr, color );
+        cv::line( copy, m_i_ll, m_i_lr, color );
 
-        cv::imshow( "bound:", input );
+        cv::imshow( "bound:", copy );
 #endif // DEBUG
 
 		// Hough line transform
 		double dRho = 1.0f;
 		double dTheta = CV_PI / 180.0f;
 		unsigned int minVote = 60;//360 / 2;
-		float minLength = 20.0f;// 360 / 2;
+		float minLength = 50.0f;// 360 / 2;
 		float maxGap = 60.0f;
 		//LineFinder::METHOD m = LineFinder::METHOD::TRAD;
         LineFinder::METHOD m = LineFinder::METHOD::PROB;
@@ -198,12 +203,13 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
             const std::vector<cv::Vec4i>& lines = tableFinder.FindLinesP( output );
 
 #ifdef DEBUG
-			tableFinder.DrawDetectedLines(input, BLUE);
-			cv::imshow("HoughLine:", input);
+            //cv::Mat copy = input.clone();
+			tableFinder.DrawDetectedLines( input, BLUE);
+			cv::imshow("HoughLine:", input );
 #endif // DEBUG
 
             // filter out the lines that's out of bound
-			tableFinder.Refine4Edges( m_Corners, m_BandWidth );
+			tableFinder.Refine4Edges( m_Corners, m_BandWidth, input );
         }
         else
         {
@@ -211,8 +217,8 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
         }
 
 #ifdef DEBUG
-		tableFinder.DrawDetectedLines( input, RED );
-		cv::imshow("Filtered HoughLine:", input);
+		tableFinder.DrawTableLines( input, RED );
+		cv::imshow("Filtered HoughLine:", input );
 #endif // DEBUG
 
 		m_TableFound = true;

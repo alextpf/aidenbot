@@ -55,7 +55,7 @@ public:
 	const std::vector<cv::Vec2f>& FindLines(cv::Mat& binary);
 
 	// Draw the detected lines on an image
-	virtual void DrawDetectedLines(cv::Mat &image, cv::Scalar color = cv::Scalar(255, 255, 255));
+	void DrawDetectedLines(cv::Mat &image, cv::Scalar color = cv::Scalar(255, 255, 255));
 
 	// whether to use traditional or probalistic Hough transform
 	void SetMethod(METHOD m)

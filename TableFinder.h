@@ -18,34 +18,43 @@ public:
 		float maxGap);
 	void Refine4Edges(
 		const std::vector<cv::Point> & corners,
-		unsigned int bandWidth );
+		unsigned int bandWidth,
+        cv::Mat& img /*debug use*/);
 
-	void DrawDetectedLines(cv::Mat &image, cv::Scalar color = cv::Scalar(255, 255, 255)) override;
+	void DrawTableLines(cv::Mat &image, cv::Scalar color = cv::Scalar(255, 255, 255));
 
 private:
 
 	// refine 4 edges
 	void RefineLeftEdge(
 		const std::vector<cv::Point> & corners,
-		unsigned int bandWidth);
-	
+		unsigned int bandWidth,
+        cv::Mat& img /*debug use*/ );
+
 	void RefineRightEdge(
 		const std::vector<cv::Point> & corners,
-		unsigned int bandWidth);
+		unsigned int bandWidth,
+        cv::Mat& img /*debug use*/ );
 
 	void RefineTopEdge(
 		const std::vector<cv::Point> & corners,
-		unsigned int bandWidth);
+		unsigned int bandWidth,
+        cv::Mat& img /*debug use*/ );
 
 	void RefineBottomEdge(
 		const std::vector<cv::Point> & corners,
-		unsigned int bandWidth);
+		unsigned int bandWidth,
+        cv::Mat& img /*debug use*/ );
 
 	cv::Vec4i FilterLines(
-		const std::vector<cv::Point> & corners, 
+		const std::vector<cv::Point> & corners,
 		unsigned int Xoffset,
-		unsigned int Yoffset );
-	
+		unsigned int Yoffset,
+        cv::Point& o_ul, // debug use
+        cv::Point& o_ur, // debug use
+        cv::Point& o_ll, // debug use
+        cv::Point& o_lr ); // debug use
+
 	cv::Vec4i m_LeftEdge;
 	cv::Vec4i m_RightEdge;
 	cv::Vec4i m_TopEdge;
