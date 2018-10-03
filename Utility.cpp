@@ -16,9 +16,8 @@ float GetSlope( const cv::Point& p1, const cv::Point& p2 )
         return (float)dy / (float)dx; // line equation: y = x * slope
     }
 } // GetSlope
-
-  //=======================================================================
-  // p2 is the origin, X postive left-ward, Y positive going up-ward
+//=======================================================================
+// p2 is the origin, X postive left-ward, Y positive going up-ward
 float GetInvSlope( const cv::Point& p1, const cv::Point& p2 )
 {
     int dx = p2.x - p1.x;
@@ -33,6 +32,85 @@ float GetInvSlope( const cv::Point& p1, const cv::Point& p2 )
         return (float)dx / (float)dy; // line equation: x = y * slope
     }
 } // GetInvSlope
+
+//=======================================================================
+void Utility::GenerateOuterBand(
+	float& o_l, // slope
+	float& o_r,
+	float& o_t,
+	float& o_b,
+	cv::Point& o_ul,
+	cv::Point& o_ur,
+	cv::Point& o_ll,
+	cv::Point& o_lr,
+	const std::vector<cv::Point>& corners,
+	unsigned int Xoffset,
+	unsigned int Yoffset)
+{
+	if (corners.size() != 4)
+	{
+		return;
+	}
+
+	// corners is arranged by: ul, ur, ll, lr
+
+	o_ul = cv::Point(corners[0].x - Xoffset, corners[0].y - Yoffset);
+	o_ur = cv::Point(corners[1].x + Xoffset, corners[1].y - Yoffset);
+	o_ll = cv::Point(corners[2].x - Xoffset, corners[2].y + Yoffset);
+	o_lr = cv::Point(corners[3].x + Xoffset, corners[3].y + Yoffset);
+
+	// outer left edge; origin at lower left, Y-axis going upward
+	o_l = GetInvSlope(o_ul, o_ll);
+
+	// outer right edge; origin at lower right, Y-axis going upward
+	o_r = GetInvSlope(o_ur, o_lr);
+
+	// outer upper edge; origin at upper right, Y-axis going upwar
+	o_t = GetSlope(o_ul, o_ur);
+
+	// outer lower edge; origin at lower right, Y-axis going upward
+	o_b = GetSlope(o_ll, o_lr);
+
+} // GenerateOuterBand
+
+//=======================================================================
+void Utility::GenerateInnerBand(
+	float& i_l, // slope
+	float& i_r,
+	float& i_t,
+	float& i_b,
+	cv::Point& i_ul,
+	cv::Point& i_ur,
+	cv::Point& i_ll,
+	cv::Point& i_lr,
+	const std::vector<cv::Point>& corners,
+	unsigned int Xoffset,
+	unsigned int Yoffset)
+{
+	if (corners.size() != 4)
+	{
+		return;
+	}
+
+	// corners is arranged by: ul, ur, ll, lr
+
+	i_ul = cv::Point(corners[0].x + Xoffset, corners[0].y + Yoffset);
+	i_ur = cv::Point(corners[1].x - Xoffset, corners[1].y + Yoffset);
+	i_ll = cv::Point(corners[2].x + Xoffset, corners[2].y - Yoffset);
+	i_lr = cv::Point(corners[3].x - Xoffset, corners[3].y - Yoffset);
+
+	// inner left edge; origin at lower left, Y-axis going upward
+	i_l = GetInvSlope(i_ul, i_ll);
+
+	// inner right edge; origin at lower right, Y-axis going upward
+	i_r = GetInvSlope(i_ur, i_lr);
+
+	// inner upper edge; origin at upper right, Y-axis going upward
+	i_t = GetSlope(i_ul, i_ur);
+
+	// inner lower edge; origin at lower right, Y-axis going upwar
+	i_b = GetSlope(i_ll, i_lr);
+} // GenerateInnerBand
 
 //=======================================================================
 void Utility::GenerateBand(
@@ -53,110 +131,35 @@ void Utility::GenerateBand(
     cv::Point& i_ll,
     cv::Point& i_lr,
     const std::vector<cv::Point>& corners,
-    cv::Size s,
-    unsigned int offset )
+    unsigned int Xoffset,
+	unsigned int Yoffset)
 {
-    if( corners.size() != 4 )
-    {
-        return;
-    }
+	GenerateOuterBand(
+		o_l, // slope
+		o_r,
+		o_t,
+		o_b,
+		o_ul,
+		o_ur,
+		o_ll,
+		o_lr,
+		corners,
+		Xoffset,
+		Yoffset);
 
-    // corners is arranged by: ul, ur, ll, lr
+	GenerateInnerBand(
+		i_l, // slope
+		i_r,
+		i_t,
+		i_b,
+		i_ul,
+		i_ur,
+		i_ll,
+		i_lr,
+		corners,
+		Xoffset,
+		Yoffset);
 
-    int x, y;
-
-    x = corners[0].x - offset;
-    if( x < 0 )
-    {
-        x = 0;
-    }
-
-    y = corners[0].y - offset;
-    if( y < 0 )
-    {
-        y = 0;
-    }
-
-    o_ul = cv::Point( x, y );
-
-    x = corners[1].x + offset;
-    if( x >= s.width )
-    {
-        x = s.width - 1;
-    }
-
-    y = corners[1].y - offset;
-    if( y < 0 )
-    {
-        y = 0;
-    }
-
-    o_ur = cv::Point( x, y );
-
-    x = corners[2].x - offset;
-    if( x < 0 )
-    {
-        x = 0;
-    }
-    y = corners[2].y + offset;
-    if( y >= s.height )
-    {
-        y = s.height - 1;
-    }
-
-    o_ll = cv::Point( x, y );
-
-    x = corners[3].x + offset;
-    if( x >= s.width )
-    {
-        x = s.width - 1;
-    }
-
-    y = corners[3].y + offset;
-    if( y >= s.height )
-    {
-        y = s.height - 1;
-    }
-
-    o_lr = cv::Point( x, y );
-
-    // inner bound shouldn't have the out-of-image-bound issue
-
-    i_ul = cv::Point( corners[0].x + offset, corners[0].y + offset );
-    i_ur = cv::Point( corners[1].x - offset, corners[1].y + offset );
-    i_ll = cv::Point( corners[2].x + offset, corners[2].y - offset );
-    i_lr = cv::Point( corners[3].x - offset, corners[3].y - offset );
-
-    //-------------------------------------------
-    // Outer
-    //-------------------------------------------
-    // outer left edge; origin at lower left, Y-axis going upward
-    o_l = GetInvSlope( o_ul, o_ll );
-
-    // outer right edge; origin at lower right, Y-axis going upward
-    o_r = GetInvSlope( o_ur, o_lr );
-
-    // outer upper edge; origin at upper right, Y-axis going upwar
-    o_t = GetSlope( o_ul, o_ur );
-
-    // outer lower edge; origin at lower right, Y-axis going upward
-    o_b = GetSlope( o_ll, o_lr );
-
-    //-------------------------------------------
-    // Inner
-    //-------------------------------------------
-    // inner left edge; origin at lower left, Y-axis going upward
-    i_l = GetInvSlope( i_ul, i_ll );
-
-    // inner right edge; origin at lower right, Y-axis going upward
-    i_r = GetInvSlope( i_ur, i_lr );
-
-    // inner upper edge; origin at upper right, Y-axis going upward
-    i_t = GetSlope( i_ul, i_ur );
-
-    // inner lower edge; origin at lower right, Y-axis going upwar
-    i_b = GetSlope( i_ll, i_lr );
-    //-------------------------------------------
 } // GenerateBand
 
 //=======================================================================

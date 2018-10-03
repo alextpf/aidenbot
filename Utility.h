@@ -31,8 +31,36 @@ public:
         cv::Point& i_ll,
         cv::Point& i_lr,
         const std::vector<cv::Point>& corners,
-        cv::Size s,
-        unsigned int offset );
+        unsigned int Xoffset,
+		unsigned int Yoffset);
+
+	//=======================================================================
+	static void Utility::GenerateOuterBand(
+		float& o_l, // slope
+		float& o_r,
+		float& o_t,
+		float& o_b,
+		cv::Point& o_ul,
+		cv::Point& o_ur,
+		cv::Point& o_ll,
+		cv::Point& o_lr,
+		const std::vector<cv::Point>& corners,
+		unsigned int Xoffset,
+		unsigned int Yoffset);
+
+	//=======================================================================
+	static void Utility::GenerateInnerBand(
+		float& i_l, // slope
+		float& i_r,
+		float& i_t,
+		float& i_b,
+		cv::Point& i_ul,
+		cv::Point& i_ur,
+		cv::Point& i_ll,
+		cv::Point& i_lr,
+		const std::vector<cv::Point>& corners,
+		unsigned int Xoffset,
+		unsigned int Yoffset);
 
     //=======================================================================
     // is the point (in image coordiante) outside outer bound

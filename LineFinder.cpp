@@ -106,8 +106,7 @@ void LineFinder::FilterDetectedLines(
         i_l, i_r, i_t, i_b,
         o_ul, o_ur, o_ll, o_lr,
         i_ul, i_ur, i_ll, i_lr,
-        corners,
-        s, bandWidth );
+        corners, bandWidth, bandWidth);
 
     std::vector<cv::Vec4i> newLines;
 
@@ -171,4 +170,4 @@ void LineFinder::DrawDetectedLines(cv::Mat &image, cv::Scalar color )
 			cv::line(image, pt1, pt2, color, thickness);
 		}
 	}
-}
+}//DrawDetectedLines

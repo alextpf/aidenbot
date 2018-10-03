@@ -1,5 +1,5 @@
 #include "Segmentor.h"
-#include "LineFinder.h"
+#include "TableFinder.h"
 #include "Utility.h"
 
 #define PI							3.1415926
@@ -14,7 +14,7 @@
 #define BLACK  cv::Scalar(0,0,0)
 
 #define DEBUG
-#define DEBUG_CORNER
+//#define DEBUG_CORNER
 
 //=======================================================================
 // helper function to show type
@@ -183,31 +183,36 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 #endif // DEBUG
 
 		// Hough line transform
-		float dRho = 1.0f;
-		float dTheta = CV_PI / 180.0f;
+		double dRho = 1.0f;
+		double dTheta = CV_PI / 180.0f;
 		unsigned int minVote = 60;//360 / 2;
-		float minLength = 30;// 360 / 2;
-		float maxGap = 60;
+		float minLength = 20.0f;// 360 / 2;
+		float maxGap = 60.0f;
 		//LineFinder::METHOD m = LineFinder::METHOD::TRAD;
         LineFinder::METHOD m = LineFinder::METHOD::PROB;
 
-		LineFinder lineFinder(m, dRho, dTheta, minVote, minLength, maxGap);
+		TableFinder tableFinder(m, dRho, dTheta, minVote, minLength, maxGap);
 
         if( m == LineFinder::METHOD::PROB )
         {
-            const std::vector<cv::Vec4i>& lines = lineFinder.FindLinesP( output );
+            const std::vector<cv::Vec4i>& lines = tableFinder.FindLinesP( output );
+
+#ifdef DEBUG
+			tableFinder.DrawDetectedLines(input, BLUE);
+			cv::imshow("HoughLine:", input);
+#endif // DEBUG
 
             // filter out the lines that's out of bound
-            lineFinder.FilterDetectedLines( m_Corners, m_BandWidth, output.size() );
+			tableFinder.Refine4Edges( m_Corners, m_BandWidth );
         }
         else
         {
-            const std::vector<cv::Vec2f>& lines = lineFinder.FindLines( output );
+            const std::vector<cv::Vec2f>& lines = tableFinder.FindLines( output );
         }
 
 #ifdef DEBUG
-		lineFinder.DrawDetectedLines( input, RED );
-		cv::imshow("HoughLine:", input);
+		tableFinder.DrawDetectedLines( input, RED );
+		cv::imshow("Filtered HoughLine:", input);
 #endif // DEBUG
 
 		m_TableFound = true;
@@ -303,8 +308,7 @@ void Segmentor::MaskCanny(cv::Mat & img)
         i_l, i_r, i_t, i_b,
         m_o_ul, m_o_ur, m_o_ll, m_o_lr,
         m_i_ul, m_i_ur, m_i_ll, m_i_lr,
-        m_Corners,
-        s, offset );
+        m_Corners, offset, offset );
 
 	for (unsigned int i = 0; i < static_cast<unsigned int>(s.width); i++)
 	{
