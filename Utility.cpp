@@ -1,6 +1,87 @@
 #include "Utility.h"
 
 //=======================================================================
+float Slope( const cv::Point& p1, const cv::Point& p2 )
+{
+	float s;
+	int dx = p2.x - p1.x;
+	int dy = p2.y - p1.y;
+	if ( dx == 0 )
+	{
+		s = 10000;//large number
+	}
+	else
+	{
+		s = dy / dx;
+	}
+	return s;
+}//Slope
+
+//=======================================================================
+bool Utility::FindLineIntersection(
+	const cv::Vec4i& l1,
+	const cv::Vec4i& l2,
+	cv::Point& intr,
+	float& s1,
+	float& s2 )
+{
+	// 2 end points of line1
+	// p2 has to be on the right of p1
+	cv::Point p1( l1[0], l1[1] );
+	cv::Point p2( l1[2], l1[3] );
+	if ( p1.x > p2.x )
+	{
+		std::swap( p1, p2 );
+	}
+
+	// 2 end points of line2
+	// p4 has to be on the right of p3
+	cv::Point p3( l2[0], l2[1] );
+	cv::Point p4( l2[2], l2[3] );
+	if ( p3.x > p4.x )
+	{
+		std::swap( p3, p4 );
+	}
+
+	// note: line equation: y = mx + t
+	// find the slope
+	float m1 = Slope( p1, p2 );
+	float m2 = Slope( p3, p4 );
+
+	if ( m1 == m2 )
+	{
+		return false;
+	}
+
+	// find the intersection
+	float t1 = p1.y - m1 * p1.x;
+	float t2 = p3.y - m2 * p3.x;
+
+	if ( m1 >= 10000 ) // l1 vertical line
+	{
+		intr.x = p1.x;
+		intr.y = m2 * p1.x + t2;
+
+		return true;
+	}
+
+	if ( m2 >= 10000 ) // l2 vertical line
+	{
+		intr.x = p3.x;
+		intr.y = m1 * p3.x + t1;
+
+		return true;
+	}
+
+	intr.x = ( t2 - t1 ) / ( m1 - m2 );
+	intr.y = ( m1 * t2 + m2 * t1 ) / ( m1 - m2 );
+
+	return true;
+	
+}//FindLineIntersection
+
+//=======================================================================
+// Specialized version of computing slope function
 // p2 is the origin, X postive right-ward, Y positive going up-ward
 float GetSlope( const cv::Point& p1, const cv::Point& p2 )
 {

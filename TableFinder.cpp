@@ -1,7 +1,8 @@
 #include "TableFinder.h"
+#include <iostream>
 #include <opencv2/highgui.hpp>
 
-#define DEBUG
+//#define DEBUG
 
 //===================================================================================
 TableFinder::TableFinder(
@@ -24,6 +25,40 @@ void TableFinder::Refine4Edges(
 	RefineRightEdge(corners, bandWidth, img );
 	RefineTopEdge(corners, bandWidth, img );
 	RefineBottomEdge(corners, bandWidth, img );
+
+	// find the 4 corners, by the intersection of 4 edges
+	
+	float s1, s2;
+	if ( !Utility::FindLineIntersection( m_LeftEdge, m_TopEdge, m_TopLeft, s1, s2 ) )
+	{
+		std::cout << "error line intersection" << std::endl;
+	}
+
+	if ( !Utility::FindLineIntersection( m_RightEdge, m_TopEdge, m_TopRight, s1, s2 ) )
+	{
+		std::cout << "error line intersection" << std::endl;
+	}
+	
+	if ( !Utility::FindLineIntersection( m_LeftEdge, m_BottomEdge, m_LowerLeft, s1, s2 ) )
+	{
+		std::cout << "error line intersection" << std::endl;
+	}
+
+	if ( !Utility::FindLineIntersection( m_RightEdge, m_BottomEdge, m_LowerRight, s1, s2 ) )
+	{
+		std::cout << "error line intersection" << std::endl;
+	}
+
+#ifdef DEBUG
+	cv::Scalar color = cv::Scalar( 255, 255, 255 ); // white
+
+	cv::line( img, m_TopLeft, m_TopRight, color, 2 );
+	cv::line( img, m_TopLeft, m_LowerLeft, color, 2 );
+	cv::line( img, m_TopRight, m_LowerRight, color, 2 );
+	cv::line( img, m_LowerLeft, m_LowerRight, color, 2 );
+
+	cv::imshow( "table:", img );
+#endif
 }//Refine4Edges
 
  //===================================================================================
@@ -143,7 +178,7 @@ void TableFinder::RefineBottomEdge(
 	tmpCorners.push_back(corners[3]);
 
     cv::Point o_ul, o_ur, o_ll, o_lr; // debug use
-
+	
 	m_BottomEdge = FilterLines(tmpCorners, Xoffset, Yoffset, o_ul, o_ur, o_ll, o_lr );
 
 #ifdef DEBUG

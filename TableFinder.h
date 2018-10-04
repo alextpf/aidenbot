@@ -23,6 +23,45 @@ public:
 
 	void DrawTableLines(cv::Mat &image, cv::Scalar color = cv::Scalar(255, 255, 255));
 
+	const cv::Point& GetTopLeft()
+	{
+		return m_TopLeft;
+	}
+
+	const cv::Point& GetTopRight()
+	{
+		return m_TopRight;
+	}
+
+	const cv::Point& GetLowerLeft()
+	{
+		return m_LowerLeft;
+	}
+
+	const cv::Point& GetLowerRight()
+	{
+		return m_LowerRight;
+	}
+
+	void SetTopLeft( const cv::Point& p )
+	{
+		m_TopLeft = p;
+	}
+	
+	void SetTopRight( const cv::Point& p )
+	{
+		m_TopRight = p;
+	}
+	
+	void SetLowerLeft( const cv::Point& p )
+	{
+		m_LowerLeft = p;
+	}
+	
+	void SetLowerRight( const cv::Point& p )
+	{
+		m_LowerRight = p;
+	}
 private:
 
 	// refine 4 edges
@@ -59,4 +98,10 @@ private:
 	cv::Vec4i m_RightEdge;
 	cv::Vec4i m_TopEdge;
 	cv::Vec4i m_BottomEdge;
+
+	// 4 corners
+	cv::Point m_TopLeft;
+	cv::Point m_TopRight;
+	cv::Point m_LowerLeft;
+	cv::Point m_LowerRight;
 }; // TableFinder

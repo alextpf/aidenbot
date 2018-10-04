@@ -13,7 +13,7 @@
 #define WHITE  cv::Scalar(255, 255, 255)
 #define BLACK  cv::Scalar(0,0,0)
 
-#define DEBUG
+//#define DEBUG
 //#define DEBUG_CORNER
 
 //=======================================================================
@@ -62,129 +62,99 @@ void Segmentor::OnMouse(int event, int x, int y, int f, void* data)
 //=======================================================================
 void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 {
+	output = input.clone();
+
+	// find table range
 	if (!m_TableFound)
 	{
-		// blur image first by Gaussian
-		int kernelSize = 3;
-		double std = 2.0;
+		cv::Point TopLeft;
+		cv::Point TopRight;
+		cv::Point LowerLeft;
+		cv::Point LowerRight;
 
-		cv::GaussianBlur(input, output, cv::Size(kernelSize, kernelSize), std, std);
+		// user-picked 4 corners
 
-#ifdef DEBUG
-		cv::imshow("gauss:", output);
-#endif // DEBUG
-		bool doThreshold = false; // later I figured it's not of great use in our case
-		if (doThreshold)
-		{
-			//std::string typeName = type2str(output.type());
-			//printf("%s\n", typeName.c_str());
-
-			// convert to gray scale
-			cv::Mat tmp;
-			cv::cvtColor(output, tmp, cv::COLOR_RGB2GRAY);
-
-			/*std::string typeName = type2str(tmp.type());
-			printf("%s\n", typeName.c_str());*/
-
-			// adaptive threshold
-			int adaptiveMethod = cv::ADAPTIVE_THRESH_MEAN_C;
-			int thresholdType = cv::THRESH_BINARY;
-			int blockSiz = 55;
-
-			cv::Mat tmp1;
-
-			cv::adaptiveThreshold(tmp, tmp1, 255, adaptiveMethod, thresholdType, blockSiz, 5);
-			//cv::threshold(tmp, tmp1, 128, 255, cv::THRESH_BINARY_INV);
-
-			//typeName = type2str(tmp1.type());
-			//printf("%s\n", typeName.c_str());
-#ifdef DEBUG
-			cv::imshow("adaptiveThreshold:", tmp1);
-#endif // DEBUG
-		}//if (doThreshold)
-
-#ifndef DEBUG_CORNER
-		cv::imshow("Input", input);
-		cv::setMouseCallback("Input", OnMouse, &m_Corners);
-		while (m_Corners.size() < 4)
+		cv::imshow( "Input", input );
+		cv::setMouseCallback( "Input", OnMouse, &m_Corners );
+		while ( m_Corners.size() < 4 )
 		{
 			unsigned m = m_Corners.size();
-			if ( m > 0)
+			if ( m > 0 )
 			{
-				cv::circle(input, m_Corners[m - 1], 3, GREEN, 2);
+				cv::circle( input, m_Corners[m - 1], 3, GREEN, 2 );
 			}
 
-			cv::imshow("Input", input);
-			cv::waitKey(10);
+			cv::imshow( "Input", input );
+			cv::waitKey( 10 );
 		}
 
 		// last point
-		cv::circle(input, m_Corners[3], 3, GREEN, 2);
+		cv::circle( input, m_Corners[3], 3, GREEN, 2 );
 
-		cv::imshow("Input", input);
-		cv::waitKey(10);
-#else
-		cv::Point pt1(69, 26);
-		cv::Point pt2(21, 324);
-		cv::Point pt3(632, 312);
-		cv::Point pt4(572, 18);
-
-		m_Corners.push_back(pt1);
-		m_Corners.push_back(pt2);
-		m_Corners.push_back(pt3);
-		m_Corners.push_back(pt4);
-#endif
+		cv::imshow( "Input", input );
+		cv::waitKey( 10 );
 		// order the 4 corners
-        OrderCorners();
+		OrderCorners();
 
 #ifdef DEBUG
 		// draw the bands around 4 picked corners
 		// m_Corners is arranged by: ul, ur, ll, lr
-		cv::circle(input, m_Corners[0], 3, GREEN, 2);
-		cv::circle(input, m_Corners[1], 3, RED, 2);
-		cv::circle(input, m_Corners[2], 3, BLUE, 2);
-		cv::circle(input, m_Corners[3], 3, WHITE, 2);
+		cv::circle( input, m_Corners[0], 3, GREEN, 2 );
+		cv::circle( input, m_Corners[1], 3, RED, 2 );
+		cv::circle( input, m_Corners[2], 3, BLUE, 2 );
+		cv::circle( input, m_Corners[3], 3, WHITE, 2 );
 
-		cv::imshow("ORder:", input);
+		cv::imshow( "ORder:", input );
 #endif // DEBUG
 
+#ifndef DEBUG_CORNER
+		// blur image first by Gaussian
+		int kernelSize = 3;
+		double std = 2.0;
+
+		cv::GaussianBlur(input, input, cv::Size(kernelSize, kernelSize), std, std);
+
+#ifdef DEBUG
+		cv::imshow("gauss:", input );
+#endif // DEBUG
+		
 		// canny low & heigh threshold
 		int low = 50;
 		int high = 100;
 
 		// convert to gray scale
 		cv::Mat tmp;
-		cv::cvtColor(output, tmp, cv::COLOR_RGB2GRAY);
+		cv::cvtColor( output, tmp, cv::COLOR_RGB2GRAY );
 
-		cv::Canny(tmp, output, low, high);
+		cv::Canny( tmp, tmp, low, high );
 
-        // dilate Canny results
-        cv::dilate(output, output, cv::Mat(), cv::Point( -1, -1 ), 1 /*num iteration*/ );
+		// erode & dilate Canny results		
+		cv::dilate( tmp, tmp, cv::Mat(), cv::Point( -1, -1 ), 1 /*num iteration*/ );
 
 #ifdef DEBUG
-		cv::imshow("canny:", output);
+		cv::imshow( "canny:", tmp );
 #endif // DEBUG
 
 		// mask out anything that's outside of the user-picked band
-		MaskCanny(output);
+		MaskCanny( tmp );
 
 #ifdef DEBUG
-        cv::Mat copy = input.clone();
+		cv::Mat copy = input.clone();
 
-        // draw bounds
-        cv::Scalar color = GREEN; // green
+		// draw bounds
+		cv::Scalar color = GREEN; // green
 
-        cv::line( copy, m_o_ul, m_o_ur, color );
-        cv::line( copy, m_o_ul, m_o_ll, color );
-        cv::line( copy, m_o_ur, m_o_lr, color );
-        cv::line( copy, m_o_ll, m_o_lr, color );
+		cv::line( copy, m_o_ul, m_o_ur, color );
+		cv::line( copy, m_o_ul, m_o_ll, color );
+		cv::line( copy, m_o_ur, m_o_lr, color );
+		cv::line( copy, m_o_ll, m_o_lr, color );
 
-        cv::line( copy, m_i_ul, m_i_ur, color );
-        cv::line( copy, m_i_ul, m_i_ll, color );
-        cv::line( copy, m_i_ur, m_i_lr, color );
-        cv::line( copy, m_i_ll, m_i_lr, color );
+		cv::line( copy, m_i_ul, m_i_ur, color );
+		cv::line( copy, m_i_ul, m_i_ll, color );
+		cv::line( copy, m_i_ur, m_i_lr, color );
+		cv::line( copy, m_i_ll, m_i_lr, color );
 
-        cv::imshow( "bound:", copy );
+		cv::imshow( "bound:", copy );
 #endif // DEBUG
 
 		// Hough line transform
@@ -194,36 +164,56 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		float minLength = 50.0f;// 360 / 2;
 		float maxGap = 60.0f;
 		//LineFinder::METHOD m = LineFinder::METHOD::TRAD;
-        LineFinder::METHOD m = LineFinder::METHOD::PROB;
+		LineFinder::METHOD m = LineFinder::METHOD::PROB;
 
-		TableFinder tableFinder(m, dRho, dTheta, minVote, minLength, maxGap);
+		TableFinder tableFinder( m, dRho, dTheta, minVote, minLength, maxGap );
 
-        if( m == LineFinder::METHOD::PROB )
-        {
-            const std::vector<cv::Vec4i>& lines = tableFinder.FindLinesP( output );
+		if ( m == LineFinder::METHOD::PROB )
+		{
+			const std::vector<cv::Vec4i>& lines = tableFinder.FindLinesP( tmp );
 
 #ifdef DEBUG
-            //cv::Mat copy = input.clone();
-			tableFinder.DrawDetectedLines( input, BLUE);
-			cv::imshow("HoughLine:", input );
+			//cv::Mat copy = input.clone();
+			tableFinder.DrawDetectedLines( input, BLUE );
+			cv::imshow( "HoughLine:", input );
 #endif // DEBUG
 
-            // filter out the lines that's out of bound
-			tableFinder.Refine4Edges( m_Corners, m_BandWidth, input );
-        }
-        else
-        {
-            const std::vector<cv::Vec2f>& lines = tableFinder.FindLines( output );
-        }
+			// filter out the lines that's out of bound
+			tableFinder.Refine4Edges( m_Corners, m_BandWidth, input/*debug use*/ );
+		}
+		else
+		{
+			const std::vector<cv::Vec2f>& lines = tableFinder.FindLines( tmp );
+		}
 
 #ifdef DEBUG
 		tableFinder.DrawTableLines( input, RED );
-		cv::imshow("Filtered HoughLine:", input );
+		cv::imshow( "Filtered HoughLine:", input );
 #endif // DEBUG
+
+		// 4 corners
+		TopLeft = tableFinder.GetTopLeft();
+		TopRight = tableFinder.GetTopRight();
+		LowerLeft = tableFinder.GetLowerLeft();
+		LowerRight = tableFinder.GetLowerRight();
+
+#else
+		// corners is arranged by: ul, ur, ll, lr
+		TopLeft    = m_Corners[0];
+		TopRight   = m_Corners[1];
+		LowerLeft  = m_Corners[2];
+		LowerRight = m_Corners[3];
+#endif
+		
+		cv::line( output, TopLeft, TopRight, GREEN, 2 );
+		cv::line( output, TopLeft, LowerLeft, GREEN, 2 );
+		cv::line( output, TopRight, LowerRight, GREEN, 2 );
+		cv::line( output, LowerLeft, LowerRight, GREEN, 2 );
 
 		m_TableFound = true;
 	}
 
+	//
 }//Process
 
 //=======================================================================

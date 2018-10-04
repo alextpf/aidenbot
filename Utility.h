@@ -6,6 +6,18 @@
 class Utility
 {
 public:
+	// find the intersection between line l1 & l2,
+	// returns the intersection as well as the slope
+	// of l1 & l2
+	// coordinate systems is the same as image coordinate
+	// i.e. X going right, Y going downward
+	// if no intersection, return false
+	static bool FindLineIntersection( 
+		const cv::Vec4i& l1, 
+		const cv::Vec4i& l2,
+		cv::Point& intr,
+		float& s1, // slope
+		float& s2 );
 
     // Generate a band around the user-picked 4 corners,
     // with width offset.

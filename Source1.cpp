@@ -6,10 +6,10 @@
 #include <opencv2/video.hpp>
 #include <opencv2/imgproc.hpp>
 
-#include "E:\alex\Air Hockey Robot\aidenbot2\AidenBot\VideoProcessor.h"
-#include "E:\alex\Air Hockey Robot\aidenbot2\AidenBot\Segmentor.h"
-//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\VideoProcessor.h"
-//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\Segmentor.h"
+//#include "E:\alex\Air Hockey Robot\aidenbot2\AidenBot\VideoProcessor.h"
+//#include "E:\alex\Air Hockey Robot\aidenbot2\AidenBot\Segmentor.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\VideoProcessor.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\Segmentor.h"
 
 using namespace cv;
 using namespace std;
@@ -21,13 +21,13 @@ int main()
 	VideoProcessor processor;
 	Segmentor segmentor;
 
-	segmentor.SetBandWidth(15);
+	segmentor.SetBandWidth(10);
 	//////////////////
 	// variables
 	//////////////////
 
-	char path[] = "E:/alex/Air Hockey Robot/aidenbot2/AidenBot/data/";
-	//char path[] = "c:/tmp/";
+	//char path[] = "E:/alex/Air Hockey Robot/aidenbot2/AidenBot/data/";
+	char path[] = "c:/tmp/";
 	char filename[] = "vid2";
 	//int num =  755; //249;
     int num = 249;
