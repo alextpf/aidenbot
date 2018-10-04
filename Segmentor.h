@@ -55,5 +55,5 @@ private:
 	cv::Point m_i_ll;
 	cv::Point m_i_lr;
 
-
+    cv::Mat m_Mask;     // mask represents table area
 };

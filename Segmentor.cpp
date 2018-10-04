@@ -13,7 +13,7 @@
 #define WHITE  cv::Scalar(255, 255, 255)
 #define BLACK  cv::Scalar(0,0,0)
 
-//#define DEBUG
+#define DEBUG
 //#define DEBUG_CORNER
 
 //=======================================================================
@@ -117,18 +117,74 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 #ifdef DEBUG
 		cv::imshow("gauss:", input );
 #endif // DEBUG
-		
+
+        // convert to gray scale
+        cv::Mat tmp;
+        cv::cvtColor( input, tmp, cv::COLOR_RGB2GRAY );
+
+        bool doThreshold = true; // later I figured it's not of great use in our case
+        if( doThreshold )
+        {
+            // adaptive threshold
+            int adaptiveMethod = cv::ADAPTIVE_THRESH_MEAN_C;
+            int thresholdType = cv::THRESH_BINARY;
+            int blockSiz = 55;
+
+            cv::Mat tmp2 = tmp.clone();
+            cv::adaptiveThreshold( tmp2, tmp2, 255, adaptiveMethod, thresholdType, blockSiz, 5 );
+            //cv::threshold(tmp, tmp1, 128, 255, cv::THRESH_BINARY_INV);
+
+            cv::erode( tmp2, tmp2, cv::Mat(), cv::Point( -1, -1 ), 1/*num iteration*/ );
+            cv::dilate( tmp2, tmp2, cv::Mat(), cv::Point( -1, -1 ), 2/*num iteration*/ );
+
+            //cv::Mat ellipse = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 5, 5 ) );	// Structuring element to find clay target
+            //cv::morphologyEx( tmp2, tmp2, cv::MORPH_CLOSE, ellipse, cv::Point( -1, -1 ), 1/*num iteration*/ );
+
+#ifdef DEBUG
+            cv::imshow( "dilated adaptiveThreshold:", tmp2 );
+#endif // DEBUG
+
+            std::vector< std::vector< cv::Point > > contours;
+            std::vector< cv::Vec4i > hierarchy;
+            cv::findContours( tmp2, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE );
+
+            //find the contour that's greater than some sizes, i.e. the table
+            double thresh = tmp2.size().width * tmp2.size().height * 0.5;
+
+            std::vector< std::vector< cv::Point > > leftOver;
+            for( int i = 0; i < contours.size(); i++ )
+            {
+                double area = cv::contourArea( contours[i] );
+                if( area > thresh )
+                {
+                    leftOver.push_back(contours[i]);
+                }
+            }
+
+            if( leftOver.size() == 1 )
+            {
+                m_Mask = cv::Mat::zeros( tmp2.size(), CV_8UC1 );
+                drawContours( m_Mask, leftOver, 0, 255/*color*/, cv::FILLED );
+#ifdef DEBUG
+                cv::imshow( "dilated contour:", m_Mask );
+#endif // DEBUG
+                // clean noise, and expand the mask
+                cv::dilate( m_Mask, m_Mask, cv::Mat(), cv::Point( -1, -1 ), 6/*num iteration*/ );
+                cv::erode( m_Mask, m_Mask, cv::Mat(), cv::Point( -1, -1 ), 3/*num iteration*/ );
+#ifdef DEBUG
+                cv::imshow( "dilated contour cleaning:", m_Mask );
+#endif // DEBUG
+            }
+
+        }//if (doThreshold)
+
 		// canny low & heigh threshold
 		int low = 50;
 		int high = 100;
 
-		// convert to gray scale
-		cv::Mat tmp;
-		cv::cvtColor( output, tmp, cv::COLOR_RGB2GRAY );
-
 		cv::Canny( tmp, tmp, low, high );
 
-		// erode & dilate Canny results		
+		// dilate Canny results
 		cv::dilate( tmp, tmp, cv::Mat(), cv::Point( -1, -1 ), 1 /*num iteration*/ );
 
 #ifdef DEBUG
@@ -162,7 +218,7 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		double dTheta = CV_PI / 180.0f;
 		unsigned int minVote = 60;//360 / 2;
 		float minLength = 50.0f;// 360 / 2;
-		float maxGap = 60.0f;
+		float maxGap = 30.0f;
 		//LineFinder::METHOD m = LineFinder::METHOD::TRAD;
 		LineFinder::METHOD m = LineFinder::METHOD::PROB;
 
@@ -204,7 +260,7 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		LowerLeft  = m_Corners[2];
 		LowerRight = m_Corners[3];
 #endif
-		
+
 		cv::line( output, TopLeft, TopRight, GREEN, 2 );
 		cv::line( output, TopLeft, LowerLeft, GREEN, 2 );
 		cv::line( output, TopRight, LowerRight, GREEN, 2 );
