@@ -286,7 +286,20 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 	else
 	{
 		// find puck and robot position
+		// 1. find puck
+		// use color threshold
 
+		// convert RGB to HSV
+		cv::Mat hsvImg;
+		cv::cvtColor( input, hsvImg, CV_BGR2HSV );
+		static 
+		vector<vector<Point> > contours;
+		vector<Vec4i> hierarchy;
+
+		findContours( src, contours, hierarchy,
+			CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
+
+		cv::findContours();
 	}
 
 	//
