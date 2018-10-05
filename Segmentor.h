@@ -14,7 +14,7 @@ public:
 	Segmentor();
 	~Segmentor() {}
 
-	virtual void Process(cv::Mat & input, cv::Mat & output);
+	void Process(cv::Mat & input, cv::Mat & output) override;
 
 	static void OnMouse(int event, int x, int y, int f, void* data);
 

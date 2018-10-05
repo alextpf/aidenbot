@@ -111,7 +111,7 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		// blur image first by Gaussian
 		int kernelSize = 3;
 		double std = 2.0;
-		
+
 		cv::GaussianBlur(input, input, cv::Size(kernelSize, kernelSize), std, std);
 
 #ifdef DEBUG
@@ -121,7 +121,7 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
         // convert to gray scale
         cv::Mat tmp;
         cv::cvtColor( input, tmp, cv::COLOR_RGB2GRAY );
-		
+
 		cv::Mat tmp2 = tmp.clone();
 
         // adaptive threshold
@@ -135,7 +135,7 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		// close, fill the "holes" in the foreground
 		//cv::dilate( tmp2, tmp2, cv::Mat(), cv::Point( -1, -1 ), 2/*num iteration*/ );
   //      cv::erode( tmp2, tmp2, cv::Mat(), cv::Point( -1, -1 ), 2/*num iteration*/ );
-        
+
         cv::Mat ellipse = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 5, 5 ) );
         cv::morphologyEx( tmp2, tmp2, cv::MORPH_CLOSE, ellipse, cv::Point( -1, -1 ), 1/*num iteration*/ );
 
@@ -169,7 +169,7 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 
 #ifdef DEBUG
             cv::imshow( "contour:", tmp2 );
-#endif // DEBUG            
+#endif // DEBUG
 		}
 		else
 		{
@@ -289,17 +289,17 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		// 1. find puck
 		// use color threshold
 
-		// convert RGB to HSV
-		cv::Mat hsvImg;
-		cv::cvtColor( input, hsvImg, CV_BGR2HSV );
-		static 
-		vector<vector<Point> > contours;
-		vector<Vec4i> hierarchy;
+		//// convert RGB to HSV
+		//cv::Mat hsvImg;
+		//cv::cvtColor( input, hsvImg, CV_BGR2HSV );
+		//static
+		//vector<vector<Point> > contours;
+		//vector<Vec4i> hierarchy;
 
-		findContours( src, contours, hierarchy,
-			CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
+		//findContours( src, contours, hierarchy,
+		//	CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
 
-		cv::findContours();
+		//cv::findContours();
 	}
 
 	//
