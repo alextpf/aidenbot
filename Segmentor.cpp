@@ -111,7 +111,7 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		// blur image first by Gaussian
 		int kernelSize = 3;
 		double std = 2.0;
-
+		
 		cv::GaussianBlur(input, input, cv::Size(kernelSize, kernelSize), std, std);
 
 #ifdef DEBUG
@@ -121,78 +121,77 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
         // convert to gray scale
         cv::Mat tmp;
         cv::cvtColor( input, tmp, cv::COLOR_RGB2GRAY );
+		
+		cv::Mat tmp2 = tmp.clone();
 
-        bool doThreshold = true; // later I figured it's not of great use in our case
-        if( doThreshold )
+        // adaptive threshold
+        int adaptiveMethod = cv::ADAPTIVE_THRESH_MEAN_C;
+        int thresholdType = cv::THRESH_BINARY;
+        int blockSiz = 55;
+
+        cv::adaptiveThreshold( tmp2, tmp2, 255, adaptiveMethod, thresholdType, blockSiz, 5 );
+        //cv::threshold(tmp, tmp1, 128, 255, cv::THRESH_BINARY_INV);
+
+		// close, fill the "holes" in the foreground
+		//cv::dilate( tmp2, tmp2, cv::Mat(), cv::Point( -1, -1 ), 2/*num iteration*/ );
+  //      cv::erode( tmp2, tmp2, cv::Mat(), cv::Point( -1, -1 ), 2/*num iteration*/ );
+        
+        cv::Mat ellipse = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 5, 5 ) );
+        cv::morphologyEx( tmp2, tmp2, cv::MORPH_CLOSE, ellipse, cv::Point( -1, -1 ), 1/*num iteration*/ );
+
+#ifdef DEBUG
+        cv::imshow( "adaptiveThreshold + closing:", tmp2 );
+#endif // DEBUG
+
+        std::vector< std::vector< cv::Point > > contours;
+        std::vector< cv::Vec4i > hierarchy;
+        cv::findContours( tmp2, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE );
+
+        //find the contour that's greater than some sizes, i.e. the table
+        double thresh = tmp2.size().width * tmp2.size().height * 0.5;
+
+        std::vector< std::vector< cv::Point > > leftOver;
+        for( int i = 0; i < contours.size(); i++ )
         {
-            // adaptive threshold
-            int adaptiveMethod = cv::ADAPTIVE_THRESH_MEAN_C;
-            int thresholdType = cv::THRESH_BINARY;
-            int blockSiz = 55;
-
-            cv::Mat tmp2 = tmp.clone();
-            cv::adaptiveThreshold( tmp2, tmp2, 255, adaptiveMethod, thresholdType, blockSiz, 5 );
-            //cv::threshold(tmp, tmp1, 128, 255, cv::THRESH_BINARY_INV);
-
-            cv::erode( tmp2, tmp2, cv::Mat(), cv::Point( -1, -1 ), 1/*num iteration*/ );
-            cv::dilate( tmp2, tmp2, cv::Mat(), cv::Point( -1, -1 ), 2/*num iteration*/ );
-
-            //cv::Mat ellipse = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 5, 5 ) );	// Structuring element to find clay target
-            //cv::morphologyEx( tmp2, tmp2, cv::MORPH_CLOSE, ellipse, cv::Point( -1, -1 ), 1/*num iteration*/ );
-
-#ifdef DEBUG
-            cv::imshow( "dilated adaptiveThreshold:", tmp2 );
-#endif // DEBUG
-
-            std::vector< std::vector< cv::Point > > contours;
-            std::vector< cv::Vec4i > hierarchy;
-            cv::findContours( tmp2, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE );
-
-            //find the contour that's greater than some sizes, i.e. the table
-            double thresh = tmp2.size().width * tmp2.size().height * 0.5;
-
-            std::vector< std::vector< cv::Point > > leftOver;
-            for( int i = 0; i < contours.size(); i++ )
+            double area = cv::contourArea( contours[i] );
+            if( area > thresh )
             {
-                double area = cv::contourArea( contours[i] );
-                if( area > thresh )
-                {
-                    leftOver.push_back(contours[i]);
-                }
+                leftOver.push_back(contours[i]);
             }
+        }
 
-            if( leftOver.size() == 1 )
-            {
-                m_Mask = cv::Mat::zeros( tmp2.size(), CV_8UC1 );
-                drawContours( m_Mask, leftOver, 0, 255/*color*/, cv::FILLED );
-#ifdef DEBUG
-                cv::imshow( "dilated contour:", m_Mask );
-#endif // DEBUG
-                // clean noise, and expand the mask
-                cv::dilate( m_Mask, m_Mask, cv::Mat(), cv::Point( -1, -1 ), 6/*num iteration*/ );
-                cv::erode( m_Mask, m_Mask, cv::Mat(), cv::Point( -1, -1 ), 3/*num iteration*/ );
-#ifdef DEBUG
-                cv::imshow( "dilated contour cleaning:", m_Mask );
-#endif // DEBUG
-            }
+        if( leftOver.size() == 1 )
+        {
+			tmp2 = cv::Mat::zeros( tmp2.size(), CV_8UC1 );
+            drawContours( tmp2, leftOver, 0, 255/*color*/, cv::FILLED );
+			// do closing to clean noise again
+			cv::morphologyEx( tmp2, tmp2, cv::MORPH_CLOSE, ellipse, cv::Point( -1, -1 ), 1/*num iteration*/ );
 
-        }//if (doThreshold)
+#ifdef DEBUG
+            cv::imshow( "contour:", tmp2 );
+#endif // DEBUG            
+		}
+		else
+		{
+			// threshold failed, bail out
+			tmp2 = tmp.clone();
+		}
 
 		// canny low & heigh threshold
 		int low = 50;
 		int high = 100;
 
-		cv::Canny( tmp, tmp, low, high );
+		cv::Canny( tmp2, tmp2, low, high );
 
 		// dilate Canny results
-		cv::dilate( tmp, tmp, cv::Mat(), cv::Point( -1, -1 ), 1 /*num iteration*/ );
+		cv::dilate( tmp2, tmp2, cv::Mat(), cv::Point( -1, -1 ), 2 /*num iteration*/ );
 
 #ifdef DEBUG
-		cv::imshow( "canny:", tmp );
+		cv::imshow( "canny:", tmp2 );
 #endif // DEBUG
 
 		// mask out anything that's outside of the user-picked band
-		MaskCanny( tmp );
+		MaskCanny( tmp2 );
 
 #ifdef DEBUG
 		cv::Mat copy = input.clone();
@@ -216,9 +215,9 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		// Hough line transform
 		double dRho = 1.0f;
 		double dTheta = CV_PI / 180.0f;
-		unsigned int minVote = 60;//360 / 2;
+		unsigned int minVote = 80;//360 / 2;
 		float minLength = 50.0f;// 360 / 2;
-		float maxGap = 30.0f;
+		float maxGap = 10.0f;
 		//LineFinder::METHOD m = LineFinder::METHOD::TRAD;
 		LineFinder::METHOD m = LineFinder::METHOD::PROB;
 
@@ -226,7 +225,7 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 
 		if ( m == LineFinder::METHOD::PROB )
 		{
-			const std::vector<cv::Vec4i>& lines = tableFinder.FindLinesP( tmp );
+			const std::vector<cv::Vec4i>& lines = tableFinder.FindLinesP( tmp2 );
 
 #ifdef DEBUG
 			//cv::Mat copy = input.clone();
@@ -239,7 +238,7 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		}
 		else
 		{
-			const std::vector<cv::Vec2f>& lines = tableFinder.FindLines( tmp );
+			const std::vector<cv::Vec2f>& lines = tableFinder.FindLines( tmp2 );
 		}
 
 #ifdef DEBUG
@@ -266,7 +265,28 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		cv::line( output, TopRight, LowerRight, GREEN, 2 );
 		cv::line( output, LowerLeft, LowerRight, GREEN, 2 );
 
+		// construct mask based on table 4 corners
+		std::vector< cv::Point > tmpContour;
+		tmpContour.push_back( TopRight );
+		tmpContour.push_back( TopLeft );
+		tmpContour.push_back( LowerLeft );
+		tmpContour.push_back( LowerRight );
+
+		std::vector< std::vector< cv::Point > > tableContour;
+		tableContour.push_back( tmpContour );
+		m_Mask = cv::Mat::zeros( tmp2.size(), CV_8UC1 );
+		drawContours( m_Mask, tableContour, 0, 255/*color*/, cv::FILLED );
+
+#ifdef DEBUG
+		cv::imshow( "Mask:", m_Mask );
+#endif // DEBUG
+
 		m_TableFound = true;
+	}
+	else
+	{
+		// find puck and robot position
+
 	}
 
 	//

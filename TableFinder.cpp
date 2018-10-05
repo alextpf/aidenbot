@@ -257,8 +257,13 @@ cv::Vec4i TableFinder::FilterLines(
 
 		return tmp;
 	}
+	else if ( edges.size() == 1 )
+	{
+		return edges[0];
+	}
 
-	return edges[0];
+	return cv::Vec4i();
+	
 }// FilterLines
 
 //===================================================================================
