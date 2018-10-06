@@ -63,7 +63,7 @@ void Segmentor::OnMouse(int event, int x, int y, int f, void* data)
 void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 {
 	output = input.clone();
-
+	
 	// find table range
 	if (!m_TableFound)
 	{
@@ -283,23 +283,66 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 
 		m_TableFound = true;
 	}
-	else
+	//else
 	{
 		// find puck and robot position
 		// 1. find puck
 		// use color threshold
 
-		//// convert RGB to HSV
-		//cv::Mat hsvImg;
-		//cv::cvtColor( input, hsvImg, CV_BGR2HSV );
-		//static
-		//vector<vector<Point> > contours;
-		//vector<Vec4i> hierarchy;
+		// convert RGB to HSV
+		cv::Mat hsvImg;
+		cv::cvtColor( input, hsvImg, CV_BGR2HSV );
 
-		//findContours( src, contours, hierarchy,
-		//	CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
+		int RedLowerH = 160;
+		int RedUpperH = 179;
 
-		//cv::findContours();
+		int OrangeLowerH = 0;
+		int OrangeUpperH = 20;
+
+		int lowerS = 160;
+		int upperS = 255;
+		
+		int lowerV = 110;
+		int upperV = 220;
+
+		cv::Mat maskRed;
+		cv::inRange( hsvImg, cv::Scalar( RedLowerH, lowerS, lowerV ), cv::Scalar( RedUpperH, upperS, upperV ), maskRed );
+
+		cv::Mat maskOrange;
+		cv::inRange( hsvImg, cv::Scalar( OrangeLowerH, lowerS, lowerV ), cv::Scalar( OrangeUpperH, upperS, upperV ), maskOrange );
+
+		cv::Mat res;
+		cv::bitwise_or( maskRed, maskOrange, res );
+		
+#ifdef DEBUG
+		cv::imshow( "res mask", res );
+#endif // DEBUG
+
+		cv::bitwise_and( res, m_Mask, res );
+
+#ifdef DEBUG
+		cv::imshow( "res + mask", res );
+#endif // DEBUG
+		
+		cv::Mat ellipse = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 5, 5 ) );
+		
+		// remove noise in background
+		cv::morphologyEx( res, res, cv::MORPH_OPEN, ellipse, cv::Point( -1, -1 ), 1/*num iteration*/ );
+
+		// remove noise in foreground
+		cv::morphologyEx( res, res, cv::MORPH_CLOSE, ellipse, cv::Point( -1, -1 ), 1/*num iteration*/ );
+
+#ifdef DEBUG
+		cv::imshow( "res + mask + noise removal", res );
+#endif // DEBUG
+
+		std::vector<std::vector<cv::Point> > contours;
+		std::vector<cv::Vec4i> hierarchy;
+
+		cv::findContours( res, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
+		
+		// locate puck by 1. area, 2. roundness, and 3. color(has been used)
+		//while()
 	}
 
 	//

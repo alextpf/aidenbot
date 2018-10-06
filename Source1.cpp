@@ -6,11 +6,12 @@
 #include <opencv2/video.hpp>
 #include <opencv2/imgproc.hpp>
 
-#include "E:\alex\Air Hockey Robot\aidenbot2\AidenBot\VideoProcessor.h"
-#include "E:\alex\Air Hockey Robot\aidenbot2\AidenBot\Segmentor.h"
-#include "E:\alex\Air Hockey Robot\aidenbot2\AidenBot\CheckHSV.h"
-//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\VideoProcessor.h"
-//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\Segmentor.h"
+//#include "E:\alex\Air Hockey Robot\aidenbot2\AidenBot\VideoProcessor.h"
+//#include "E:\alex\Air Hockey Robot\aidenbot2\AidenBot\Segmentor.h"
+//#include "E:\alex\Air Hockey Robot\aidenbot2\AidenBot\CheckHSV.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\VideoProcessor.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\Segmentor.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\CheckHSV.h"
 
 using namespace cv;
 using namespace std;
@@ -29,13 +30,15 @@ int main()
 	// variables
 	//////////////////
 
-	char path[] = "E:/alex/Air Hockey Robot/aidenbot2/AidenBot/data/";
-	//char path[] = "c:/tmp/";
+	//char path[] = "E:/alex/Air Hockey Robot/aidenbot2/AidenBot/data/";
+	char path[] = "c:/tmp/";
 	char filename[] = "vid2";
-	int num =  755; //249;
-	int startFrame =  754;//248;// frame number we want to start at
-	//int num = 249;
-	//int startFrame = 248;// frame number we want to start at
+	//int num =  755; //249;
+	//int startFrame =  754;//248;// frame number we want to start at
+	int num = 249;
+	int startFrame = 248;// frame number we want to start at
+	//int num = 184;
+	//int startFrame = 183;// frame number we want to start at
 	//char inputMode[] = "";
 	char outputMode[] = "";
 
@@ -145,8 +148,8 @@ int main()
 			break;
 	}//switch (outputType)
 
-	//processor.SetFrameProcessor( &segmentor );
-    processor.SetFrameProcessor( &hsvChecker );
+	processor.SetFrameProcessor( &segmentor );
+    //processor.SetFrameProcessor( &hsvChecker );
 
 	// Declare a window to display the video
 	processor.DisplayOutput("Test Output");
