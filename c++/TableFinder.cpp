@@ -16,37 +16,35 @@ TableFinder::TableFinder(
 {}
 
 //===================================================================================
-void TableFinder::Refine4Edges(
+cv::Vec2f TableFinder::ImgToTableCoordinate( cv::Point p )
+{
+	cv::Vec2f ret;
+	return ret;
+} // ImgToTableCoordinate
+
+//===================================================================================
+bool TableFinder::Refine4Edges(
 	const std::vector<cv::Point> & corners,
 	unsigned int bandWidth,
     cv::Mat& img /*debug use*/ )
 {
-	RefineLeftEdge(corners, bandWidth, img );
-	RefineRightEdge(corners, bandWidth, img );
-	RefineTopEdge(corners, bandWidth, img );
-	RefineBottomEdge(corners, bandWidth, img );
+	bool ok;
+	ok = RefineLeftEdge(corners, bandWidth, img );
+	ok = ok && RefineRightEdge(corners, bandWidth, img );
+	ok = ok && RefineTopEdge(corners, bandWidth, img );
+	ok = ok && RefineBottomEdge(corners, bandWidth, img );
 
 	// find the 4 corners, by the intersection of 4 edges
 	
 	float s1, s2;
-	if ( !Utility::FindLineIntersection( m_LeftEdge, m_TopEdge, m_TopLeft, s1, s2 ) )
-	{
-		std::cout << "error line intersection" << std::endl;
-	}
+	ok = ok && Utility::FindLineIntersection( m_LeftEdge, m_TopEdge, m_TopLeft, s1, s2 );
+	ok = ok && Utility::FindLineIntersection( m_RightEdge, m_TopEdge, m_TopRight, s1, s2 );
+	ok = ok && Utility::FindLineIntersection( m_LeftEdge, m_BottomEdge, m_LowerLeft, s1, s2 );
+	ok = ok && Utility::FindLineIntersection( m_RightEdge, m_BottomEdge, m_LowerRight, s1, s2 );
 
-	if ( !Utility::FindLineIntersection( m_RightEdge, m_TopEdge, m_TopRight, s1, s2 ) )
+	if ( !ok )
 	{
-		std::cout << "error line intersection" << std::endl;
-	}
-	
-	if ( !Utility::FindLineIntersection( m_LeftEdge, m_BottomEdge, m_LowerLeft, s1, s2 ) )
-	{
-		std::cout << "error line intersection" << std::endl;
-	}
-
-	if ( !Utility::FindLineIntersection( m_RightEdge, m_BottomEdge, m_LowerRight, s1, s2 ) )
-	{
-		std::cout << "error line intersection" << std::endl;
+		return false;
 	}
 
 #ifdef DEBUG
@@ -59,10 +57,18 @@ void TableFinder::Refine4Edges(
 
 	cv::imshow( "table:", img );
 #endif
-}//Refine4Edges
+
+	m_Left = ( m_TopLeft.x + m_LowerLeft.x ) * 0.5f;
+	m_Right = ( m_TopRight.x + m_LowerRight.x ) * 0.5f;
+	m_Top = ( m_TopLeft.y + m_TopRight.y ) * 0.5f;
+	m_Bottom = ( m_LowerLeft.y + m_LowerRight.y ) * 0.5f;
+	
+	m_PixToMM = TABLE_LENGTH / ( m_Right - m_Left );
+	return true;
+}//Refine4Edge
 
  //===================================================================================
-void TableFinder::RefineLeftEdge(
+bool TableFinder::RefineLeftEdge(
 	const std::vector<cv::Point> & corners,
 	unsigned int bandWidth,
     cv::Mat& img /*debug use*/ )
@@ -80,7 +86,7 @@ void TableFinder::RefineLeftEdge(
 
     cv::Point o_ul, o_ur, o_ll, o_lr; // debug use
 
-	m_LeftEdge = FilterLines(tmpCorners, Xoffset, Yoffset, o_ul, o_ur, o_ll, o_lr );
+	return FilterLines( m_LeftEdge, tmpCorners, Xoffset, Yoffset, o_ul, o_ur, o_ll, o_lr );
 
 #ifdef DEBUG
     cv::Scalar color = cv::Scalar( 255, 255, 255 ); // white
@@ -95,7 +101,7 @@ void TableFinder::RefineLeftEdge(
 }//RefineLeftEdge
 
  //===================================================================================
-void TableFinder::RefineRightEdge(
+bool TableFinder::RefineRightEdge(
 	const std::vector<cv::Point> & corners,
 	unsigned int bandWidth,
     cv::Mat& img /*debug use*/ )
@@ -113,22 +119,22 @@ void TableFinder::RefineRightEdge(
 
     cv::Point o_ul, o_ur, o_ll, o_lr; // debug use
 
-	m_RightEdge = FilterLines(tmpCorners, Xoffset, Yoffset, o_ul, o_ur, o_ll, o_lr );
-
 #ifdef DEBUG
-    cv::Scalar color = cv::Scalar( 0, 255, 255 ); // yellow
+	cv::Scalar color = cv::Scalar( 0, 255, 255 ); // yellow
 
-    cv::line( img, o_ul, o_ur, color );
-    cv::line( img, o_ul, o_ll, color );
-    cv::line( img, o_ur, o_lr, color );
-    cv::line( img, o_ll, o_lr, color );
+	cv::line( img, o_ul, o_ur, color );
+	cv::line( img, o_ul, o_ll, color );
+	cv::line( img, o_ur, o_lr, color );
+	cv::line( img, o_ll, o_lr, color );
 
-    cv::imshow( "line bound:", img );
+	cv::imshow( "line bound:", img );
 #endif
+	return FilterLines( m_RightEdge, tmpCorners, Xoffset, Yoffset, o_ul, o_ur, o_ll, o_lr );
+
 }//RefineRightEdge
 
  //===================================================================================
-void TableFinder::RefineTopEdge(
+bool TableFinder::RefineTopEdge(
 	const std::vector<cv::Point> & corners,
 	unsigned int bandWidth,
     cv::Mat& img /*debug use*/ )
@@ -146,8 +152,6 @@ void TableFinder::RefineTopEdge(
 
     cv::Point o_ul, o_ur, o_ll, o_lr; // debug use
 
-	m_TopEdge = FilterLines(tmpCorners, Xoffset, Yoffset, o_ul, o_ur, o_ll, o_lr );
-
 #ifdef DEBUG
     cv::Scalar color = cv::Scalar( 0, 0, 255 ); // red
 
@@ -158,10 +162,13 @@ void TableFinder::RefineTopEdge(
 
     cv::imshow( "line bound:", img );
 #endif
+
+	return FilterLines( m_TopEdge, tmpCorners, Xoffset, Yoffset, o_ul, o_ur, o_ll, o_lr );
+
 }//RefineTopEdge
 
  //===================================================================================
-void TableFinder::RefineBottomEdge(
+bool TableFinder::RefineBottomEdge(
 	const std::vector<cv::Point> & corners,
 	unsigned int bandWidth,
     cv::Mat& img /*debug use*/ )
@@ -179,8 +186,6 @@ void TableFinder::RefineBottomEdge(
 
     cv::Point o_ul, o_ur, o_ll, o_lr; // debug use
 	
-	m_BottomEdge = FilterLines(tmpCorners, Xoffset, Yoffset, o_ul, o_ur, o_ll, o_lr );
-
 #ifdef DEBUG
     cv::Scalar color = cv::Scalar( 0, 255, 0 ); // green
 
@@ -191,10 +196,14 @@ void TableFinder::RefineBottomEdge(
 
     cv::imshow( "line bound:", img );
 #endif
+
+	return FilterLines( m_BottomEdge, tmpCorners, Xoffset, Yoffset, o_ul, o_ur, o_ll, o_lr );
+
 }//RefineBottomEdge
 
 //===================================================================================
-cv::Vec4i TableFinder::FilterLines(
+bool TableFinder::FilterLines(
+	cv::Vec4i& edge,
 	const std::vector<cv::Point> & corners,
 	unsigned int Xoffset,
 	unsigned int Yoffset,
@@ -254,15 +263,16 @@ cv::Vec4i TableFinder::FilterLines(
                 maxSqrLen = sqrLen;
 			}
 		}
-
-		return tmp;
+		edge = tmp;
+		return true;
 	}
 	else if ( edges.size() == 1 )
 	{
-		return edges[0];
+		edge = edges[0];
+		return true;
 	}
 
-	return cv::Vec4i();
+	return false;
 	
 }// FilterLines
 

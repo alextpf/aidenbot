@@ -5,10 +5,15 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 
+#define TABLE_LENGTH    1003  // mm = 39.5''
+#define TABLE_WIDTH     597   // mm = 23.5''
 //===================================================================================
 class TableFinder : public LineFinder
 {
 public:
+	TableFinder() :LineFinder()
+	{}
+
 	TableFinder(
 		METHOD m,
 		double dRho,
@@ -16,7 +21,8 @@ public:
 		unsigned int minVote,
 		float minLength,
 		float maxGap);
-	void Refine4Edges(
+	
+	bool Refine4Edges(
 		const std::vector<cv::Point> & corners,
 		unsigned int bandWidth,
         cv::Mat& img /*debug use*/);
@@ -62,30 +68,53 @@ public:
 	{
 		m_LowerRight = p;
 	}
+
+	// assuming robot is on the right of the screen
+	//
+	//  Robot Coordinate:
+	//                          ^ X
+	//                          |
+	//  -------------------------
+	//  |                       |
+	//  |                       |
+	//  | Y                     |
+	// <-------------------------
+
+	//  Image Coordinate:
+	//  --------------------------->X
+	//  |                       |
+	//  |                       |
+	//  |                       |
+	//  |------------------------
+	//  |
+	//  V Y
+	cv::Vec2f ImgToTableCoordinate( cv::Point p);
+
 private:
 
 	// refine 4 edges
-	void RefineLeftEdge(
+	bool RefineLeftEdge(
 		const std::vector<cv::Point> & corners,
 		unsigned int bandWidth,
         cv::Mat& img /*debug use*/ );
 
-	void RefineRightEdge(
+	bool RefineRightEdge(
 		const std::vector<cv::Point> & corners,
 		unsigned int bandWidth,
         cv::Mat& img /*debug use*/ );
 
-	void RefineTopEdge(
+	bool RefineTopEdge(
 		const std::vector<cv::Point> & corners,
 		unsigned int bandWidth,
         cv::Mat& img /*debug use*/ );
 
-	void RefineBottomEdge(
+	bool RefineBottomEdge(
 		const std::vector<cv::Point> & corners,
 		unsigned int bandWidth,
         cv::Mat& img /*debug use*/ );
 
-	cv::Vec4i FilterLines(
+	bool FilterLines(
+		cv::Vec4i& edge,
 		const std::vector<cv::Point> & corners,
 		unsigned int Xoffset,
 		unsigned int Yoffset,
@@ -104,4 +133,17 @@ private:
 	cv::Point m_TopRight;
 	cv::Point m_LowerLeft;
 	cv::Point m_LowerRight;
+
+	// This is an oversimplified model that assumes
+	// image plane is parellel to table with no tilt
+	// and ignore any lense distortion.
+	// So the resulting table boundary is a rectangle on screen
+	float m_Left;
+	float m_Right;
+	float m_Top;
+	float m_Bottom;
+
+	// camera pixel to table mm
+	float m_PixToMM;
+
 }; // TableFinder

@@ -1,5 +1,5 @@
 #include "Segmentor.h"
-#include "TableFinder.h"
+#include "PuckFinder.h"
 #include "Utility.h"
 
 #define PI							3.1415926
@@ -221,36 +221,45 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		//LineFinder::METHOD m = LineFinder::METHOD::TRAD;
 		LineFinder::METHOD m = LineFinder::METHOD::PROB;
 
-		TableFinder tableFinder( m, dRho, dTheta, minVote, minLength, maxGap );
+		m_TableFinder.SetMethod( m );
+		m_TableFinder.SetDeltaRho( dRho );
+		m_TableFinder.SetDeltaTheta( dTheta );
+		m_TableFinder.SetMinVote( minVote );
+		m_TableFinder.SetMinLength( minLength );
+		m_TableFinder.SetMaxGap( maxGap );
 
 		if ( m == LineFinder::METHOD::PROB )
 		{
-			const std::vector<cv::Vec4i>& lines = tableFinder.FindLinesP( tmp2 );
+			const std::vector<cv::Vec4i>& lines = m_TableFinder.FindLinesP( tmp2 );
 
 #ifdef DEBUG
 			//cv::Mat copy = input.clone();
-			tableFinder.DrawDetectedLines( input, BLUE );
+			m_TableFinder.DrawDetectedLines( input, BLUE );
 			cv::imshow( "HoughLine:", input );
 #endif // DEBUG
 
 			// filter out the lines that's out of bound
-			tableFinder.Refine4Edges( m_Corners, m_BandWidth, input/*debug use*/ );
+			if ( !m_TableFinder.Refine4Edges( m_Corners, m_BandWidth, input/*debug use*/ ) )
+			{
+				std::cout << "error" << std::endl;
+				return;
+			}
 		}
 		else
 		{
-			const std::vector<cv::Vec2f>& lines = tableFinder.FindLines( tmp2 );
+			const std::vector<cv::Vec2f>& lines = m_TableFinder.FindLines( tmp2 );
 		}
 
 #ifdef DEBUG
-		tableFinder.DrawTableLines( input, RED );
+		m_TableFinder.DrawTableLines( input, RED );
 		cv::imshow( "Filtered HoughLine:", input );
 #endif // DEBUG
 
 		// 4 corners
-		TopLeft = tableFinder.GetTopLeft();
-		TopRight = tableFinder.GetTopRight();
-		LowerLeft = tableFinder.GetLowerLeft();
-		LowerRight = tableFinder.GetLowerRight();
+		TopLeft = m_TableFinder.GetTopLeft();
+		TopRight = m_TableFinder.GetTopRight();
+		LowerLeft = m_TableFinder.GetLowerLeft();
+		LowerRight = m_TableFinder.GetLowerRight();
 
 #else
 		// corners is arranged by: ul, ur, ll, lr
@@ -287,62 +296,15 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 	{
 		// find puck and robot position
 		// 1. find puck
-		// use color threshold
+		PuckFinder puckFinder;
+		Contours contours;
+		cv::Point center;
 
-		// convert RGB to HSV
-		cv::Mat hsvImg;
-		cv::cvtColor( input, hsvImg, CV_BGR2HSV );
+		const bool success = puckFinder.FindPuck(
+			contours, center, input, m_Mask	);
 
-		int RedLowerH = 160;
-		int RedUpperH = 179;
-
-		int OrangeLowerH = 0;
-		int OrangeUpperH = 20;
-
-		int lowerS = 160;
-		int upperS = 255;
-		
-		int lowerV = 110;
-		int upperV = 220;
-
-		cv::Mat maskRed;
-		cv::inRange( hsvImg, cv::Scalar( RedLowerH, lowerS, lowerV ), cv::Scalar( RedUpperH, upperS, upperV ), maskRed );
-
-		cv::Mat maskOrange;
-		cv::inRange( hsvImg, cv::Scalar( OrangeLowerH, lowerS, lowerV ), cv::Scalar( OrangeUpperH, upperS, upperV ), maskOrange );
-
-		cv::Mat res;
-		cv::bitwise_or( maskRed, maskOrange, res );
-		
-#ifdef DEBUG
-		cv::imshow( "res mask", res );
-#endif // DEBUG
-
-		cv::bitwise_and( res, m_Mask, res );
-
-#ifdef DEBUG
-		cv::imshow( "res + mask", res );
-#endif // DEBUG
-		
-		cv::Mat ellipse = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 5, 5 ) );
-		
-		// remove noise in background
-		cv::morphologyEx( res, res, cv::MORPH_OPEN, ellipse, cv::Point( -1, -1 ), 1/*num iteration*/ );
-
-		// remove noise in foreground
-		cv::morphologyEx( res, res, cv::MORPH_CLOSE, ellipse, cv::Point( -1, -1 ), 1/*num iteration*/ );
-
-#ifdef DEBUG
-		cv::imshow( "res + mask + noise removal", res );
-#endif // DEBUG
-
-		std::vector<std::vector<cv::Point> > contours;
-		std::vector<cv::Vec4i> hierarchy;
-
-		cv::findContours( res, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
-		
-		// locate puck by 1. area, 2. roundness, and 3. color(has been used)
-		//while()
+		// robot strategy
+		m_TableFinder.ImgToTableCoordinate();
 	}
 
 	//

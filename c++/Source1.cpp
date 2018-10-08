@@ -9,9 +9,9 @@
 //#include "E:\alex\Air Hockey Robot\aidenbot2\AidenBot\VideoProcessor.h"
 //#include "E:\alex\Air Hockey Robot\aidenbot2\AidenBot\Segmentor.h"
 //#include "E:\alex\Air Hockey Robot\aidenbot2\AidenBot\CheckHSV.h"
-#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\VideoProcessor.h"
-#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\Segmentor.h"
-#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\CheckHSV.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\VideoProcessor.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\Segmentor.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\CheckHSV.h"
 
 using namespace cv;
 using namespace std;

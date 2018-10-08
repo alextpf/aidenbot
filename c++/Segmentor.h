@@ -5,6 +5,7 @@
 #include <opencv2/video.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include "TableFinder.h"
 #include "videoprocessor.h"
 #include <list>
 
@@ -35,6 +36,7 @@ private:
 	// use the user-picked band to zero out the result of Canny
 	void MaskCanny(cv::Mat & img);
 
+	TableFinder m_TableFinder;
     bool m_TableFound;
 
 	// user picked 4 corners of table
