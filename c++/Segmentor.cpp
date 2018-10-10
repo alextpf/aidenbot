@@ -304,7 +304,8 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 			contours, center, input, m_Mask	);
 
 		// robot strategy
-		m_TableFinder.ImgToTableCoordinate();
+		cv::Vec2f puckPos = m_TableFinder.ImgToTableCoordinate( center ); // mm, in table coordinate
+
 	}
 
 	//

@@ -19,6 +19,9 @@ TableFinder::TableFinder(
 cv::Vec2f TableFinder::ImgToTableCoordinate( cv::Point p )
 {
 	cv::Vec2f ret;
+	ret[1] = ( p.x - m_Right ) * m_PixToMM;
+	ret[0] = ( m_Bottom - p.y ) * m_PixToMM;
+
 	return ret;
 } // ImgToTableCoordinate
 
