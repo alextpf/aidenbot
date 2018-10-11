@@ -311,6 +311,15 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		clock_t curr = clock();
 
 		int dt = static_cast<int>( ( curr - m_CurrTime ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
+		
+		m_CurrTime = curr;
+
+		if ( dt > 10000 )
+		{
+			// this is probably the 1st frame, skip it
+			return;
+		}
+
 		m_Camera.CamProcess( dt );
 	}
 

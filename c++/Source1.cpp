@@ -37,7 +37,7 @@ int main()
 	// note: 213 - 380 good samples
 	//int num =  755; //249;
 	//int startFrame =  754;//248;// frame number we want to start at
-	int num = 214;
+	int num = 215;
 	int startFrame = 213;// frame number we want to start at
 	//int num = 184;
 	//int startFrame = 183;// frame number we want to start at

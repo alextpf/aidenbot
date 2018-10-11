@@ -19,7 +19,7 @@ TableFinder::TableFinder(
 cv::Point TableFinder::ImgToTableCoordinate( cv::Point p )
 {
 	cv::Point ret;
-	ret.y = static_cast<int>( ( p.x - m_Right ) * m_PixToMM );
+	ret.y = static_cast<int>( ( m_Right - p.x ) * m_PixToMM );
 	ret.x = static_cast<int>( ( m_Bottom - p.y ) * m_PixToMM );
 
 	return ret;

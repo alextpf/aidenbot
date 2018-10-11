@@ -85,5 +85,12 @@ bool PuckFinder::FindPuck(
 		}
 	} // for ( int i = 0; i< contours.size(); i++ )
 
+	if ( contours.size() == 1 )
+	{
+		cv::Moments m = cv::moments( contours[0] );
+		pt.x = static_cast<int>( m.m10 / m.m00 );
+		pt.y = static_cast<int>( m.m01 / m.m00 );
+	}
+
 	return contours.size() == 1;
 }// FindPuck
