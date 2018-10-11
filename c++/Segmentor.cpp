@@ -314,13 +314,14 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		
 		m_CurrTime = curr;
 
-		if ( dt > 10000 )
+		if ( dt < 10000 )
 		{
-			// this is probably the 1st frame, skip it
-			return;
+
+			m_Camera.CamProcess( dt );
 		}
 
-		m_Camera.CamProcess( dt );
+		m_Camera.SetPrevPuckPos( puckPos );
+
 	}
 
 	//
