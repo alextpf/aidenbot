@@ -5,9 +5,11 @@
 #include <opencv2/video.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include <list>
+
 #include "TableFinder.h"
 #include "videoprocessor.h"
-#include <list>
+#include "Camera.h"
 
 class Segmentor : public FrameProcessor
 {
@@ -58,4 +60,7 @@ private:
 	cv::Point m_i_lr;
 
     cv::Mat m_Mask;     // mask represents table area
+
+	clock_t m_CurrTime;
+	Camera m_Camera;
 };

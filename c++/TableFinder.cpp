@@ -16,11 +16,11 @@ TableFinder::TableFinder(
 {}
 
 //===================================================================================
-cv::Vec2f TableFinder::ImgToTableCoordinate( cv::Point p )
+cv::Point TableFinder::ImgToTableCoordinate( cv::Point p )
 {
-	cv::Vec2f ret;
-	ret[1] = ( p.x - m_Right ) * m_PixToMM;
-	ret[0] = ( m_Bottom - p.y ) * m_PixToMM;
+	cv::Point ret;
+	ret.y = static_cast<int>( ( p.x - m_Right ) * m_PixToMM );
+	ret.x = static_cast<int>( ( m_Bottom - p.y ) * m_PixToMM );
 
 	return ret;
 } // ImgToTableCoordinate
@@ -252,13 +252,13 @@ bool TableFinder::FilterLines(
 	if (edges.size() > 1)
 	{
 		// pick the line that has the longest length
-		float maxSqrLen = 0.0f;
+		unsigned int maxSqrLen = 0;
 		cv::Vec4i tmp;
 		for (int i = 0; i < edges.size(); i++)
 		{
 			cv::Point pt1(edges[i][0], edges[i][1]);
 			cv::Point pt2(edges[i][2], edges[i][3]);
-			float sqrLen = (pt1.x - pt2.x) * (pt1.x - pt2.x) +
+			unsigned int sqrLen = (pt1.x - pt2.x) * (pt1.x - pt2.x) +
 				(pt1.y - pt2.y) * (pt1.y - pt2.y);
 			if (sqrLen > maxSqrLen)
 			{

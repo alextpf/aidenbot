@@ -88,7 +88,7 @@ public:
 	//  |------------------------
 	//  |
 	//  V Y
-	cv::Vec2f ImgToTableCoordinate( cv::Point p);
+	cv::Point ImgToTableCoordinate( cv::Point p);
 
 private:
 

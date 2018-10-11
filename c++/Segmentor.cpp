@@ -13,7 +13,7 @@
 #define WHITE  cv::Scalar(255, 255, 255)
 #define BLACK  cv::Scalar(0,0,0)
 
-#define DEBUG
+//#define DEBUG
 //#define DEBUG_CORNER
 
 //=======================================================================
@@ -78,7 +78,7 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		cv::setMouseCallback( "Input", OnMouse, &m_Corners );
 		while ( m_Corners.size() < 4 )
 		{
-			unsigned m = m_Corners.size();
+			size_t m = m_Corners.size();
 			if ( m > 0 )
 			{
 				cv::circle( input, m_Corners[m - 1], 3, GREEN, 2 );
@@ -292,7 +292,8 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 
 		m_TableFound = true;
 	}
-	//else
+	
+	if ( m_TableFound )
 	{
 		// find puck and robot position
 		// 1. find puck
@@ -304,8 +305,13 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 			contours, center, input, m_Mask	);
 
 		// robot strategy
-		cv::Vec2f puckPos = m_TableFinder.ImgToTableCoordinate( center ); // mm, in table coordinate
+		cv::Point puckPos = m_TableFinder.ImgToTableCoordinate( center ); // mm, in table coordinate
+		
+		m_Camera.SetCurrPuckPos( puckPos );
+		clock_t curr = clock();
 
+		int dt = static_cast<int>( ( curr - m_CurrTime ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
+		m_Camera.CamProcess( dt );
 	}
 
 	//

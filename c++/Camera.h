@@ -77,7 +77,7 @@ private:
 	int				m_PredictBounceStatus; //
 
 	// Time
-	int				m_PredictTime;
+	int				m_PredictTimeDefence;
 	int				m_PredictTimeAttack;
 
 	/////////////////////////////

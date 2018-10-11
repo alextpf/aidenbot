@@ -1,4 +1,7 @@
 #include "PuckFinder.h"
+
+#define DEBUG
+
 //===================================================================================
 bool PuckFinder::FindPuck( 
 	Contours& contours, 
@@ -66,7 +69,7 @@ bool PuckFinder::FindPuck(
 		// 1. test area
 		double area = cv::contourArea( tmpContours[i] );
 		double areaLow = 400.0;
-		double areaHigh = 450.0;
+		double areaHigh = 500.0;
 		if ( area > areaLow && area < areaHigh )
 		{
 			// 2. test roundness
