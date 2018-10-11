@@ -101,7 +101,7 @@ void Camera::CamProcess( int dt /*ms*/ )
   cv::Point posDif = m_CurrPuckPos - m_PrevPuckPos;
 
   m_PrevPuckSpeed = m_CurrPuckSpeed; // update old speed
-  m_CurrPuckSpeed = posDif * 100 / dt; // speed in dm/ms (we use this units to not overflow the variable)
+  m_CurrPuckSpeed = static_cast<cv::Point2f>( posDif * 100 ) / dt; // speed in dm/ms (we use this units to not overflow the variable)
 
   // Noise detection, if there are a big speeds this should be noise
   if ( m_CurrPuckSpeed.x < -1000 ||

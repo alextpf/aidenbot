@@ -3,8 +3,8 @@
 #define DEBUG
 
 //===================================================================================
-bool PuckFinder::FindPuck( 
-	Contours& contours, 
+bool PuckFinder::FindPuck(
+	Contours& contours,
 	cv::Point& pt,
 	const cv::Mat & input,
 	const cv::Mat& mask	)
@@ -69,7 +69,7 @@ bool PuckFinder::FindPuck(
 		// 1. test area
 		double area = cv::contourArea( tmpContours[i] );
 		double areaLow = 400.0;
-		double areaHigh = 500.0;
+		double areaHigh = 520.0;
 		if ( area > areaLow && area < areaHigh )
 		{
 			// 2. test roundness
@@ -79,7 +79,12 @@ bool PuckFinder::FindPuck(
 			if ( roundness < 20.0 && roundness > 0.05 )
 			{
 				// survived
-				//cv::drawContours( output, contours, i, BLUE, 2, 8, hierarchy, 0, cv::Point() );
+
+#ifdef DEBUG
+                cv::Mat img = cv::Mat::zeros( input.size(), CV_8U );
+                cv::drawContours( img, tmpContours, i, cv::Scalar( 255 ), 2, 8, hierarchy, 0, cv::Point() );
+                cv::imshow( "puck", img );
+#endif // DEBUG
 				contours.push_back( tmpContours[i] );
 			}
 		}

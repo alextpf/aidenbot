@@ -6,12 +6,12 @@
 #include <opencv2/video.hpp>
 #include <opencv2/imgproc.hpp>
 
-//#include "E:\alex\Air Hockey Robot\aidenbot\aidenbot2\c++\VideoProcessor.h"
-//#include "E:\alex\Air Hockey Robot\aidenbot\aidenbot2\c++\Segmentor.h"
-//#include "E:\alex\Air Hockey Robot\aidenbot\aidenbot2\c++\CheckHSV.h"
-#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\VideoProcessor.h"
-#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\Segmentor.h"
-#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\CheckHSV.h"
+#include "E:\alex\Air Hockey Robot\aidenbot\aidenbot2\c++\VideoProcessor.h"
+#include "E:\alex\Air Hockey Robot\aidenbot\aidenbot2\c++\Segmentor.h"
+#include "E:\alex\Air Hockey Robot\aidenbot\aidenbot2\c++\CheckHSV.h"
+//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\VideoProcessor.h"
+//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\Segmentor.h"
+//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\CheckHSV.h"
 
 using namespace cv;
 using namespace std;
@@ -30,15 +30,16 @@ int main()
 	// variables
 	//////////////////
 
-	//char path[] = "E:/alex/Air Hockey Robot/aidenbot/aidenbot2/data/";
-	char path[] = "c:/tmp/";
+	char path[] = "E:/alex/Air Hockey Robot/aidenbot/aidenbot2/data/";
+	//char path[] = "c:/tmp/";
 	char filename[] = "vid2";
 
 	// note: 213 - 380 good samples
+    // 452 - 507 samples for attack
 	//int num =  755; //249;
 	//int startFrame =  754;//248;// frame number we want to start at
-	int num = 215;
-	int startFrame = 213;// frame number we want to start at
+	int num = 456;
+	int startFrame = 452;// frame number we want to start at
 	//int num = 184;
 	//int startFrame = 183;// frame number we want to start at
 	//char inputMode[] = "";

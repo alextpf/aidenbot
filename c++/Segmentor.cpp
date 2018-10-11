@@ -63,7 +63,7 @@ void Segmentor::OnMouse(int event, int x, int y, int f, void* data)
 void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 {
 	output = input.clone();
-	
+
 	// find table range
 	if (!m_TableFound)
 	{
@@ -292,7 +292,7 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 
 		m_TableFound = true;
 	}
-	
+
 	if ( m_TableFound )
 	{
 		// find puck and robot position
@@ -304,24 +304,28 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		const bool success = puckFinder.FindPuck(
 			contours, center, input, m_Mask	);
 
-		// robot strategy
+        if( !success )
+        {
+            std::cout << "can't find puck" << std::endl;
+            return;
+        }
+
+        // robot strategy
 		cv::Point puckPos = m_TableFinder.ImgToTableCoordinate( center ); // mm, in table coordinate
-		
+
 		m_Camera.SetCurrPuckPos( puckPos );
 		clock_t curr = clock();
 
 		int dt = static_cast<int>( ( curr - m_CurrTime ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
-		
-		m_CurrTime = curr;
 
-		if ( dt < 10000 )
+        // skip processing if 1st frame
+		if ( /*dt < 2000 &&*/ m_CurrTime > 0)
 		{
-
 			m_Camera.CamProcess( dt );
 		}
 
+        m_CurrTime = curr;
 		m_Camera.SetPrevPuckPos( puckPos );
-
 	}
 
 	//
