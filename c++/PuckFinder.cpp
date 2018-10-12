@@ -21,7 +21,7 @@ bool PuckFinder::FindPuck(
 	const int OrangeLowerH = 0;
 	const int OrangeUpperH = 20;
 
-	const int lowerS = 160;
+	const int lowerS = 110;
 	const int upperS = 255;
 
 	const int lowerV = 110;
@@ -68,8 +68,8 @@ bool PuckFinder::FindPuck(
 	{
 		// 1. test area
 		double area = cv::contourArea( tmpContours[i] );
-		double areaLow = 400.0;
-		double areaHigh = 520.0;
+		double areaLow = 500.0;
+		double areaHigh = 850.0;
 		if ( area > areaLow && area < areaHigh )
 		{
 			// 2. test roundness

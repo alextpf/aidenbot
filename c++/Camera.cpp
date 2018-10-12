@@ -47,7 +47,7 @@ int Camera::GetNumPredictBounce()
 }
 
 //=========================================================
-int Camera::GetPredictTime() const
+int Camera::GetPredictTimeDefence() const
 {
 	return m_PredictTimeDefence;
 }

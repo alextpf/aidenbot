@@ -26,7 +26,7 @@ public:
 
 	int GetNumPredictBounce();
 
-	int GetPredictTime() const;
+	int GetPredictTimeDefence() const;
 
 	int GetPredictTimeAttack() const;
 
