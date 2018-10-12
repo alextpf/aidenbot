@@ -65,8 +65,8 @@ private:
 	cv::Point2f		m_PrevPuckSpeed;      // previous speed. dm/ms
 	cv::Point2f		m_AverageSpeed;
 
-	// 0 : No risk, 
-	// 1 : Puck is moving to our field directly, 
+	// 0 : No risk,
+	// 1 : Puck is moving to our field directly, with no bounce
 	// 2 : Puck is moving to our field with a bounce
 	// 3 : ?
 	// -1 : error: noise
@@ -82,7 +82,7 @@ private:
 
 	/////////////////////////////
 	// Robot
-	/////////////////////////////  
+	/////////////////////////////
 	cv::Point		m_RobotPos;        // robot pos captured by camera. mm
 
 };// Camera
