@@ -1,5 +1,5 @@
 #include "Segmentor.h"
-#include "PuckFinder.h"
+#include "DiskFinder.h"
 #include "Utility.h"
 
 #define PI							3.1415926
@@ -297,12 +297,19 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 	{
 		// find puck and robot position
 		// 1. find puck
-		PuckFinder puckFinder;
+		DiskFinder diskFinder;
 		Contours contours;
 		cv::Point center;
 
-		const bool success = puckFinder.FindPuck(
-			contours, center, input, m_Mask	);
+
+		// convert RGB to HSV
+		cv::Mat hsvImg;
+		cv::cvtColor( input, hsvImg, CV_BGR2HSV );
+		cv::Vec6i redThresh( 160, 110, 110, 179, 255, 220 ); // lowH, lowS, lowV, highH, highS, highV
+		cv::Vec6i orangeThresh( 0, 110, 110, 20, 255, 220 ); // lowH, lowS, lowV, highH, highS, highV
+		
+		const bool success = diskFinder.FindDisk2Thresh(
+			contours, center, hsvImg, redThresh, orangeThresh, m_Mask );
 
         if( !success )
         {
