@@ -34,12 +34,12 @@ public:
   //   3: Attack mode
   //   4: ?? REMOVE ??
   //   5: Manual mode => User send direct commands to robot
-  //void RobotStrategy( Camera& cam );
+  void RobotStrategy( Camera& cam );
   
   //====================================================================================================================
   // This function returns true if the puck is behind the robot and 
   // there are posibilities of an auto goal when the robots moves back
-  //bool CheckOwnGoal( const Camera& cam );
+  bool CheckOwnGoal( const Camera& cam );
   
 private:
   // 0: Init

@@ -10,6 +10,7 @@
 #include "TableFinder.h"
 #include "videoprocessor.h"
 #include "Camera.h"
+#include "Robot.h"
 
 class Segmentor : public FrameProcessor
 {
@@ -59,8 +60,9 @@ private:
 	cv::Point m_i_ll;
 	cv::Point m_i_lr;
 
-    cv::Mat m_Mask;     // mask represents table area
+    cv::Mat		m_Mask;     // mask represents table area
 
-	clock_t m_CurrTime;
-	Camera m_Camera;
+	clock_t		m_CurrTime;
+	Camera		m_Camera;
+	Robot		m_Robot;
 };

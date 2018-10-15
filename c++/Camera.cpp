@@ -95,6 +95,18 @@ void Camera::SetCurrPredictPos( const cv::Point& pos )
 }
 
 //=========================================================
+void Camera::SetRobotPos( const cv::Point& pos )
+{
+	m_RobotPos = pos;
+}
+
+//=========================================================
+cv::Point Camera::GetRobotPos() const
+{
+	return m_RobotPos;
+}
+
+//=========================================================
 void Camera::CamProcess( int dt /*ms*/ )
 {
     // Speed calculation on each axis

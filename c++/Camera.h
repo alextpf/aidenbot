@@ -44,6 +44,9 @@ public:
 
 	int GetPredictXAttack();
 
+	void SetRobotPos(const cv::Point& pos);
+	cv::Point GetRobotPos() const;
+
 private:
 	/////////////////////////////
 	// Puck

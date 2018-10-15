@@ -301,7 +301,6 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		Contours contours;
 		cv::Point center;
 
-
 		// convert RGB to HSV
 		cv::Mat hsvImg;
 		cv::cvtColor( input, hsvImg, CV_BGR2HSV );
@@ -329,6 +328,7 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 		if ( /*dt < 2000 &&*/ m_CurrTime > 0)
 		{
 			m_Camera.CamProcess( dt );
+			m_Robot.NewDataStrategy( m_Camera );
 		}
 
         m_CurrTime = curr;
