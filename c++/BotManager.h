@@ -13,11 +13,11 @@
 #include "Robot.h"
 #include "SerialPort.h"
 
-class Segmentor : public FrameProcessor
+class BotManager : public FrameProcessor
 {
 public:
-	Segmentor();
-	~Segmentor() {}
+	BotManager();
+	~BotManager() {}
 
 	void Process(cv::Mat & input, cv::Mat & output) override;
 

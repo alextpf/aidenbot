@@ -1,4 +1,4 @@
-#include "Segmentor.h"
+#include "BotManager.h"
 #include "DiskFinder.h"
 #include "Utility.h"
 
@@ -45,14 +45,14 @@ std::string type2str(int type)
 }//std::string type2str(int type)
 
 //=======================================================================
-Segmentor::Segmentor()
+BotManager::BotManager()
 : m_TableFound( false )
 , m_BandWidth( 0 )
 , m_SerialPort( PORT )
 {}
 
 //=======================================================================
-void Segmentor::OnMouse(int event, int x, int y, int f, void* data)
+void BotManager::OnMouse(int event, int x, int y, int f, void* data)
 {
 	std::vector<cv::Point> *curobj = reinterpret_cast<std::vector<cv::Point>*>(data);
 
@@ -63,7 +63,7 @@ void Segmentor::OnMouse(int event, int x, int y, int f, void* data)
 }
 
 //=======================================================================
-void Segmentor::Process(cv::Mat & input, cv::Mat & output)
+void BotManager::Process(cv::Mat & input, cv::Mat & output)
 {
 	output = input.clone();
 
@@ -299,30 +299,51 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
 	if ( m_TableFound )
 	{
 		// find puck and robot position
-		// 1. find puck
-		DiskFinder diskFinder;
-		Contours contours;
-		cv::Point center;
+        DiskFinder diskFinder;
+        Contours contours;
+        cv::Point center;
 
-		// convert RGB to HSV
-		cv::Mat hsvImg;
-		cv::cvtColor( input, hsvImg, CV_BGR2HSV );
+        // convert RBG to HSV first
+        cv::Mat hsvImg;
+        cv::cvtColor( input, hsvImg, CV_BGR2HSV );
+
+		// 1. find puck
 		cv::Vec6i redThresh( 160, 110, 110, 179, 255, 220 ); // lowH, lowS, lowV, highH, highS, highV
 		cv::Vec6i orangeThresh( 0, 110, 110, 20, 255, 220 ); // lowH, lowS, lowV, highH, highS, highV
-		
-		const bool success = diskFinder.FindDisk2Thresh(
+
+		const bool hasPuck = diskFinder.FindDisk2Thresh(
 			contours, center, hsvImg, redThresh, orangeThresh, m_Mask );
 
-        if( !success )
+        if( !hasPuck )
         {
             std::cout << "can't find puck" << std::endl;
             return;
         }
 
-        // robot strategy
-		cv::Point puckPos = m_TableFinder.ImgToTableCoordinate( center ); // mm, in table coordinate
+        // convert screen coordinate to table coordinate
+		const cv::Point puckPos = m_TableFinder.ImgToTableCoordinate( center ); // mm, in table coordinate
 
 		m_Camera.SetCurrPuckPos( puckPos );
+
+        // 2. find robot
+
+        //cv::Vec6i orangeThresh( 0, 110, 110, 20, 255, 220 ); // lowH, lowS, lowV, highH, highS, highV
+
+        //const bool hasRobot = diskFinder.FindDisk1Thresh(
+        //    contours, center, hsvImg, redThresh, m_Mask );
+
+        //if( !hasRobot )
+        //{
+        //    std::cout << "can't find Robot" << std::endl;
+        //    return;
+        //}
+
+        //// convert screen coordinate to table coordinate
+        //const cv::Point robotPos = m_TableFinder.ImgToTableCoordinate( center ); // mm, in table coordinate
+
+        //m_Camera.SetRobotPos( robotPos );
+
+        // get time stamp
 		clock_t curr = clock();
 
 		int dt = static_cast<int>( ( curr - m_CurrTime ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
@@ -330,19 +351,28 @@ void Segmentor::Process(cv::Mat & input, cv::Mat & output)
         // skip processing if 1st frame
 		if ( /*dt < 2000 &&*/ m_CurrTime > 0)
 		{
+            // do prediction work
 			m_Camera.CamProcess( dt );
+
+            // determine robot strategy
 			m_Robot.NewDataStrategy( m_Camera );
+
+            // determine robot position
+            m_Robot.RobotMoveDecision( m_Camera );
+
+            // send the message by com port over to Arduino
+
 		}
 
+        // update time stamp and puck position
         m_CurrTime = curr;
 		m_Camera.SetPrevPuckPos( puckPos );
 	}
 
-	//
 }//Process
 
 //=======================================================================
-void Segmentor::OrderCorners()
+void BotManager::OrderCorners()
 {
 	if (m_Corners.size() != 4)
 	{
@@ -409,7 +439,7 @@ void Segmentor::OrderCorners()
 }// OrderCorners
 
 //=======================================================================
-void Segmentor::MaskCanny(cv::Mat & img)
+void BotManager::MaskCanny(cv::Mat & img)
 {
     // Generate a band around user-picked 4 corners.
     // This band is wider than the m_BandWidth because

@@ -11,11 +11,18 @@ Robot::Robot()
 	: m_RobotStatus( 0 )
 	, m_AttackTime( 0 )
 	, m_AttackStatus( 0 )
+    , m_Speed( 0 )
 {}
 
 //====================================================================================================================
 Robot::~Robot()
 {}
+
+//====================================================================================================================
+cv::Point Robot::GetRobotPos()
+{
+    return m_RobotPos;
+} // GetRobotPos
 
 //====================================================================================================================
 void Robot::NewDataStrategy( Camera& cam )
@@ -82,29 +89,23 @@ void Robot::NewDataStrategy( Camera& cam )
 } // Robot::NewDataStrategy
 
 //====================================================================================================================
-void Robot::RobotStrategy( Camera& cam )
+void Robot::RobotMoveDecision( Camera& cam )
 {
-	//hBot.SetMaxAbsSpeed( MAX_ABS_SPEED ); // default to max robot speed and accel
-	//hBot.SetMaxAbsAccel( MAX_ABS_ACCEL );
+    m_Speed = MAX_ABS_SPEED;
 
-	int posX, posY;
+    cv::Point robotPos;
+
 	switch ( m_RobotStatus )
 	{
 	case 0: // Go to init position
 	{
-		posY = ROBOT_DEFENSE_POSITION_DEFAULT;
-		posX = ROBOT_CENTER_X;  //center X axis
-		//const int s = MAX_ABS_SPEED * 0.6667; // Return a bit more slowly...
-		//hBot.SetMaxAbsSpeed( s );
-/*
-		if ( CheckOwnGoal( hBot, cam ) )
-		{
-			posX = hBot.GetRobotPos().x;
-			posY = hBot.GetRobotPos().y;
-		}
+		if ( !IsOwnGoal( cam ) )
+        {
+            m_RobotPos.x = ROBOT_CENTER_X;  //center X axis
+            m_RobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
+            m_Speed = MAX_ABS_SPEED * 0.6667; // Return a bit more slowly...
+        }
 
-		hBot.SetPosStraight( posX, posY );
-*/
 		m_AttackTime = 0;
 	}
 	break;
@@ -126,9 +127,8 @@ void Robot::RobotStrategy( Camera& cam )
 
 		cam.SetCurrPredictPos( pos );
 
-		posY = ROBOT_DEFENSE_POSITION_DEFAULT;
-		posX = pos.x;
-		//hBot.SetPosStraight( posX, posY );
+		m_RobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
+        m_RobotPos.x = pos.x;
 
 		m_AttackTime = 0;
 	} // case 1
@@ -138,20 +138,16 @@ void Robot::RobotStrategy( Camera& cam )
 	{
 		if ( cam.GetPredictTimeAttack() < MIN_PREDICT_TIME ) // If time is less than 150ms we start the attack
 		{
-			posY = ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT + PUCK_SIZE * 4; // we need some override
-			posX = cam.GetPredictXAttack();
-
-			// We supose that we start at defense position
-			//com_pos_x = ROBOT_CENTER_X + (((long)(predict_x_attack - ROBOT_CENTER_X) * (com_pos_y - defense_position)) / (attack_position - defense_position));
+            m_RobotPos.y = ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT + PUCK_SIZE * 4; // we need some override
+            m_RobotPos.x = cam.GetPredictXAttack();
 		}
 		else      // Defense position
 		{
-			posY = ROBOT_DEFENSE_POSITION_DEFAULT;
-			posX = cam.GetCurrPredictPos().x;  // predict_x_attack;
+            m_RobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
+            m_RobotPos.x = cam.GetCurrPredictPos().x;  // predict_x_attack;
 
 			m_AttackTime = 0;
 		}
-		//hBot.SetPosStraight( posX, posY );
 	} // case 2
 	break;
 
@@ -161,97 +157,70 @@ void Robot::RobotStrategy( Camera& cam )
 
 		if ( m_AttackTime == 0 )
 		{
-			attackPredictPos = cam.PredictPuckPos( 500 );
+            if( !IsOwnGoal( cam ) )
+            {
+                attackPredictPos = cam.PredictPuckPos( 500 );
 
-			if ( ( attackPredictPos.x > PUCK_SIZE * 3 ) &&
-				 ( attackPredictPos.x < TABLE_WIDTH - PUCK_SIZE * 3 ) &&
-				 ( attackPredictPos.y > PUCK_SIZE * 4 ) &&
-				 ( attackPredictPos.y < ROBOT_CENTER_Y - PUCK_SIZE * 5 ) )
-			{
-				m_AttackTime = clock() + static_cast<clock_t>( 500 * CLOCKS_PER_SEC / 1000.0f );  // Prepare an attack in 500ms
-				//Serial.print( "AM:" );
-				//Serial.print(m_AttackTime);
-				//Serial.print(",");
-				//Serial.print( attackPredictPos.x );
-				//Serial.print( "," );
-				//Serial.println( attackPredictPos.y );
-				//Serial.print(" ");
+                if( ( attackPredictPos.x > PUCK_SIZE * 3 ) &&
+                    ( attackPredictPos.x < TABLE_WIDTH - PUCK_SIZE * 3 ) &&
+                    ( attackPredictPos.y > PUCK_SIZE * 4 ) &&
+                    ( attackPredictPos.y < ROBOT_CENTER_Y - PUCK_SIZE * 5 ) )
+                {
+                    m_AttackTime = clock() + static_cast<clock_t>( 500 * CLOCKS_PER_SEC / 1000.0f );  // Prepare an attack in 500ms
 
-				// Go to pre-attack position
-				posX = attackPredictPos.x;
-				posY = attackPredictPos.y - PUCK_SIZE * 4;
+                    // Go to pre-attack position
+                    m_RobotPos.x = attackPredictPos.x;
+                    m_RobotPos.y = attackPredictPos.y - PUCK_SIZE * 4;
 
-				const int s = MAX_ABS_SPEED * 0.5;
-				//hBot.SetMaxAbsSpeed( s );
+                    m_Speed = static_cast<int>( MAX_ABS_SPEED * 0.5 );
 
-				m_AttackStatus = 1;
-			}
-			else
-			{
-				m_AttackTime = 0;  // Continue waiting for the right attack moment...
-				m_AttackStatus = 0;
+                    m_AttackStatus = 1;
+                }
+                else
+                {
+                    m_AttackTime = 0;  // Continue waiting for the right attack moment...
+                    m_AttackStatus = 0;
 
-				// And go to defense position
-				posY = ROBOT_DEFENSE_POSITION_DEFAULT;
-				posX = ROBOT_CENTER_X;  //center X axis
-				const int s = MAX_ABS_SPEED * 0.6667; // Return a bit more slowly...
-				//hBot.SetMaxAbsSpeed( s );
-			}
-
-			//if ( CheckOwnGoal( cam ) )
-			//{
-			//	posX = hBot.GetRobotPos().x;
-			//	posY = hBot.GetRobotPos().y;
-			//}
-
-			//hBot.SetPosStraight( posX, posY );
+                    // And go to defense position
+                    m_RobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
+                    m_RobotPos.x = ROBOT_CENTER_X;  //center X axis
+                    m_Speed = static_cast<int>( MAX_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
+                }
+            } // if( !IsOwnGoal( cam ) )
 		}
 		else
 		{
 			if ( m_AttackStatus == 1 )
 			{
-				int impactTime = static_cast<int>( ( m_AttackTime - clock() ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
-				if ( impactTime < 170 )  // less than 150ms to start the attack
-				{
-					// Attack movement
-					attackPredictPos = cam.PredictPuckPos( impactTime );
-					posX = attackPredictPos.x;
-					posY = attackPredictPos.y + PUCK_SIZE * 2;
+                if( !IsOwnGoal( cam ) )
+                {
+                    int impactTime = static_cast<int>( ( m_AttackTime - clock() ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
+                    if( impactTime < 170 )  // less than 150ms to start the attack
+                    {
+                        // Attack movement
+                        attackPredictPos = cam.PredictPuckPos( impactTime );
+                        m_RobotPos.x = attackPredictPos.x;
+                        m_RobotPos.y = attackPredictPos.y + PUCK_SIZE * 2;
 
-					//Serial.print( "ATTACK:" );
-					//Serial.print( posX );
-					//Serial.print( "," );
-					//Serial.println( posY );
+                        m_AttackStatus = 2; // Attacking
+                    }
+                    else  // m_AttackStatus=1 but it´s no time to attack yet
+                    {
+                        // Go to pre-attack position
+                        attackPredictPos = cam.PredictPuckPos( 500 );
 
-					m_AttackStatus = 2; // Attacking
-				}
-				else  // m_AttackStatus=1 but it´s no time to attack yet
-				{
-					// Go to pre-attack position
-					attackPredictPos = cam.PredictPuckPos( 500 );
+                        m_RobotPos.x = attackPredictPos.x;
+                        m_RobotPos.y = attackPredictPos.y - PUCK_SIZE * 4;
 
-					posX = attackPredictPos.x;
-					posY = attackPredictPos.y - PUCK_SIZE * 4;
-
-					const int s = MAX_ABS_SPEED * 0.5;
-					//hBot.SetMaxAbsSpeed( s );
-				}
-/*
-				if ( CheckOwnGoal( hBot, cam ) )
-				{
-					posX = hBot.GetRobotPos().x;
-					posY = hBot.GetRobotPos().y;
-				}
-*/
-				//hBot.SetPosStraight( posX, posY );
-
+                        m_Speed = static_cast<int>( MAX_ABS_SPEED * 0.5 );
+                    }
+                }
 			} // if (m_AttackStatus == 1)
 
 			if ( m_AttackStatus == 2 )
 			{
-
 				int dt = static_cast<int>( ( clock() - m_AttackTime ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
-				
+
 				if ( dt > 80 ) // Attack move is done? => Reset to defense position
 				{
 					//Serial.print( "RESET" );
@@ -268,7 +237,7 @@ void Robot::RobotStrategy( Camera& cam )
 		// Only defense now (we could improve this in future)
 		// Defense mode (only move on X axis on the defense line)
 		cv::Point pos = cam.GetCurrPredictPos();
-		
+
 		const int minX = PUCK_SIZE * 3;
 		const int maxX = TABLE_WIDTH - PUCK_SIZE * 3;
 
@@ -281,12 +250,11 @@ void Robot::RobotStrategy( Camera& cam )
 		{
 			pos.x = maxX;
 		}
-		
+
 		cam.SetCurrPredictPos( pos );
 
-		posY = ROBOT_DEFENSE_POSITION_DEFAULT;
-		posX = pos.x;
-		//hBot.SetPosStraight( posX, posY );
+        m_RobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
+        m_RobotPos.x = pos.x;
 
 		m_AttackTime = 0;
 	}
@@ -305,41 +273,32 @@ void Robot::RobotStrategy( Camera& cam )
 
 	default:
 		// Default : go to defense position
-		posY = ROBOT_DEFENSE_POSITION_DEFAULT;
-		posX = ROBOT_CENTER_X;  //center X axis
-
-		if ( CheckOwnGoal( cam ) )
+		if ( !IsOwnGoal( cam ) )
 		{
-			//posX = hBot.GetRobotPos().x;
-			//posY = hBot.GetRobotPos().y;
+            m_RobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
+            m_RobotPos.x = ROBOT_CENTER_X;  //center X axis
 		}
-
-		//hBot.SetPosStraight( posX, posY );
 
 		m_AttackTime = 0;
 	}// switch
-} // Robot::RobotStrategy
+} // Robot::RobotMoveDecision
 
 //====================================================================================================================
-bool Robot::CheckOwnGoal( const Camera& cam )
+bool Robot::IsOwnGoal( const Camera& cam )
 {
 	const int rotPosY  = cam.GetRobotPos().y;
 	const int puckPosX = cam.GetCurrPuckPos().x;
 	const int puckPosY = cam.GetCurrPuckPos().y;
 
-	if ( rotPosY > ROBOT_DEFENSE_POSITION_DEFAULT + PUCK_SIZE  &&  // robot in front of defence line
+	if ( rotPosY  > ROBOT_DEFENSE_POSITION_DEFAULT + PUCK_SIZE  &&  // robot in front of defence line
     	 puckPosY < rotPosY && // puck behind robot
 		 puckPosX > ROBOT_CENTER_X - PUCK_SIZE * 5 &&     // puck X within table range
 		 puckPosX < ROBOT_CENTER_X + PUCK_SIZE * 5 )
 	{
-		//Serial.print( "Possible Own Goal " );
-		//Serial.print( puckPosX );
-		//Serial.print( " " );
-		//Serial.println( puckPosY );
 		return true;
 	}
 	else
 	{
 		return false;
 	}
-} // CheckOwnGoal
+} // IsOwnGoal
