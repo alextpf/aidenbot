@@ -13,6 +13,8 @@
 #define WHITE  cv::Scalar(255, 255, 255)
 #define BLACK  cv::Scalar(0,0,0)
 
+#define PORT "\\\\.\\COM20"
+
 //#define DEBUG
 //#define DEBUG_CORNER
 
@@ -46,6 +48,7 @@ std::string type2str(int type)
 Segmentor::Segmentor()
 : m_TableFound( false )
 , m_BandWidth( 0 )
+, m_SerialPort( PORT )
 {}
 
 //=======================================================================

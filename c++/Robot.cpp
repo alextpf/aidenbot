@@ -90,7 +90,7 @@ void Robot::RobotStrategy( Camera& cam )
 	int posX, posY;
 	switch ( m_RobotStatus )
 	{
-	case 0: // Go to defense position
+	case 0: // Go to init position
 	{
 		posY = ROBOT_DEFENSE_POSITION_DEFAULT;
 		posX = ROBOT_CENTER_X;  //center X axis
@@ -210,7 +210,7 @@ void Robot::RobotStrategy( Camera& cam )
 		{
 			if ( m_AttackStatus == 1 )
 			{
-				long impactTime = m_AttackTime - millis();
+				int impactTime = static_cast<int>( ( m_AttackTime - clock() ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
 				if ( impactTime < 170 )  // less than 150ms to start the attack
 				{
 					// Attack movement
@@ -249,7 +249,10 @@ void Robot::RobotStrategy( Camera& cam )
 
 			if ( m_AttackStatus == 2 )
 			{
-				if ( millis() > ( m_AttackTime + 80 ) ) // Attack move is done? => Reset to defense position
+
+				int dt = static_cast<int>( ( clock() - m_AttackTime ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
+				
+				if ( dt > 80 ) // Attack move is done? => Reset to defense position
 				{
 					//Serial.print( "RESET" );
 					m_AttackTime = 0;
