@@ -67,7 +67,7 @@ SerialPort::~SerialPort()
 	}
 } // SerialPort::~SerialPort()
 
-int SerialPort::ReadSerialPort( char *buffer, unsigned int buf_size )
+int SerialPort::ReadSerialPort( BYTE *buffer, unsigned int buf_size )
 {
 	DWORD bytesRead;
 	unsigned int toRead = 0;
@@ -94,7 +94,7 @@ int SerialPort::ReadSerialPort( char *buffer, unsigned int buf_size )
 	return 0;
 } // ReadSerialPort
 
-bool SerialPort::WriteSerialPort( char *buffer, unsigned int buf_size )
+bool SerialPort::WriteSerialPort( BYTE *buffer, unsigned int buf_size )
 {
 	DWORD bytesSend;
 

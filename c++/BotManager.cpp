@@ -361,7 +361,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
             m_Robot.RobotMoveDecision( m_Camera );
 
             // send the message by com port over to Arduino
-
+            SendMessage();
 		}
 
         // update time stamp and puck position
@@ -370,6 +370,45 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 	}
 
 }//Process
+
+//=======================================================================
+void SendMessage()
+{
+	BYTE message[12];
+
+	// Initial sync "AA"
+	message[0] = 0x41;
+	message[1] = 0x41;
+
+	// table size is 1003 x 597, which is within 2 bytes (2^16 = 65536, 2^8 = 256)
+	// so we use 2 bytes to store position. Similarly for speed
+
+	// desired robot pos
+	cv::Point desiredBotPos = m_Robot.GetDesiredRobotPos();
+
+	// Pos X (high byte, low byte)
+	message[2] = ( desiredBotPos.x >> 8 ) & 0xFF;
+	message[3] = desiredBotPos.x & 0xFF;
+
+	// Pos Y (high byte, low byte)
+	message[4] = ( desiredBotPos.y >> 8 ) & 0xFF;
+	message[5] = desiredBotPos.y & 0xFF;
+
+	// detected robot pos
+	cv::Point detectedBotPos = m_Camera.GetRobotPos();
+	message[6] = ( detectedBotPos.x >> 8 ) & 0xFF;
+	message[7] = detectedBotPos.x & 0xFF;
+
+	// Pos Y (high byte, low byte)
+	message[8] = ( detectedBotPos.y >> 8 ) & 0xFF;
+	message[9] = detectedBotPos.y & 0xFF;
+
+	// speed
+	int speed = m_Robot.GetDesiredRobotSpeed();
+	message[10] = ( speed >> 8 ) & 0xFF;
+	message[11] = speed & 0xFF;
+
+} // SendMessage
 
 //=======================================================================
 void BotManager::OrderCorners()

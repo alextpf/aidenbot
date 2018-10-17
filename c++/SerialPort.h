@@ -2,7 +2,6 @@
 // Original Author: Manash Kumar Mandal
 // Modified by Alex Chen
 ////////////////////////////////////////////
-
 #pragma once
 
 #define ARDUINO_WAIT_TIME 2000
@@ -19,8 +18,8 @@ public:
     SerialPort(char *portName);
     ~SerialPort();
 
-    int		ReadSerialPort(char *buffer, unsigned int buf_size);
-    bool	WriteSerialPort(char *buffer, unsigned int buf_size);
+    int		ReadSerialPort(BYTE *buffer, unsigned int buf_size);
+    bool	WriteSerialPort(BYTE *buffer, unsigned int buf_size);
     bool	IsConnected();
 
 private:

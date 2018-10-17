@@ -11,7 +11,7 @@ Robot::Robot()
 	: m_RobotStatus( 0 )
 	, m_AttackTime( 0 )
 	, m_AttackStatus( 0 )
-    , m_Speed( 0 )
+    , m_DesiredSpeed( 0 )
 {}
 
 //====================================================================================================================
@@ -19,10 +19,16 @@ Robot::~Robot()
 {}
 
 //====================================================================================================================
-cv::Point Robot::GetRobotPos()
+int Robot::GetDesiredRobotSpeed()
 {
-    return m_RobotPos;
-} // GetRobotPos
+	return m_DesiredSpeed;
+}
+
+//====================================================================================================================
+cv::Point Robot::GetDesiredRobotPos()
+{
+    return m_DesiredRobotPos;
+} // GetDesiredRobotPos
 
 //====================================================================================================================
 void Robot::NewDataStrategy( Camera& cam )
@@ -91,7 +97,7 @@ void Robot::NewDataStrategy( Camera& cam )
 //====================================================================================================================
 void Robot::RobotMoveDecision( Camera& cam )
 {
-    m_Speed = MAX_ABS_SPEED;
+    m_DesiredSpeed = MAX_ABS_SPEED;
 
     cv::Point robotPos;
 
@@ -101,9 +107,9 @@ void Robot::RobotMoveDecision( Camera& cam )
 	{
 		if ( !IsOwnGoal( cam ) )
         {
-            m_RobotPos.x = ROBOT_CENTER_X;  //center X axis
-            m_RobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
-            m_Speed = MAX_ABS_SPEED * 0.6667; // Return a bit more slowly...
+            m_DesiredRobotPos.x = ROBOT_CENTER_X;  //center X axis
+            m_DesiredRobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
+            m_DesiredSpeed = MAX_ABS_SPEED * 0.6667; // Return a bit more slowly...
         }
 
 		m_AttackTime = 0;
@@ -127,8 +133,8 @@ void Robot::RobotMoveDecision( Camera& cam )
 
 		cam.SetCurrPredictPos( pos );
 
-		m_RobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
-        m_RobotPos.x = pos.x;
+		m_DesiredRobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
+        m_DesiredRobotPos.x = pos.x;
 
 		m_AttackTime = 0;
 	} // case 1
@@ -138,13 +144,13 @@ void Robot::RobotMoveDecision( Camera& cam )
 	{
 		if ( cam.GetPredictTimeAttack() < MIN_PREDICT_TIME ) // If time is less than 150ms we start the attack
 		{
-            m_RobotPos.y = ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT + PUCK_SIZE * 4; // we need some override
-            m_RobotPos.x = cam.GetPredictXAttack();
+            m_DesiredRobotPos.y = ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT + PUCK_SIZE * 4; // we need some override
+            m_DesiredRobotPos.x = cam.GetPredictXAttack();
 		}
 		else      // Defense position
 		{
-            m_RobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
-            m_RobotPos.x = cam.GetCurrPredictPos().x;  // predict_x_attack;
+            m_DesiredRobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
+            m_DesiredRobotPos.x = cam.GetCurrPredictPos().x;  // predict_x_attack;
 
 			m_AttackTime = 0;
 		}
@@ -169,10 +175,10 @@ void Robot::RobotMoveDecision( Camera& cam )
                     m_AttackTime = clock() + static_cast<clock_t>( 500 * CLOCKS_PER_SEC / 1000.0f );  // Prepare an attack in 500ms
 
                     // Go to pre-attack position
-                    m_RobotPos.x = attackPredictPos.x;
-                    m_RobotPos.y = attackPredictPos.y - PUCK_SIZE * 4;
+                    m_DesiredRobotPos.x = attackPredictPos.x;
+                    m_DesiredRobotPos.y = attackPredictPos.y - PUCK_SIZE * 4;
 
-                    m_Speed = static_cast<int>( MAX_ABS_SPEED * 0.5 );
+                    m_DesiredSpeed = static_cast<int>( MAX_ABS_SPEED * 0.5 );
 
                     m_AttackStatus = 1;
                 }
@@ -182,9 +188,9 @@ void Robot::RobotMoveDecision( Camera& cam )
                     m_AttackStatus = 0;
 
                     // And go to defense position
-                    m_RobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
-                    m_RobotPos.x = ROBOT_CENTER_X;  //center X axis
-                    m_Speed = static_cast<int>( MAX_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
+                    m_DesiredRobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
+                    m_DesiredRobotPos.x = ROBOT_CENTER_X;  //center X axis
+                    m_DesiredSpeed = static_cast<int>( MAX_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
                 }
             } // if( !IsOwnGoal( cam ) )
 		}
@@ -199,8 +205,8 @@ void Robot::RobotMoveDecision( Camera& cam )
                     {
                         // Attack movement
                         attackPredictPos = cam.PredictPuckPos( impactTime );
-                        m_RobotPos.x = attackPredictPos.x;
-                        m_RobotPos.y = attackPredictPos.y + PUCK_SIZE * 2;
+                        m_DesiredRobotPos.x = attackPredictPos.x;
+                        m_DesiredRobotPos.y = attackPredictPos.y + PUCK_SIZE * 2;
 
                         m_AttackStatus = 2; // Attacking
                     }
@@ -209,10 +215,10 @@ void Robot::RobotMoveDecision( Camera& cam )
                         // Go to pre-attack position
                         attackPredictPos = cam.PredictPuckPos( 500 );
 
-                        m_RobotPos.x = attackPredictPos.x;
-                        m_RobotPos.y = attackPredictPos.y - PUCK_SIZE * 4;
+                        m_DesiredRobotPos.x = attackPredictPos.x;
+                        m_DesiredRobotPos.y = attackPredictPos.y - PUCK_SIZE * 4;
 
-                        m_Speed = static_cast<int>( MAX_ABS_SPEED * 0.5 );
+                        m_DesiredSpeed = static_cast<int>( MAX_ABS_SPEED * 0.5 );
                     }
                 }
 			} // if (m_AttackStatus == 1)
@@ -253,8 +259,8 @@ void Robot::RobotMoveDecision( Camera& cam )
 
 		cam.SetCurrPredictPos( pos );
 
-        m_RobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
-        m_RobotPos.x = pos.x;
+        m_DesiredRobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
+        m_DesiredRobotPos.x = pos.x;
 
 		m_AttackTime = 0;
 	}
@@ -275,8 +281,8 @@ void Robot::RobotMoveDecision( Camera& cam )
 		// Default : go to defense position
 		if ( !IsOwnGoal( cam ) )
 		{
-            m_RobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
-            m_RobotPos.x = ROBOT_CENTER_X;  //center X axis
+            m_DesiredRobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
+            m_DesiredRobotPos.x = ROBOT_CENTER_X;  //center X axis
 		}
 
 		m_AttackTime = 0;
@@ -286,7 +292,7 @@ void Robot::RobotMoveDecision( Camera& cam )
 //====================================================================================================================
 bool Robot::IsOwnGoal( const Camera& cam )
 {
-	const int rotPosY  = cam.GetRobotPos().y;
+	const int rotPosY  = cam.GetDesiredRobotPos().y;
 	const int puckPosX = cam.GetCurrPuckPos().x;
 	const int puckPosY = cam.GetCurrPuckPos().y;
 

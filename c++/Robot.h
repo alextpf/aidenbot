@@ -41,19 +41,21 @@ public:
   // there are posibilities of an auto goal when the robots moves back
   bool IsOwnGoal( const Camera& cam );
 
-  cv::Point GetRobotPos();
+  cv::Point GetDesiredRobotPos();
 
+  int GetDesiredRobotSpeed();
+  
 private:
   // 0: Init
   // 1: Defense
   // 2: Defense+Atack
   // 3: Atack
   unsigned int		m_RobotStatus;
-  clock_t			m_AttackTime;
+  clock_t			    m_AttackTime;
   unsigned int		m_AttackStatus;
 
-  cv::Point			m_RobotPos;
+  cv::Point			  m_DesiredRobotPos;
 
   // robot speed in steps/seg
-  int               m_Speed;
+  int             m_DesiredSpeed;
 }; // Robot
