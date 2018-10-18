@@ -1,52 +1,54 @@
 #include "PacketReader.h"
 
+//==========================================================================
+PacketReader::PacketReader()
+    : m_MsgFullyRead( false )
+    , m_ReadCounter( 0 )
+{}
+
+//==========================================================================
 void PacketReader::ReadPacket()
 {
-  char SBuffer[12];
-  
-  if (Serial.available() > 0) 
-  {
-    //Serial.println("P");
-    // We rotate the Buffer (we could implement a ring buffer in future)
-    for (int i=11;i>0;i--)
+    if( Serial.available() > 0 )
     {
-      SBuffer[i] = SBuffer[i-1];
-    }
-
-    SBuffer[0] = Serial.read();
-    //Serial.print(S1Buffer[0]);
-    // We look for a  message start like "AA" to sync packets
-    if ((SBuffer[0] == 'A')&&(SBuffer[1] == 'A'))
-    {
-      if (readStatus == 0)
-      {
-        readStatus=1;
-        readCounter=12;
-      }
-      else
-      {
-        Serial.println("S ERR");
-        readStatus=1;
-        readCounter=12;
-      }
-      return;
-    }
-    else if (readStatus==1)
-    {
-      readCounter--;   // Until we complete the packet
-      if (readCounter<=0)   // packet complete!!
-      {
-        // Extract parameters
-        cam_timestamp = extractParamInt(10);
-        puckPixX = extractParamInt(8);
-        puckPixY = extractParamInt(6);
-        puckSize = extractParamInt(4);
-        robotPixX = extractParamInt(2);
-        robotPixY = extractParamInt(0);  
-        readStatus = 0;
-        newPacket = 1;
         //Serial.println("P");
-      }
+        // We rotate the Buffer (we could implement a ring buffer in future)
+        for( int i = 11; i > 0; i-- )
+        {
+            m_SBuffer[i] = m_SBuffer[i - 1];
+        }
+
+        m_SBuffer[0] = Serial.read();
+        //Serial.print(S1Buffer[0]);
+        // We look for a  message start like "AA" to sync packets
+        if( ( m_SBuffer[0] == 'A' ) && ( m_SBuffer[1] == 'A' ) )
+        {
+            if( !m_MsgFullyRead )
+            {
+                m_MsgFullyRead = true;                
+            }
+            else
+            {
+                Serial.println( "S ERR" );
+            }
+
+            m_ReadCounter = 12;
+
+            return;
+        }
+        else if( m_MsgFullyRead )
+        {
+            m_ReadCounter--;   // Until we complete the packet
+            if( m_ReadCounter <= 0 )   // packet complete!!
+            {
+                // Extract parameters
+                puckPixX = extractParamInt( 8 );
+                puckPixY = extractParamInt( 6 );
+                puckSize = extractParamInt( 4 );
+                robotPixX = extractParamInt( 2 );
+                robotPixY = extractParamInt( 0 );
+                m_MsgFullyRead = false;
+            }
+        }
     }
-  }
 }
