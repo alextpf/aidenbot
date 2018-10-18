@@ -372,8 +372,15 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 }//Process
 
 //=======================================================================
-void SendMessage()
+void BotManager::SendMessage()
 {
+	// message lay out :
+	// 0, 1: for sync use, "AA"
+	// 2, 3: desired robot pos X
+	// 4, 5: desired robot pos Y
+	// 6, 7: detected robot pos X
+	// 8, 9: detected robot pos Y
+	// 10, 11: desired speed
 	BYTE message[12];
 
 	// Initial sync "AA"

@@ -292,7 +292,7 @@ void Robot::RobotMoveDecision( Camera& cam )
 //====================================================================================================================
 bool Robot::IsOwnGoal( const Camera& cam )
 {
-	const int rotPosY  = cam.GetDesiredRobotPos().y;
+	const int rotPosY  = cam.GetRobotPos().y;
 	const int puckPosX = cam.GetCurrPuckPos().x;
 	const int puckPosY = cam.GetCurrPuckPos().y;
 
