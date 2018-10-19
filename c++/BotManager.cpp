@@ -403,6 +403,8 @@ void BotManager::SendMessage()
 
 	// detected robot pos
 	cv::Point detectedBotPos = m_Camera.GetRobotPos();
+
+	// Pos X (high byte, low byte)
 	message[6] = ( detectedBotPos.x >> 8 ) & 0xFF;
 	message[7] = detectedBotPos.x & 0xFF;
 

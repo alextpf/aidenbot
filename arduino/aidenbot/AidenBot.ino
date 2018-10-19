@@ -4,6 +4,7 @@
 //////////////////////////////////////////////////////
 #include "Configuration.h"
 #include "HBot.h"
+#include "PacketReader.h"
 //#include "Camera.h"
 //#include "Robot.h"
 
@@ -12,6 +13,7 @@ long prev_time;
 bool testmode = true;
 //
 HBot hBot;
+PacketReader reader;
 //Camera cam;
 //Robot robot;
 
@@ -84,6 +86,6 @@ void loop()
     }
     
     hBot.Update(); // internally update 
-    
+    reader.ReadPacket();
   }
 }
