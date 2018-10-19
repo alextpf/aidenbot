@@ -109,7 +109,7 @@ void Robot::RobotMoveDecision( Camera& cam )
         {
             m_DesiredRobotPos.x = ROBOT_CENTER_X;  //center X axis
             m_DesiredRobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
-            m_DesiredSpeed = MAX_ABS_SPEED * 0.6667; // Return a bit more slowly...
+            m_DesiredSpeed = static_cast<int>( MAX_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
         }
 
 		m_AttackTime = 0;

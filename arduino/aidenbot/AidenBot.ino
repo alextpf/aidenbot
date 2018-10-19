@@ -17,6 +17,8 @@ PacketReader reader;
 //Camera cam;
 //Robot robot;
 
+#define DEBUG_PACKET_READER
+
 void setup() 
 {
   Serial.begin(BAUD_RATE);
@@ -87,5 +89,7 @@ void loop()
     
     hBot.Update(); // internally update 
     reader.ReadPacket();
+#ifdef DEBUG_PACKET_READER
+#endif    
   }
 }

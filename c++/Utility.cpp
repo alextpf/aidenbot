@@ -12,7 +12,7 @@ float Slope( const cv::Point& p1, const cv::Point& p2 )
 	}
 	else
 	{
-		s = dy / dx;
+        s = static_cast<float>( dy ) / static_cast<float>( dx );
 	}
 	return s;
 }//Slope
@@ -60,7 +60,7 @@ bool Utility::FindLineIntersection(
 	if ( m1 >= 10000 ) // l1 vertical line
 	{
 		intr.x = p1.x;
-		intr.y = m2 * p1.x + t2;
+        intr.y = static_cast<int>( m2 * p1.x + t2 );
 
 		return true;
 	}
@@ -68,13 +68,13 @@ bool Utility::FindLineIntersection(
 	if ( m2 >= 10000 ) // l2 vertical line
 	{
 		intr.x = p3.x;
-		intr.y = m1 * p3.x + t1;
+        intr.y = static_cast<int>( m1 * p3.x + t1 );
 
 		return true;
 	}
 
-	intr.x = ( t2 - t1 ) / ( m1 - m2 );
-	intr.y = ( m1 * t2 + m2 * t1 ) / ( m1 - m2 );
+    intr.x = static_cast<int>( ( t2 - t1 ) / ( m1 - m2 ) );
+    intr.y = static_cast<int>( ( m1 * t2 + m2 * t1 ) / ( m1 - m2 ) );
 
 	return true;
 	
