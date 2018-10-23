@@ -18,8 +18,11 @@ public:
     SerialPort(char *portName);
     ~SerialPort();
 
-    int		ReadSerialPort(BYTE *buffer, unsigned int buf_size);
-    bool	WriteSerialPort(BYTE *buffer, unsigned int buf_size);
+    template <typename TYPE>
+    int		ReadSerialPort( TYPE *buffer, unsigned int buf_size );
+
+    template <typename TYPE>
+    bool	WriteSerialPort( TYPE *buffer, unsigned int buf_size );
     bool	IsConnected();
 
 private:

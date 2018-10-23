@@ -58,6 +58,7 @@ SerialPort::SerialPort(char *portName)
 	}
 } // SerialPort::SerialPort(char *portName)
 
+//=======================================================================
 SerialPort::~SerialPort()
 {
 	if ( m_Connected )
@@ -67,7 +68,9 @@ SerialPort::~SerialPort()
 	}
 } // SerialPort::~SerialPort()
 
-int SerialPort::ReadSerialPort( BYTE *buffer, unsigned int buf_size )
+//=======================================================================
+template <typename TYPE>
+int SerialPort::ReadSerialPort( TYPE *buffer, unsigned int buf_size )
 {
 	DWORD bytesRead;
 	unsigned int toRead = 0;
@@ -94,7 +97,9 @@ int SerialPort::ReadSerialPort( BYTE *buffer, unsigned int buf_size )
 	return 0;
 } // ReadSerialPort
 
-bool SerialPort::WriteSerialPort( BYTE *buffer, unsigned int buf_size )
+//=======================================================================
+template <typename TYPE>
+bool SerialPort::WriteSerialPort( TYPE *buffer, unsigned int buf_size )
 {
 	DWORD bytesSend;
 
@@ -108,7 +113,14 @@ bool SerialPort::WriteSerialPort( BYTE *buffer, unsigned int buf_size )
 
 } // WriteSerialPort
 
+//=======================================================================
 bool SerialPort::IsConnected()
 {
 	return m_Connected;
 }
+
+template bool SerialPort::WriteSerialPort<BYTE>( BYTE *buffer, unsigned int buf_size );
+template bool SerialPort::WriteSerialPort<char>( char *buffer, unsigned int buf_size );
+
+template int SerialPort::ReadSerialPort<BYTE>( BYTE *buffer, unsigned int buf_size );
+template int SerialPort::ReadSerialPort<char>( char *buffer, unsigned int buf_size );

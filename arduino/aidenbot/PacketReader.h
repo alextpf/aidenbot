@@ -17,8 +17,23 @@ class PacketReader
 public:
     PacketReader();
 
-    void ReadPacket();
-    uint16_t ExtractParamInt(uint8_t pos);
+    void      ReadPacket();
+    uint16_t  ExtractParamInt(uint8_t pos);
+    
+    RobotPos  GetDesiredBotPos()
+    {
+      return m_DesiredBotPos;
+    }
+    
+    RobotPos  GetDetectedBotPos()
+    {
+      return m_DetectedBotPos;
+    }
+    
+    int       GetDesiredMotorSpeed()
+    {
+      return m_DesiredMotorSpeed;
+    }
     
 private:
 

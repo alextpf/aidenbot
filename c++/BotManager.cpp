@@ -17,6 +17,7 @@
 
 //#define DEBUG
 //#define DEBUG_CORNER
+#define DEBUG_SERIAL
 
 //=======================================================================
 // helper function to show type
@@ -362,6 +363,10 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 
             // send the message by com port over to Arduino
             SendMessage();
+#ifdef DEBUG_SERIAL
+            ReceiveMessage();
+#endif // DEBUG
+
 		}
 
         // update time stamp and puck position
@@ -417,7 +422,18 @@ void BotManager::SendMessage()
 	message[10] = ( speed >> 8 ) & 0xFF;
 	message[11] = speed & 0xFF;
 
+    m_SerialPort.WriteSerialPort<BYTE>( message, 12 );
 } // SendMessage
+
+//=======================================================================
+void BotManager::ReceiveMessage()
+{
+    char msg[200];
+
+    int res = m_SerialPort.ReadSerialPort<char>( msg, 200 );
+    std::cout << msg << std::endl;
+
+} // ReceiveMessage
 
 //=======================================================================
 void BotManager::OrderCorners()

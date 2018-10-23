@@ -67,4 +67,4 @@ uint16_t PacketReader::ExtractParamInt(uint8_t pos)
   u.Buff[0] = (unsigned char)m_SBuffer[pos];
   u.Buff[1] = (unsigned char)m_SBuffer[pos+1];
   return(u.d); 
-}
+} // ExtractParamInt

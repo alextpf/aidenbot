@@ -38,6 +38,9 @@ private:
 	// send the message to Arduino over com port
 	void SendMessage();
 
+    // send the message to Arduino over com port
+    void ReceiveMessage(); // debug tuse
+
 	// find ul, ur, ll, lr corners of user input
 	void OrderCorners();
 

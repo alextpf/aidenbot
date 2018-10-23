@@ -90,6 +90,16 @@ void loop()
     hBot.Update(); // internally update 
     reader.ReadPacket();
 #ifdef DEBUG_PACKET_READER
-#endif    
-  }
+    Serial.println( "Desired bot pos = " );
+    Serial.println( reader.GetDesiredBotPos().m_X );
+    Serial.println( reader.GetDesiredBotPos().m_Y );
+
+    Serial.println( "Detected bot pos = " );
+    Serial.println( reader.GetDetectedBotPos().m_X );
+    Serial.println( reader.GetDetectedBotPos().m_Y );
+
+    Serial.println( "Desired Motor Speed = " );
+    Serial.println( reader.GetDesiredMotorSpeed() );
+#endif
+  
 }
