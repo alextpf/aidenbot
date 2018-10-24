@@ -23,3 +23,17 @@ $(OPENCV_DIR)\lib
 opencv_world343d.lib
 
 OPENCV_DIR = C:\opencv343\build\x64\vc14
+=======================================================
+Calibrate extruder (3d printer)
+1. draw 150 mm mark on filament
+2. use command:
+
+G92E0
+G1E100F90
+
+3. 
+new step = old step * 100 / actual extruded length
+
+100/4*150
+
+change DEFAULT_AXIS_STEPS_PER_UNIT, 4th argument
