@@ -12,7 +12,6 @@ void SetPINS()
   pinMode(Y_DIR_PIN, OUTPUT);
   pinMode(Y_ENABLE_PIN, OUTPUT);
 } //SetPINS
-
 //================================================================
 void SetTimerInterrupt()
 {  
@@ -189,3 +188,4 @@ void testMovements()
   }
   
 }
+

@@ -17,7 +17,7 @@ PacketReader reader;
 //Camera cam;
 //Robot robot;
 
-#define DEBUG_PACKET_READER
+//#define DEBUG_PACKET_READER
 
 void setup() 
 {
@@ -88,7 +88,7 @@ void loop()
     }
     
     hBot.Update(); // internally update 
-    reader.ReadPacket();
+    // reader.ReadPacket();
 #ifdef DEBUG_PACKET_READER
     Serial.println( "Desired bot pos = " );
     Serial.println( reader.GetDesiredBotPos().m_X );
@@ -101,5 +101,5 @@ void loop()
     Serial.println( "Desired Motor Speed = " );
     Serial.println( reader.GetDesiredMotorSpeed() );
 #endif
-  
+  } 
 }
