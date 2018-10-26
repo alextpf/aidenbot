@@ -6,12 +6,12 @@
 #include <opencv2/video.hpp>
 #include <opencv2/imgproc.hpp>
 
-#include "E:\alex\aidenbot2\c++\VideoProcessor.h"
-#include "E:\alex\aidenbot2\c++\BotManager.h"
-#include "E:\alex\aidenbot2\c++\CheckHSV.h"
-//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\VideoProcessor.h"
-//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\BotManager.h"
-//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\CheckHSV.h"
+//#include "E:\alex\aidenbot2\c++\VideoProcessor.h"
+//#include "E:\alex\aidenbot2\c++\BotManager.h"
+//#include "E:\alex\aidenbot2\c++\CheckHSV.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\VideoProcessor.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\BotManager.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\CheckHSV.h"
 
 using namespace cv;
 using namespace std;
@@ -26,21 +26,22 @@ int main()
 	segmentor.SetBandWidth(10);
 
     CheckHSV hsvChecker;
+
 	//////////////////
 	// variables
 	//////////////////
 
-	char path[] = "E:/alex/aidenbot2/data/";
-	//char path[] = "c:/tmp/";
-	char filename[] = "vid2";
+	//char path[] = "E:/alex/aidenbot2/data/";
+	char path[] = "c:/tmp/";
+	char filename[] = "vid";
 
 	// note: 213 - 380 good samples
     // 452 - 507 samples for attack
 	// 653 - 700
 	//int num =  755; //249;
 	//int startFrame =  754;//248;// frame number we want to start at
-	int num = 836;
-	int startFrame = 708;// frame number we want to start at
+	int num = 719;
+	int startFrame = 716;// frame number we want to start at
 	//int num = 184;
 	//int startFrame = 183;// frame number we want to start at
 	//char inputMode[] = "";
@@ -61,7 +62,8 @@ int main()
 	/////////////////
 	float fps = 60.f;
 
-	int delay = static_cast<int>(1000.f / fps);
+	//int delay = static_cast<int>(1000.f / fps);
+	int delay = 1;
 
 	/////////////////////////////////////////////////////
 	// Input
@@ -168,7 +170,7 @@ int main()
 	}
 
 	processor.SetDelay(delay);
-	processor.SetDownSampleRate(3);
+	processor.SetDownSampleRate(1);
 
 	// Start the Process
 	processor.Run();

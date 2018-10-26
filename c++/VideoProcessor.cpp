@@ -1,5 +1,8 @@
 #include "VideoProcessor.h"
 
+#define FRAME_WIDTH 320
+#define FRAME_HEIGHT 640
+
 //=======================================================================
 VideoProcessor::VideoProcessor()
 : m_CallIt( false )
@@ -108,6 +111,9 @@ bool VideoProcessor::SetInput( int id )
     // associated with the VideoCapture instance
     m_Capture.release();
     m_Images.clear();
+
+	m_Capture.set( CV_CAP_PROP_FRAME_WIDTH, FRAME_WIDTH );
+	m_Capture.set( CV_CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT );
 
     // Open the video file
     return m_Capture.open( id );
@@ -342,7 +348,8 @@ bool VideoProcessor::SetFrameNumber( long pos )
     else
     {
         // if input is a m_Capture device
-        return m_Capture.set( CV_CAP_PROP_POS_FRAMES, pos );
+		//return m_Capture.set( CV_CAP_PROP_POS_FRAMES, pos );
+		return true;
     }
 }
 
@@ -425,7 +432,7 @@ void VideoProcessor::Run()
 
             // increment frame number
             m_FNumber++;
-            std::cout << m_FNumber << std::endl;//print the number for debug
+            //std::cout << m_FNumber << std::endl;//print the number for debug
         }
         else
         {

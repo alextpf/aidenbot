@@ -13,7 +13,7 @@
 #define WHITE  cv::Scalar(255, 255, 255)
 #define BLACK  cv::Scalar(0,0,0)
 
-#define PORT "\\\\.\\COM20"
+#define PORT "\\\\.\\COM4"
 
 //#define DEBUG
 //#define DEBUG_CORNER
