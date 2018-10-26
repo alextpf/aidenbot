@@ -205,7 +205,11 @@ void VideoProcessor::SetFrameProcessor( FrameProcessor* frameProcessorPtr )
     m_Process = 0;
     // this is the frame processor instance that will be called
     m_FrameProcessor = frameProcessorPtr;
-    CallProcess();
+
+	if( m_FrameProcessor != NULL )
+	{
+		CallProcess();
+	}    
 }
 
 //=======================================================================

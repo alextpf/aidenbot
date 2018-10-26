@@ -19,6 +19,9 @@ using namespace std;
 //========================================
 int main()
 {
+	enum Option { CHECK_COLOR, RUN, RECORD_IMG };
+	Option op = RUN;
+	
 	// Create video procesor instance
 	VideoProcessor processor;
 	BotManager segmentor;
@@ -26,13 +29,27 @@ int main()
 	segmentor.SetBandWidth(10);
 
     CheckHSV hsvChecker;
-
+	
+	FrameProcessor * proc = NULL;
+	switch ( op )
+	{
+	case CHECK_COLOR:
+		proc = &hsvChecker;
+		break;
+	case RUN:
+		proc = &segmentor;
+		break;
+	case RECORD_IMG:
+		break;
+	default:
+		break;
+	}
 	//////////////////
 	// variables
 	//////////////////
 
 	//char path[] = "E:/alex/aidenbot2/data/";
-	char path[] = "c:/tmp/";
+	char path[] = "C:/Users/alex_/Documents/Arduino/aidenbot/v2/aidenbot/data/webcam/";
 	char filename[] = "vid";
 
 	// note: 213 - 380 good samples
@@ -40,7 +57,7 @@ int main()
 	// 653 - 700
 	//int num =  755; //249;
 	//int startFrame =  754;//248;// frame number we want to start at
-	int num = 719;
+	int num = 717;
 	int startFrame = 716;// frame number we want to start at
 	//int num = 184;
 	//int startFrame = 183;// frame number we want to start at
@@ -119,9 +136,9 @@ int main()
 			break;
 	} //switch (inputType)
 
-	 /////////////////////////////////////////////////////
-	 // Output
-	 /////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////
+	// Output
+	/////////////////////////////////////////////////////
 	switch (outputType)
 	{
 		case 0:
@@ -154,9 +171,8 @@ int main()
 			break;
 	}//switch (outputType)
 
-	processor.SetFrameProcessor( &segmentor );
-    //processor.SetFrameProcessor( &hsvChecker );
-
+	processor.SetFrameProcessor( proc );
+    
 	// Declare a window to display the video
 	processor.DisplayOutput("Test Output");
 
