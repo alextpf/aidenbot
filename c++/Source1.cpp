@@ -116,7 +116,7 @@ int main()
 	float fps = 60.f;
 
 	//int delay = static_cast<int>(1000.f / fps);
-	int delay = 1000;
+	int delay = 5000;
 
 	/////////////////////////////////////////////////////
 	// Input

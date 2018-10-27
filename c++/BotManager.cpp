@@ -334,7 +334,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 		//draw puck center
 		if ( m_ShowOutPutImg )
 		{
-			const int radius = 10;
+			const int radius = 12;
 			const int thickness = 2;
 			cv::circle( output, center, radius, GREEN, thickness );
 		}
@@ -372,6 +372,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 		clock_t curr = clock();
 
 		int dt = static_cast<int>( ( curr - m_CurrTime ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
+		float fps = m_FpsCalculator.GetFPS( dt );
 
         // skip processing if 1st frame
 		if ( /*dt < 2000 &&*/ m_CurrTime > 0)

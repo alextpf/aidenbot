@@ -13,6 +13,7 @@
 #include "Camera.h"
 #include "Robot.h"
 #include "SerialPort.h"
+#include "FPSCalculator.h"
 
 class BotManager : public FrameProcessor
 {
@@ -83,5 +84,5 @@ private:
 	bool			m_ShowDebugImg;
 	bool			m_ShowOutPutImg;
 	bool			m_ManualPickTableCorners;
-
+	FPSCalculator	m_FpsCalculator;
 };

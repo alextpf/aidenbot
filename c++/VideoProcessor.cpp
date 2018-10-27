@@ -40,7 +40,7 @@ bool VideoProcessor::ReadNextFrame( cv::Mat& frame )
         ////////////////
         if( m_ItImg != m_Images.end() )
         {
-            printf( "%s\n", ( *m_ItImg ).c_str() );
+            //printf( "%s\n", ( *m_ItImg ).c_str() ); // debug: print file path
             m_TmpFrame = cv::imread( *m_ItImg );
             m_ItImg++;
 
@@ -444,7 +444,7 @@ void VideoProcessor::Run()
         }
 
         m_TotalFrame++;
-        std::cout << m_TotalFrame << std::endl;//print the number for debug
+        //std::cout << m_TotalFrame << std::endl;//print the number for debug
 
         // write output sequence
         if( m_OutputFile.length() != 0 )
@@ -462,7 +462,7 @@ void VideoProcessor::Run()
         if( m_Delay >= 0 )
         {
             int ret = cv::waitKey( m_Delay );
-            if( ret > 0 )
+            if( ret == 27/*ESC*/ )
             {
                 StopIt();
             }
