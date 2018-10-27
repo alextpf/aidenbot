@@ -90,6 +90,25 @@ public:
 	//  V Y
 	cv::Point ImgToTableCoordinate( cv::Point p);
 
+	float GetLeft()
+	{
+		return m_Left;
+	}
+
+	float GetRight()
+	{
+		return m_Right;
+	}
+
+	float GetTop()
+	{
+		return m_Top;
+	}
+
+	float GetBottom()
+	{
+		return m_Bottom;
+	}
 private:
 
 	// refine 4 edges

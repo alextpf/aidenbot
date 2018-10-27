@@ -16,34 +16,78 @@
 using namespace cv;
 using namespace std;
 
+//=======================================================================
+bool ReadConfig( std::vector<int> & tmp, const int entries )
+{
+	string line;
+	
+	std::ifstream configFile( "Config.ini" );
+
+	if ( configFile.is_open() )
+	{
+		for ( int i = 0; i < entries * 2; i++ )
+		{			
+			std::getline( configFile, line );
+			if ( i % 2 == 1 )
+			{
+				const int value = std::stoi( line );
+				tmp.push_back( value );
+			}			
+		}
+		configFile.close();
+	}
+	else
+	{
+		std::cout << "file open error" << std::endl;
+		return false;
+	}
+
+	return true;
+} //ReadConfig
+
 //========================================
 int main()
 {
-	enum Option { CHECK_COLOR, RUN, RECORD_IMG };
-	Option op = RUN;
-	
+	std::vector<int> tmp;
+	if ( !ReadConfig( tmp, 7 ) ) // read configuration file
+	{
+		return 0;
+	}
+
+	int operation		= tmp[0]; // 1. run the program, 2. check HSV, 3. record webcam images only
+	int inputType		= tmp[1];
+	int outputType		= tmp[2];
+	bool showDebugImg	= tmp[3] == 1 ? true : false;
+	bool showInputImg	= tmp[4] == 1 ? true : false;
+	bool showOutputImg  = tmp[5] == 1 ? true : false;
+	bool manualPickTableCorners = tmp[6] == 1 ? true : false;
+
 	// Create video procesor instance
 	VideoProcessor processor;
 	BotManager segmentor;
-
+	CheckHSV hsvChecker;
+	
+	segmentor.SetShowDebugImg( showDebugImg );
+	segmentor.SetShowOutPutImg( showOutputImg );
+	segmentor.SetManualPickTableCorners( manualPickTableCorners );
 	segmentor.SetBandWidth(10);
 
-    CheckHSV hsvChecker;
-	
+
 	FrameProcessor * proc = NULL;
-	switch ( op )
+	switch ( operation )
 	{
-	case CHECK_COLOR:
-		proc = &hsvChecker;
-		break;
-	case RUN:
+	case 1:
 		proc = &segmentor;
 		break;
-	case RECORD_IMG:
+	case 2:
+		proc = &hsvChecker;
+		break;
+	case 3:
 		break;
 	default:
 		break;
 	}
+
 	//////////////////
 	// variables
 	//////////////////
@@ -52,27 +96,19 @@ int main()
 	char path[] = "C:/Users/alex_/Documents/Arduino/aidenbot/v2/aidenbot/data/webcam/";
 	char filename[] = "vid";
 
+	int webCamId = 1; // 0: default (laptop's camera), 1: external connected cam
+
 	// note: 213 - 380 good samples
     // 452 - 507 samples for attack
 	// 653 - 700
 	//int num =  755; //249;
 	//int startFrame =  754;//248;// frame number we want to start at
-	int num = 717;
+	int num = 719;
 	int startFrame = 716;// frame number we want to start at
 	//int num = 184;
 	//int startFrame = 183;// frame number we want to start at
 	//char inputMode[] = "";
 	char outputMode[] = "";
-
-	/////////////////////
-	// Input & Output
-	/////////////////////
-	// 0: imgs, 1: video, 2: webcam
-	static int inputType = 0;
-	int webCamId = 1; // 0: default
-
-	// 0: imgs, 1: video, 2: no output written
-	static int outputType = 2;
 
 	/////////////////
 	// Frame Rate:
@@ -80,7 +116,7 @@ int main()
 	float fps = 60.f;
 
 	//int delay = static_cast<int>(1000.f / fps);
-	int delay = 1;
+	int delay = 1000;
 
 	/////////////////////////////////////////////////////
 	// Input
@@ -174,10 +210,16 @@ int main()
 	processor.SetFrameProcessor( proc );
     
 	// Declare a window to display the video
-	processor.DisplayOutput("Test Output");
+	if ( showOutputImg )
+	{
+		processor.DisplayOutput( "Test Output" );
+	}
 
 	// Declare a window to display the input
-	processor.DisplayInput("Input");
+	if ( showInputImg )
+	{
+		processor.DisplayInput( "Input" );
+	}
 
 	if (!processor.SetFrameNumber(startFrame))
 	{

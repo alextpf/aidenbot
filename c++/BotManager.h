@@ -5,6 +5,7 @@
 #include <opencv2/video.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include <fstream>
 #include <list>
 
 #include "TableFinder.h"
@@ -33,6 +34,11 @@ public:
         return m_BandWidth;
     }
 
+	void SetShowDebugImg( const bool ok );
+	
+	void SetManualPickTableCorners( const bool ok );
+
+	void SetShowOutPutImg( const bool ok );
 private:
 
 	// send the message to Arduino over com port
@@ -74,4 +80,8 @@ private:
 	Camera			m_Camera;
 	Robot			m_Robot;
 	SerialPort		m_SerialPort;
+	bool			m_ShowDebugImg;
+	bool			m_ShowOutPutImg;
+	bool			m_ManualPickTableCorners;
+
 };
