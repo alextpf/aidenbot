@@ -6,12 +6,13 @@
 #define DEG_TO_RAD					PI / 180.0f
 
 // color definition
-#define BLUE   cv::Scalar(255, 0, 0) //BGR
-#define GREEN  cv::Scalar(0, 255, 0)
-#define RED    cv::Scalar(0, 0, 255)
-#define YELLOW cv::Scalar(0, 255, 255)
-#define WHITE  cv::Scalar(255, 255, 255)
-#define BLACK  cv::Scalar(0,0,0)
+#define BLUE   cv::Scalar( 255,   0,   0 ) //BGR
+#define GREEN  cv::Scalar(   0, 255,   0 )
+#define RED    cv::Scalar(   0,   0, 255 )
+#define YELLOW cv::Scalar(   0, 255, 255 )
+#define WHITE  cv::Scalar( 255, 255, 255 )
+#define BLACK  cv::Scalar(   0,   0,   0 )
+#define PURPLE cv::Scalar( 255, 112, 132 )
 
 #define PORT "\\\\.\\COM4"
 
@@ -51,7 +52,9 @@ BotManager::BotManager()
 , m_ShowDebugImg( false )
 , m_ShowOutPutImg( true )
 , m_ManualPickTableCorners( false )
-{}
+{
+	m_FpsCalculator.SetBufferSize( 10 );
+}
 
 //=======================================================================
 void BotManager::Process(cv::Mat & input, cv::Mat & output)
@@ -60,6 +63,17 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 	{
 		output = input.clone();
 	}
+
+	//debug
+	/*char in[] = "s\n";
+	m_SerialPort.WriteSerialPort<char>( in, 10 );
+*/
+	char msg[20];
+
+	int res = m_SerialPort.ReadSerialPort<char>( msg, 20 );
+	std::cout << msg << std::endl;
+
+	return;
 
 	// find table range
 	char windowName[] = "corners";
@@ -331,19 +345,20 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 
 		const bool hasPuck = diskFinder.FindDisk2Thresh(
 			contours, center, hsvImg, redThresh, orangeThresh, m_Mask );
-		//draw puck center
-		if ( m_ShowOutPutImg )
-		{
-			const int radius = 12;
-			const int thickness = 2;
-			cv::circle( output, center, radius, GREEN, thickness );
-		}
-
+		
         if( !hasPuck )
         {
             std::cout << "can't find puck" << std::endl;
             return;
         }
+
+		//draw puck center
+		if ( m_ShowOutPutImg )
+		{
+			const int radius = 15;
+			const int thickness = 2;
+			cv::circle( output, center, radius, GREEN, thickness );
+		}
 
         // convert screen coordinate to table coordinate
 		const cv::Point puckPos = m_TableFinder.ImgToTableCoordinate( center ); // mm, in table coordinate
@@ -372,13 +387,41 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 		clock_t curr = clock();
 
 		int dt = static_cast<int>( ( curr - m_CurrTime ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
-		float fps = m_FpsCalculator.GetFPS( dt );
+		
+		//debug
+		//dt = 50; // ms, for debug purpose
 
         // skip processing if 1st frame
 		if ( /*dt < 2000 &&*/ m_CurrTime > 0)
 		{
+			// calculate FPS
+			m_FpsCalculator.AddFrameTime( dt );
+			int fps = m_FpsCalculator.GetFPS();
+
             // do prediction work
 			m_Camera.CamProcess( dt );
+
+			if ( m_ShowOutPutImg )
+			{
+				// show FPS on screen
+				const std::string text = "FPS = " + std::to_string( fps );
+				cv::Point origin( 520, 25 ); // upper right
+				int thickness = 1;
+				int lineType = 8;
+
+				cv::putText( output, text, origin, cv::FONT_HERSHEY_SIMPLEX, 0.5, BLUE, thickness, lineType );
+
+				// draw previous pos
+				cv::Point prevPos = m_Camera.GetPrevPuckPos(); // mm, table coordinate
+				prevPos = m_TableFinder.TableToImgCoordinate( prevPos );
+
+				cv::line( output, prevPos, center, cv::Scalar( 130,221,238 )/**/, 2 );
+				
+				// draw prediction on screen
+				cv::Point predPos = m_Camera.GetCurrPredictPos();
+				predPos = m_TableFinder.TableToImgCoordinate( predPos );
+				cv::line( output, predPos, center, PURPLE, 2 );
+			}
 
             // determine robot strategy
 			m_Robot.NewDataStrategy( m_Camera );
@@ -387,7 +430,8 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
             m_Robot.RobotMoveDecision( m_Camera );
 
             // send the message by com port over to Arduino
-            SendMessage();
+            SendBotMessage();
+
 #ifdef DEBUG_SERIAL
             ReceiveMessage();
 #endif // DEBUG
@@ -413,7 +457,7 @@ void BotManager::OnMouse( int event, int x, int y, int f, void* data )
 }//OnMouse
 
 //=======================================================================
-void BotManager::SendMessage()
+void BotManager::SendBotMessage()
 {
 	// message lay out :
 	// 0, 1: for sync use, "AA"
@@ -459,7 +503,7 @@ void BotManager::SendMessage()
 	message[11] = speed & 0xFF;
 
     m_SerialPort.WriteSerialPort<BYTE>( message, 12 );
-} // SendMessage
+} // SendBotMessage
 
 //=======================================================================
 void BotManager::ReceiveMessage()

@@ -34,6 +34,32 @@ G1E100F90
 3. 
 new step = old step * 100 / actual extruded length
 
-100/4*150
+100/125*500
 
 change DEFAULT_AXIS_STEPS_PER_UNIT, 4th argument
+========================================================
+Logitech Webcam C260
+1280×720
+
+Webcam Name: 	Logitech Webcam C260
+Quality Rating: 	34
+Built-in Microphone: 	None
+Built-in Speaker: 	None
+Frame rate: 	23 FPS
+Stream Type: 	video
+Image Mode: 	rgb
+Webcam MegaPixels: 	0.92 MP
+Webcam Resolution: 	1280×720
+Video Standard: 	HD
+Aspect Ratio: 	1.78
+PNG File Size: 	912.61 kB
+JPEG File Size: 	309.01 kB
+Bitrate: 	6.94 MB/s
+Number of Colors: 	28469
+Average RGB Color: 	
+ 
+Lightness: 	46.08%
+Luminosity: 	46.58%
+Brightness: 	46.27%
+Hue: 	60°
+Saturation: 	1.28%

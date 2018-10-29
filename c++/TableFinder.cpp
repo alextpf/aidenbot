@@ -19,8 +19,19 @@ TableFinder::TableFinder(
 cv::Point TableFinder::ImgToTableCoordinate( cv::Point p )
 {
 	cv::Point ret;
-	ret.y = static_cast<int>( ( m_Right - p.x ) * m_PixToMM );
-	ret.x = static_cast<int>( ( m_Bottom - p.y ) * m_PixToMM );
+	ret.y = static_cast<int>( ( p.x - m_Left ) * m_PixToMM );
+	ret.x = static_cast<int>( ( p.y - m_Top ) * m_PixToMM );
+
+	return ret;
+} // ImgToTableCoordinate
+
+//===================================================================================
+cv::Point TableFinder::TableToImgCoordinate( cv::Point p )
+{
+	cv::Point ret;
+	float mmToPix = 1.0f / m_PixToMM;
+	ret.y = static_cast<int>( m_Top + p.x * mmToPix );
+	ret.x = static_cast<int>( m_Left + p.y * mmToPix );
 
 	return ret;
 } // ImgToTableCoordinate

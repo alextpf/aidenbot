@@ -88,7 +88,7 @@ void loop()
     }
     
     hBot.Update(); // internally update 
-    // reader.ReadPacket();
+    reader.ReadPacket();
 #ifdef DEBUG_PACKET_READER
     Serial.println( "Desired bot pos = " );
     Serial.println( reader.GetDesiredBotPos().m_X );

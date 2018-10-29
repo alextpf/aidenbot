@@ -69,16 +69,18 @@ public:
 		m_LowerRight = p;
 	}
 
-	// assuming robot is on the right of the screen
+	// assuming robot is on the left of the screen
 	//
 	//  Robot Coordinate:
-	//                          ^ X
-	//                          |
-	//  -------------------------
+	//
+	//
+	//  ---------------------------->Y
 	//  |                       |
 	//  |                       |
-	//  | Y                     |
-	// <-------------------------
+	//  |                       |
+	//  |------------------------
+	//  |  X
+	//  V
 
 	//  Image Coordinate:
 	//  --------------------------->X
@@ -89,6 +91,8 @@ public:
 	//  |
 	//  V Y
 	cv::Point ImgToTableCoordinate( cv::Point p);
+
+	cv::Point TableToImgCoordinate( cv::Point p );
 
 	float GetLeft()
 	{

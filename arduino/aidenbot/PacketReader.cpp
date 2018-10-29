@@ -13,7 +13,10 @@ void PacketReader::ReadPacket()
 {
     if( Serial.available() > 0 )
     {
-        //Serial.println("P");
+        //char input = Serial.read();
+        Serial.println("pHEllo");
+        return;
+        
         // We rotate the Buffer (we could implement a ring buffer in future)
         for( int i = 11; i > 0; i-- )
         {

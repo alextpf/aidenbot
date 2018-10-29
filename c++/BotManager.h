@@ -43,7 +43,7 @@ public:
 private:
 
 	// send the message to Arduino over com port
-	void SendMessage();
+	void SendBotMessage();
 
     // send the message to Arduino over com port
     void ReceiveMessage(); // debug tuse

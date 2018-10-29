@@ -1,6 +1,6 @@
 #include "VideoProcessor.h"
 
-#define FRAME_WIDTH 320
+#define FRAME_WIDTH 360
 #define FRAME_HEIGHT 640
 
 //=======================================================================

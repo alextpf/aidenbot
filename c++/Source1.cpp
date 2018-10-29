@@ -49,7 +49,7 @@ bool ReadConfig( std::vector<int> & tmp, const int entries )
 int main()
 {
 	std::vector<int> tmp;
-	if ( !ReadConfig( tmp, 7 ) ) // read configuration file
+	if ( !ReadConfig( tmp, 8 ) ) // read configuration file
 	{
 		return 0;
 	}
@@ -61,6 +61,7 @@ int main()
 	bool showInputImg	= tmp[4] == 1 ? true : false;
 	bool showOutputImg  = tmp[5] == 1 ? true : false;
 	bool manualPickTableCorners = tmp[6] == 1 ? true : false;
+	int delay			= tmp[7];
 
 	// Create video procesor instance
 	VideoProcessor processor;
@@ -71,8 +72,7 @@ int main()
 	segmentor.SetShowOutPutImg( showOutputImg );
 	segmentor.SetManualPickTableCorners( manualPickTableCorners );
 	segmentor.SetBandWidth(10);
-
-
+	
 	FrameProcessor * proc = NULL;
 	switch ( operation )
 	{
@@ -83,7 +83,6 @@ int main()
 		proc = &hsvChecker;
 		break;
 	case 3:
-		break;
 	default:
 		break;
 	}
@@ -109,15 +108,7 @@ int main()
 	//int startFrame = 183;// frame number we want to start at
 	//char inputMode[] = "";
 	char outputMode[] = "";
-
-	/////////////////
-	// Frame Rate:
-	/////////////////
-	float fps = 60.f;
-
-	//int delay = static_cast<int>(1000.f / fps);
-	int delay = 5000;
-
+	
 	/////////////////////////////////////////////////////
 	// Input
 	/////////////////////////////////////////////////////

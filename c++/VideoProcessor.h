@@ -21,7 +21,6 @@ public:
 class VideoProcessor
 {
 public:
-
     // Constructor setting the default values
     VideoProcessor();
 
