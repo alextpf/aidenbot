@@ -3,19 +3,24 @@
 
 //==========================================================================
 PacketReader::PacketReader()
-    : m_MsgFullyRead( false )
+    : m_InSync( false )
     , m_ReadCounter( 0 )
     , m_DesiredMotorSpeed( MAX_ABS_SPEED )
 {}
 
 //==========================================================================
-void PacketReader::ReadPacket()
+bool PacketReader::ReadPacket()
 {
+    //Serial.println("pHEllo");
+    //return;
+    bool ret = false;
+    
     if( Serial.available() > 0 )
     {
+        //debug
+        Serial.println("in available");
+        
         //char input = Serial.read();
-        Serial.println("pHEllo");
-        return;
         
         // We rotate the Buffer (we could implement a ring buffer in future)
         for( int i = 11; i > 0; i-- )
@@ -24,25 +29,24 @@ void PacketReader::ReadPacket()
         }
 
         m_SBuffer[0] = Serial.read();
-        //Serial.print(S1Buffer[0]);
+        //Serial.print(SBuffer[0]);
         // We look for a  message start like "AA" to sync packets
         if( ( m_SBuffer[0] == 'A' ) && ( m_SBuffer[1] == 'A' ) )
         {
-            if( !m_MsgFullyRead )
-            {
-                m_MsgFullyRead = true;                
-            }
-            else
+            //debug
+            Serial.println("in AA");
+        
+            if( m_InSync )
             {
                 Serial.println( "S ERR" );
             }
-
+            
+            m_InSync = true;
             m_ReadCounter = 12;
-
-            return;
         }
-        else if( m_MsgFullyRead )
+        else if( m_InSync )
         {
+            Serial.println("start counter decrease");
             m_ReadCounter--;   // Until we complete the packet
             if( m_ReadCounter <= 0 )   // packet complete!!
             {
@@ -52,10 +56,14 @@ void PacketReader::ReadPacket()
                 m_DetectedBotPos.m_X = ExtractParamInt( 4 );
                 m_DetectedBotPos.m_Y = ExtractParamInt( 2 );
                 m_DesiredMotorSpeed = ExtractParamInt( 0 );
-                m_MsgFullyRead = false;
+                m_InSync = false;
+
+                ret = true;
             }
         }
     }
+    
+    return ret;
 } // ReadPacket
 
 //==========================================================================

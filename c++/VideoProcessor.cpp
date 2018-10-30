@@ -466,6 +466,11 @@ void VideoProcessor::Run()
             {
                 StopIt();
             }
+			//debug
+			if ( ret == 68/*D*/ )
+			{
+				m_FrameProcessor->m_Debug = true;
+			}
         }
         else
         {

@@ -40,10 +40,15 @@ public:
 	void SetManualPickTableCorners( const bool ok );
 
 	void SetShowOutPutImg( const bool ok );
+
+	bool IsSerialConnected()
+	{
+		return m_SerialPort.IsConnected();
+	}
 private:
 
 	// send the message to Arduino over com port
-	void SendBotMessage();
+	bool SendBotMessage();
 
     // send the message to Arduino over com port
     void ReceiveMessage(); // debug tuse

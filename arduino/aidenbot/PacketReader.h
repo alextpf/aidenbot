@@ -17,7 +17,7 @@ class PacketReader
 public:
     PacketReader();
 
-    void      ReadPacket();
+    bool      ReadPacket();
     uint16_t  ExtractParamInt(uint8_t pos);
     
     RobotPos  GetDesiredBotPos()
@@ -38,7 +38,7 @@ public:
 private:
 
     char      m_SBuffer[12];
-    bool      m_MsgFullyRead; // true: ready; false: not ready
+    bool      m_InSync; // true: ready; false: not ready
     int       m_ReadCounter;
     RobotPos  m_DesiredBotPos;
     RobotPos  m_DetectedBotPos;

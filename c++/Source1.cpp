@@ -67,6 +67,12 @@ int main()
 	VideoProcessor processor;
 	BotManager segmentor;
 	CheckHSV hsvChecker;
+
+	if ( !segmentor.IsSerialConnected() )
+	{
+		std::cout << "serial port is not connected" << std::endl; // check "PORT" definition in BotManager.cpp
+		return -1;
+	}
 	
 	segmentor.SetShowDebugImg( showDebugImg );
 	segmentor.SetShowOutPutImg( showOutputImg );

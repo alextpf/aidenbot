@@ -12,10 +12,13 @@
 // The frame processor interface
 class FrameProcessor
 {
-
 public:
-    // processing method
+	FrameProcessor() : m_Debug( false )
+	{}
+					 
+	// processing method
     virtual void Process( cv::Mat &input, cv::Mat &output ) = 0;
+	bool m_Debug;
 }; // class FrameProcessor
 
 class VideoProcessor

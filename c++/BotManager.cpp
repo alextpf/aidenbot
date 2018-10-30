@@ -65,14 +65,38 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 	}
 
 	//debug
-	/*char in[] = "s\n";
-	m_SerialPort.WriteSerialPort<char>( in, 10 );
-*/
-	char msg[20];
+	if ( m_Debug )
+	{		
+		m_Debug = false;
 
-	int res = m_SerialPort.ReadSerialPort<char>( msg, 20 );
-	std::cout << msg << std::endl;
+		m_Robot.SetDesiredRobotPos( cv::Point( 56, 43 ) );
+		m_Camera.SetRobotPos( cv::Point( 89, 23 ) );
+		m_Robot.SetDesiredRobotSpeed( 84 );
+		if ( !SendBotMessage() )
+		{
+			return;
+		}
+	}
+	
+	char msg[40];
 
+	int res = m_SerialPort.ReadSerialPort<char>( msg, 40 );
+	bool toPrint = false;
+
+	for ( int i = 0; i < 40; i++ )
+	{
+		if ( msg[i] == '\n' )
+		{
+			toPrint = true;
+			break;
+		}
+	}
+	
+	if ( toPrint )
+	{
+		std::cout << msg << std::endl;
+	}
+	
 	return;
 
 	// find table range
@@ -457,7 +481,7 @@ void BotManager::OnMouse( int event, int x, int y, int f, void* data )
 }//OnMouse
 
 //=======================================================================
-void BotManager::SendBotMessage()
+bool BotManager::SendBotMessage()
 {
 	// message lay out :
 	// 0, 1: for sync use, "AA"
@@ -502,7 +526,7 @@ void BotManager::SendBotMessage()
 	message[10] = ( speed >> 8 ) & 0xFF;
 	message[11] = speed & 0xFF;
 
-    m_SerialPort.WriteSerialPort<BYTE>( message, 12 );
+	return m_SerialPort.WriteSerialPort<BYTE>( message, 12 );
 } // SendBotMessage
 
 //=======================================================================
