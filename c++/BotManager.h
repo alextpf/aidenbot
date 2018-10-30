@@ -36,7 +36,7 @@ public:
     }
 
 	void SetShowDebugImg( const bool ok );
-	
+
 	void SetManualPickTableCorners( const bool ok );
 
 	void SetShowOutPutImg( const bool ok );

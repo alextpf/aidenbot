@@ -6,12 +6,12 @@
 #include <opencv2/video.hpp>
 #include <opencv2/imgproc.hpp>
 
-//#include "E:\alex\aidenbot2\c++\VideoProcessor.h"
-//#include "E:\alex\aidenbot2\c++\BotManager.h"
-//#include "E:\alex\aidenbot2\c++\CheckHSV.h"
-#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\VideoProcessor.h"
-#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\BotManager.h"
-#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\CheckHSV.h"
+#include "E:\alex\aidenbot2\c++\VideoProcessor.h"
+#include "E:\alex\aidenbot2\c++\BotManager.h"
+#include "E:\alex\aidenbot2\c++\CheckHSV.h"
+//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\VideoProcessor.h"
+//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\BotManager.h"
+//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\CheckHSV.h"
 
 using namespace cv;
 using namespace std;
@@ -20,19 +20,19 @@ using namespace std;
 bool ReadConfig( std::vector<int> & tmp, const int entries )
 {
 	string line;
-	
+
 	std::ifstream configFile( "Config.ini" );
 
 	if ( configFile.is_open() )
 	{
 		for ( int i = 0; i < entries * 2; i++ )
-		{			
+		{
 			std::getline( configFile, line );
 			if ( i % 2 == 1 )
 			{
 				const int value = std::stoi( line );
 				tmp.push_back( value );
-			}			
+			}
 		}
 		configFile.close();
 	}
@@ -73,12 +73,12 @@ int main()
 		std::cout << "serial port is not connected" << std::endl; // check "PORT" definition in BotManager.cpp
 		return -1;
 	}
-	
+
 	segmentor.SetShowDebugImg( showDebugImg );
 	segmentor.SetShowOutPutImg( showOutputImg );
 	segmentor.SetManualPickTableCorners( manualPickTableCorners );
 	segmentor.SetBandWidth(10);
-	
+
 	FrameProcessor * proc = NULL;
 	switch ( operation )
 	{
@@ -114,7 +114,7 @@ int main()
 	//int startFrame = 183;// frame number we want to start at
 	//char inputMode[] = "";
 	char outputMode[] = "";
-	
+
 	/////////////////////////////////////////////////////
 	// Input
 	/////////////////////////////////////////////////////
@@ -205,7 +205,7 @@ int main()
 	}//switch (outputType)
 
 	processor.SetFrameProcessor( proc );
-    
+
 	// Declare a window to display the video
 	if ( showOutputImg )
 	{

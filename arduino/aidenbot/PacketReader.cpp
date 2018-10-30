@@ -3,48 +3,43 @@
 
 //==========================================================================
 PacketReader::PacketReader()
-    : m_InSync( false )
-    , m_ReadCounter( 0 )
+    : m_ReadCounter( 0 )
     , m_DesiredMotorSpeed( MAX_ABS_SPEED )
 {}
 
 //==========================================================================
 bool PacketReader::ReadPacket()
 {
+    static bool inSync = false; // true: ready; false: not ready
+    
     //Serial.println("pHEllo");
     //return;
+
+    char tmp;
     bool ret = false;
     
-    if( Serial.available() > 0 )
+    while ( Serial.available() > 0 )
     {
         //debug
         Serial.println("in available");
         
-        //char input = Serial.read();
+        tmp = Serial.read();
         
-        // We rotate the Buffer (we could implement a ring buffer in future)
-        for( int i = 11; i > 0; i-- )
-        {
-            m_SBuffer[i] = m_SBuffer[i - 1];
-        }
-
-        m_SBuffer[0] = Serial.read();
-        //Serial.print(SBuffer[0]);
         // We look for a  message start like "AA" to sync packets
         if( ( m_SBuffer[0] == 'A' ) && ( m_SBuffer[1] == 'A' ) )
         {
             //debug
             Serial.println("in AA");
         
-            if( m_InSync )
+            if( inSync )
             {
                 Serial.println( "S ERR" );
             }
             
-            m_InSync = true;
+            inSync = true;
             m_ReadCounter = 12;
         }
-        else if( m_InSync )
+        else if( inSync )
         {
             Serial.println("start counter decrease");
             m_ReadCounter--;   // Until we complete the packet
@@ -56,7 +51,7 @@ bool PacketReader::ReadPacket()
                 m_DetectedBotPos.m_X = ExtractParamInt( 4 );
                 m_DetectedBotPos.m_Y = ExtractParamInt( 2 );
                 m_DesiredMotorSpeed = ExtractParamInt( 0 );
-                m_InSync = false;
+                inSync = false;
 
                 ret = true;
             }

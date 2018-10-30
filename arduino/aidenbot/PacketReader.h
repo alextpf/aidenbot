@@ -37,8 +37,7 @@ public:
     
 private:
 
-    char      m_SBuffer[12];
-    bool      m_InSync; // true: ready; false: not ready
+    char      m_SBuffer[12];    
     int       m_ReadCounter;
     RobotPos  m_DesiredBotPos;
     RobotPos  m_DetectedBotPos;

@@ -66,7 +66,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 
 	//debug
 	if ( m_Debug )
-	{		
+	{
 		m_Debug = false;
 
 		m_Robot.SetDesiredRobotPos( cv::Point( 56, 43 ) );
@@ -77,7 +77,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 			return;
 		}
 	}
-	
+
 	char msg[40];
 
 	int res = m_SerialPort.ReadSerialPort<char>( msg, 40 );
@@ -91,12 +91,12 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 			break;
 		}
 	}
-	
+
 	if ( toPrint )
 	{
 		std::cout << msg << std::endl;
 	}
-	
+
 	return;
 
 	// find table range
@@ -369,7 +369,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 
 		const bool hasPuck = diskFinder.FindDisk2Thresh(
 			contours, center, hsvImg, redThresh, orangeThresh, m_Mask );
-		
+
         if( !hasPuck )
         {
             std::cout << "can't find puck" << std::endl;
@@ -411,7 +411,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 		clock_t curr = clock();
 
 		int dt = static_cast<int>( ( curr - m_CurrTime ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
-		
+
 		//debug
 		//dt = 50; // ms, for debug purpose
 
@@ -440,7 +440,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 				prevPos = m_TableFinder.TableToImgCoordinate( prevPos );
 
 				cv::line( output, prevPos, center, cv::Scalar( 130,221,238 )/**/, 2 );
-				
+
 				// draw prediction on screen
 				cv::Point predPos = m_Camera.GetCurrPredictPos();
 				predPos = m_TableFinder.TableToImgCoordinate( predPos );
