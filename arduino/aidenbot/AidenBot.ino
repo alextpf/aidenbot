@@ -72,7 +72,7 @@ void setup()
 void loop() 
 {
   curr_time = micros();
-  //if ( curr_time - prev_time >= 1000  /*&& hBot.GetLoopCounter()< 20*/ )  // 1Khz loop
+  if ( curr_time - prev_time >= 1000  /*&& hBot.GetLoopCounter()< 20*/ )  // 1Khz loop
   {
     prev_time = curr_time; // update time
     
