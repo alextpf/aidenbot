@@ -1,6 +1,7 @@
 #include "PacketReader.h"
 #include "Configuration.h"
 
+//#define DEBUG_SERIAL
 //==========================================================================
 PacketReader::PacketReader()
     : m_DesiredMotorSpeed( MAX_ABS_SPEED )
@@ -10,45 +11,54 @@ PacketReader::PacketReader()
 //==========================================================================
 bool PacketReader::ReadPacket()
 {
-    const byte numBytes = 10;
+    const byte numBytes = 11;
     static bool isInSync = false; // true: sync chars read; false: not ready
     static byte idx = 0;
+    
+    byte startMarker = 0x41; // 'A'
+    byte endMarker = 0x42; // 'B'
 
     //Serial.println("pHEllo");
     //return;
 
-    char c1,c2;
+    byte c1,c2;
     bool ret = false;
     
     if ( Serial.available() > 0 )
     {
+#ifdef DEBUG_SERIAL      
         //debug
         Serial.println("in 1st available");
-
+#endif
         c1 = Serial.read();
         
         while ( Serial.available() > 0 && !m_IsPacketRead )
         {
+#ifdef DEBUG_SERIAL                
             //debug
             Serial.println("in while available");
+#endif
             
             c2 = Serial.read();
             
             // We look for a  message start like "AA" to sync packets            
             if( isInSync )
             {
+#ifdef DEBUG_SERIAL                    
                 //debug
                 Serial.println("start count and read packet");
+#endif
 
                 bool startRead = true;
 
-                if( c2 == 'B' )
+                if( c2 == endMarker ) // character 'B'
                 {
                     c1 = Serial.read();
-                    if( c1 == 'B' )
+                    if( c1 == endMarker )
                     {   
+#ifdef DEBUG_SERIAL                            
                         Serial.println("is done");
-                        
+#endif                        
                         //done                     
                         startRead = false;                        
                         isInSync = false;
@@ -61,35 +71,41 @@ bool PacketReader::ReadPacket()
 
                 if( startRead )
                 {
+#ifdef DEBUG_SERIAL      
                     Serial.println( "start reading " );
-                    
+#endif                    
                     m_Buffer[idx] = c2;
                     idx++;
                     if ( idx >= numBytes )
                     {
                         idx = numBytes - 1;
 
+#ifdef DEBUG_SERIAL      
                         Serial.println( "possible error " );
+#endif                        
                         ret = false;
                     }
                 }
             }
-            else if( ( c1 == 'A' ) && ( c2 == 'A' ) )
+            else if( ( c1 == startMarker ) && ( c2 == startMarker ) ) // character 'A'
             {
+#ifdef DEBUG_SERIAL      
                 //debug
                 Serial.println("in AA");
+#endif                
                 isInSync = true;
             }
 
             c1 = c2;
         }
-
+/*
         // Extract parameters
         m_DesiredBotPos.m_X = ExtractParamInt( 0 );
         m_DesiredBotPos.m_Y = ExtractParamInt( 2 );
         m_DetectedBotPos.m_X = ExtractParamInt( 4 );
         m_DetectedBotPos.m_Y = ExtractParamInt( 6 );
         m_DesiredMotorSpeed = ExtractParamInt( 8 );    
+        */
     }
 
     return ret;
@@ -165,4 +181,3 @@ void PacketReader::showNewData()
         m_IsPacketRead = false;
     }
 }
-

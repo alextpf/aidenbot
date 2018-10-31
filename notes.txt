@@ -63,3 +63,27 @@ Luminosity: 	46.58%
 Brightness: 	46.27%
 Hue: 	60°
 Saturation: 	1.28%
+==========================
+AAz8dos.2idmBB
+ => 
+z = 0x7A 
+8 = 0x38 
+d = 0x64 
+o = 0x6F
+s = 0x73
+. = 0x2E
+2 = 0x32
+i = 0x69
+d = 0x64
+m = 0x6D
+
+This just in (HEX values)... 7A 38 6F 73 2E 69 64 6D 42 41 
+This just in (HEX values)... 7A 41 38 64 6F 2E 32 69 6D 41
+--
+<z8dos.2idm>
+This just in (HEX values)... 7A 38 64 6F 73 2E 32 69 64 6D 
+This just in (HEX values)... 7A 38 64 6F 73 2E 32 69 64 3C 
+This just in (HEX values)... 7A 38 3C 7A 38 64 6F 73 2E 32 
+This just in (HEX values)... 7A 38 64 6F 73 2E 32 69 64 6D 
+This just in (HEX values)... 7A 38 64 6F 3C 7A 38 3C 7A 38
+
