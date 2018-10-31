@@ -18,7 +18,6 @@ PacketReader reader;
 //Robot robot;
 
 //#define DEBUG_PACKET_READER
-
 void setup() 
 {
   Serial.begin(BAUD_RATE);
@@ -79,17 +78,13 @@ void loop()
     
     if (testmode)
     {
-      testMovements();
+      //testMovements();
     }
     
     if ( hBot.GetLoopCounter() % 10 == 0 )
     {
-      hBot.UpdatePosStraight();  // update straight line motion algorithm
+      //hBot.UpdatePosStraight();  // update straight line motion algorithm
     }
-    
-    //hBot.Update(); // internally update 
-    
-    //reader.ReadPacket();
     
     //if(false)
     {
@@ -107,8 +102,11 @@ void loop()
 #endif
     }
     
-    //debug
-    reader.recvBytesWithStartEndMarkers();
-    reader.showNewData();
+    //debug    
+    if( reader.ReadPacket() )
+    {
+      reader.showNewData();
+    }
+    //hBot.Update(); // internally update 
   } 
 }

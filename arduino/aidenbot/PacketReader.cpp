@@ -26,20 +26,34 @@ bool PacketReader::ReadPacket()
     
     if ( Serial.available() > 0 )
     {
+      
 #ifdef DEBUG_SERIAL      
         //debug
         Serial.println("in 1st available");
 #endif
+        int i = Serial.available();
+        Serial.print("# available=");
+        Serial.println(i);
+        
         c1 = Serial.read();
         
+        Serial.print("c1 = ");
+        Serial.println(c1);
+      
         while ( Serial.available() > 0 && !m_IsPacketRead )
-        {
+        {          
 #ifdef DEBUG_SERIAL                
             //debug
             Serial.println("in while available");
-#endif
+#endif            
+            int u = Serial.available();
+            Serial.print("while # available=");
+            Serial.println(u);
             
             c2 = Serial.read();
+            
+            Serial.print("c2 = ");
+            Serial.println(c2);
             
             // We look for a  message start like "AA" to sync packets            
             if( isInSync )
@@ -53,13 +67,15 @@ bool PacketReader::ReadPacket()
 
                 if( c2 == endMarker ) // character 'B'
                 {
+                    delayMicroseconds(10);
                     c1 = Serial.read();
                     if( c1 == endMarker )
-                    {   
+                    {                           
 #ifdef DEBUG_SERIAL                            
                         Serial.println("is done");
 #endif                        
-                        //done                     
+                        //done              
+                        m_Buffer[idx] = '\0'; // terminate the string       
                         startRead = false;                        
                         isInSync = false;
                         idx = 0;
