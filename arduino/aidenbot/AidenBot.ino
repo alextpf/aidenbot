@@ -73,7 +73,7 @@ void setup()
 void loop() 
 {
   curr_time = micros();
-  if ( curr_time - prev_time >= 1000  /*&& hBot.GetLoopCounter()< 20*/ )  // 1Khz loop
+  //if ( curr_time - prev_time >= 1000  /*&& hBot.GetLoopCounter()< 20*/ )  // 1Khz loop
   {
     prev_time = curr_time; // update time
     
@@ -87,8 +87,9 @@ void loop()
       hBot.UpdatePosStraight();  // update straight line motion algorithm
     }
     
-    hBot.Update(); // internally update 
-    if( reader.ReadPacket() )
+    //hBot.Update(); // internally update 
+    //if( reader.ReadPacket() )
+    if(false)
     {
 #ifdef DEBUG_PACKET_READER
     Serial.println( "Desired bot pos = " );
@@ -103,5 +104,8 @@ void loop()
     Serial.println( reader.GetDesiredMotorSpeed() );
 #endif
     }
+    //debug
+    reader.recvBytesWithStartEndMarkers();
+    reader.showNewData();
   } 
 }

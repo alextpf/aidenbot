@@ -490,7 +490,8 @@ bool BotManager::SendBotMessage()
 	// 6, 7: detected robot pos X
 	// 8, 9: detected robot pos Y
 	// 10, 11: desired speed
-	BYTE message[12];
+	// 12, 13: sync "BB"
+	BYTE message[14];
 
 	// Initial sync "AA"
 	message[0] = 0x41;
@@ -526,7 +527,11 @@ bool BotManager::SendBotMessage()
 	message[10] = ( speed >> 8 ) & 0xFF;
 	message[11] = speed & 0xFF;
 
-	return m_SerialPort.WriteSerialPort<BYTE>( message, 12 );
+	// Ending sync "BB"
+	message[12] = 0x42;
+	message[13] = 0x42;
+
+	return m_SerialPort.WriteSerialPort<BYTE>( message, 14 );
 } // SendBotMessage
 
 //=======================================================================

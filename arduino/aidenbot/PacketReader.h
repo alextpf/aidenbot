@@ -34,11 +34,19 @@ public:
     {
       return m_DesiredMotorSpeed;
     }
+    //debug
+    void recvBytesWithStartEndMarkers();
+    bool IsPacketRead()
+    {
+      return m_IsPacketRead;
+    }
+    
+    void showNewData();
     
 private:
 
-    char      m_SBuffer[12];    
-    int       m_ReadCounter;
+    byte      m_Buffer[11];    
+    bool      m_IsPacketRead;
     RobotPos  m_DesiredBotPos;
     RobotPos  m_DetectedBotPos;
     int       m_DesiredMotorSpeed;
