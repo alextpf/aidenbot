@@ -9,123 +9,81 @@ PacketReader::PacketReader()
 {}
 
 //==========================================================================
-bool PacketReader::ReadPacket()
+bool PacketReader::ReadPacket2()
 {
-    const byte numBytes = 11;
-    static bool isInSync = false; // true: sync chars read; false: not ready
-    static byte idx = 0;
+    const byte numBytes = 12; // 10 byte data + 2 bytes sync markers
+    static bool inSync = false; // true: ready; false: not ready
+    static byte counter = 0;
     
     byte startMarker = 0x41; // 'A'
     byte endMarker = 0x42; // 'B'
 
-    //Serial.println("pHEllo");
-    //return;
-
-    byte c1,c2;
+    byte tmp;
     bool ret = false;
     
     if ( Serial.available() > 0 )
     {
-      
-#ifdef DEBUG_SERIAL      
+        // We rotate the Buffer (we could implement a ring buffer in future)
+        for( int i = numBytes - 1 ; i > 0 ; i-- )
+        {
+            m_Buffer[i] = m_Buffer[i - 1];
+        }
+#ifdef DEBUG_SERIAL        
         //debug
-        Serial.println("in 1st available");
-#endif
         int i = Serial.available();
         Serial.print("# available=");
         Serial.println(i);
-        
-        c1 = Serial.read();
-        
-        Serial.print("c1 = ");
-        Serial.println(c1);
-      
-        while ( Serial.available() > 0 && !m_IsPacketRead )
-        {          
-#ifdef DEBUG_SERIAL                
-            //debug
-            Serial.println("in while available");
-#endif            
-            int u = Serial.available();
-            Serial.print("while # available=");
-            Serial.println(u);
-            
-            c2 = Serial.read();
-            
-            Serial.print("c2 = ");
-            Serial.println(c2);
-            
-            // We look for a  message start like "AA" to sync packets            
-            if( isInSync )
-            {
-#ifdef DEBUG_SERIAL                    
-                //debug
-                Serial.println("start count and read packet");
 #endif
+        
+        m_Buffer[0] = Serial.read();
 
-                bool startRead = true;
-
-                if( c2 == endMarker ) // character 'B'
-                {
-                    delayMicroseconds(10);
-                    c1 = Serial.read();
-                    if( c1 == endMarker )
-                    {                           
-#ifdef DEBUG_SERIAL                            
-                        Serial.println("is done");
-#endif                        
-                        //done              
-                        m_Buffer[idx] = '\0'; // terminate the string       
-                        startRead = false;                        
-                        isInSync = false;
-                        idx = 0;
-                        m_IsPacketRead = true;
-
-                        ret = true;
-                    }
-                }
-
-                if( startRead )
-                {
-#ifdef DEBUG_SERIAL      
-                    Serial.println( "start reading " );
-#endif                    
-                    m_Buffer[idx] = c2;
-                    idx++;
-                    if ( idx >= numBytes )
-                    {
-                        idx = numBytes - 1;
-
-#ifdef DEBUG_SERIAL      
-                        Serial.println( "possible error " );
-#endif                        
-                        ret = false;
-                    }
-                }
-            }
-            else if( ( c1 == startMarker ) && ( c2 == startMarker ) ) // character 'A'
+#ifdef DEBUG_SERIAL        
+        Serial.print("m_Buffer[0] = ");
+        Serial.println(m_Buffer[0]);
+#endif
+        
+        // We look for a  message start like "AA" to sync packets
+        if( ( m_Buffer[0] == startMarker ) && ( m_Buffer[1] == startMarker ) )
+        {
+            if( inSync )
             {
-#ifdef DEBUG_SERIAL      
-                //debug
-                Serial.println("in AA");
-#endif                
-                isInSync = true;
+                Serial.println( "S ERR" );
             }
-
-            c1 = c2;
+            
+            inSync = true;
+            counter = numBytes-2;
         }
-/*
-        // Extract parameters
-        m_DesiredBotPos.m_X = ExtractParamInt( 0 );
-        m_DesiredBotPos.m_Y = ExtractParamInt( 2 );
-        m_DetectedBotPos.m_X = ExtractParamInt( 4 );
-        m_DetectedBotPos.m_Y = ExtractParamInt( 6 );
-        m_DesiredMotorSpeed = ExtractParamInt( 8 );    
-        */
-    }
+        else if( inSync )
+        {
+#ifdef DEBUG_SERIAL          
+            Serial.print("counter=");
+            Serial.println(counter);
+#endif
+            
+            counter--;   // Until we complete the packet
+            
+            if( counter <= 0 )   // packet complete!!
+            {
+#ifdef DEBUG_SERIAL              
+                Serial.println("done");
+#endif                
+              
+                // Extract parameters
+                m_DesiredBotPos.m_X = ExtractParamInt( 8 );
+                m_DesiredBotPos.m_Y = ExtractParamInt( 6 );
+                m_DetectedBotPos.m_X = ExtractParamInt( 4 );
+                m_DetectedBotPos.m_Y = ExtractParamInt( 2 );
+                m_DesiredMotorSpeed = ExtractParamInt( 0 );
+                
+                inSync = false;
+                m_IsPacketRead = true;
 
+                ret = true;
+            }
+        }
+    }    
     return ret;
-} // ReadPacket
+} // ReadPacket2
 
 //==========================================================================
 uint16_t PacketReader::ExtractParamInt(uint8_t pos)
@@ -189,7 +147,7 @@ void PacketReader::showNewData()
     if (m_IsPacketRead == true) 
     {
         Serial.print("This just in (HEX values)... ");
-        for (byte n = 0; n < 10; n++) {
+        for (byte n = 0; n < 12; n++) {
             Serial.print(m_Buffer[n], HEX);
             Serial.print(' ');
         }

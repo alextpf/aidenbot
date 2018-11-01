@@ -18,6 +18,7 @@ public:
     PacketReader();
 
     bool      ReadPacket();
+    bool      ReadPacket2();
     uint16_t  ExtractParamInt(uint8_t pos);
     
     RobotPos  GetDesiredBotPos()
@@ -45,7 +46,7 @@ public:
     
 private:
 
-    byte      m_Buffer[11];    
+    byte      m_Buffer[14];    
     bool      m_IsPacketRead;
     RobotPos  m_DesiredBotPos;
     RobotPos  m_DetectedBotPos;

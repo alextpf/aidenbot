@@ -68,12 +68,14 @@ AAz8dos.2idmBB
 A = 0x41 = 65
 B = 0x42 = 66
 
-z = 0x7A = 122
-8 = 0x38 = 56
-d = 0x64 = 100
-o = 0x6F = 111
-s = 0x73 = 115
-. = 0x2E = 46
+  | Hex  | Dec | Bin |
+--------------------------
+z = 0x7A = 122 = 01111010
+8 = 0x38 = 56  = 00111000 , so, desiredBotPos.x = 0111101000111000 = 31288
+d = 0x64 = 100 = 01100100
+o = 0x6F = 111 = 01101111 , so, desiredBotPos.y = 0110010001101111 = 25711
+s = 0x73 = 115 = 01110011
+. = 0x2E = 46  = 00101110 , so, Detected bot pos.x = 0111001100101110 = 29486
 2 = 0x32 = 50
 i = 0x69 = 105
 d = 0x64 = 100
@@ -82,3 +84,12 @@ m = 0x6D = 109
 --
 <z8dos.2idm>
 
+This just in (HEX values)... 6D 64 69 32 2E 73 6F 64 38 7A 41 41 
+Desired bot pos = 
+31288
+25711
+Detected bot pos = 
+29486
+12905
+Desired Motor Speed = 
+25709

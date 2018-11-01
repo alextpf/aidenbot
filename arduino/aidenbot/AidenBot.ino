@@ -103,10 +103,21 @@ void loop()
     }
     
     //debug    
-    if( reader.ReadPacket() )
+    if( reader.ReadPacket2() )
     {
-      reader.showNewData();
+      //reader.showNewData();
+      Serial.println( "Desired bot pos = " );
+      Serial.println( reader.GetDesiredBotPos().m_X );
+      Serial.println( reader.GetDesiredBotPos().m_Y );
+  
+      Serial.println( "Detected bot pos = " );
+      Serial.println( reader.GetDetectedBotPos().m_X );
+      Serial.println( reader.GetDetectedBotPos().m_Y );
+  
+      Serial.println( "Desired Motor Speed = " );
+      Serial.println( reader.GetDesiredMotorSpeed() );
     }
-    //hBot.Update(); // internally update 
+    
+    hBot.Update(); // internally update 
   } 
 }
