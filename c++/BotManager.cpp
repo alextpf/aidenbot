@@ -13,6 +13,7 @@
 #define WHITE  cv::Scalar( 255, 255, 255 )
 #define BLACK  cv::Scalar(   0,   0,   0 )
 #define PURPLE cv::Scalar( 255, 112, 132 )
+#define MEDIUM_PURPLE cv::Scalar( 219, 112, 147 )
 
 //#define DEBUG_SERIAL
 
@@ -434,7 +435,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 				int thickness = 1;
 				int lineType = 8;
 
-				cv::putText( output, text, origin, cv::FONT_HERSHEY_SIMPLEX, 0.5, BLUE, thickness, lineType );
+				cv::putText( output, text, origin, cv::FONT_HERSHEY_SIMPLEX, 0.5, MEDIUM_PURPLE, thickness, lineType );
 
 				// draw previous pos
 				cv::Point prevPos = m_Camera.GetPrevPuckPos(); // mm, table coordinate

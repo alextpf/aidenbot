@@ -72,11 +72,11 @@ int main()
 	BotManager segmentor( comPort );
 	CheckHSV hsvChecker;
 
-	if ( !segmentor.IsSerialConnected() )
-	{
-		std::cout << "serial port is not connected" << std::endl; // check "PORT" definition in BotManager.cpp
-		return -1;
-	}
+	//if ( !segmentor.IsSerialConnected() )
+	//{
+	//	std::cout << "serial port is not connected" << std::endl; // check "PORT" definition in BotManager.cpp
+	//	return -1;
+	//}
 
 	segmentor.SetShowDebugImg( showDebugImg );
 	segmentor.SetShowOutPutImg( showOutputImg );
@@ -101,8 +101,9 @@ int main()
 	// variables
 	//////////////////
 
-	//char path[] = "E:/alex/aidenbot2/data/";
-	char path[] = "C:/Users/alex_/Documents/Arduino/aidenbot/v2/aidenbot/data/webcam/";
+	//char inPath[] = "E:/alex/aidenbot2/data/";
+	char inPath[] = "C:/Users/alex_/Documents/Arduino/aidenbot/v2/aidenbot/data/webcam/";
+	char outPath[] = "C:/tmp/";
 	char filename[] = "vid";
 
 	int webCamId = 1; // 0: default (laptop's camera), 1: external connected cam
@@ -113,11 +114,9 @@ int main()
 	//int num =  755; //249;
 	//int startFrame =  754;//248;// frame number we want to start at
 	int num = 719;
-	int startFrame = 716;// frame number we want to start at
+	int startFrame = 516;// frame number we want to start at
 	//int num = 184;
 	//int startFrame = 183;// frame number we want to start at
-	//char inputMode[] = "";
-	char outputMode[] = "";
 
 	/////////////////////////////////////////////////////
 	// Input
@@ -134,7 +133,7 @@ int main()
 			for (int i = 0; i < num; i++)
 			{
 				char buffer[100];
-				sprintf_s(buffer, "%s%s%03i.jpg", path, filename,i);
+				sprintf_s(buffer, "%s%s%03i.jpg", inPath, filename,i);
 
 				std::string name = buffer;
 				imgs.push_back(name);
@@ -150,7 +149,7 @@ int main()
 			// input: video
 			/////////////////////////
 			char buffer[100];
-			sprintf_s(buffer, "%s%s.mp4", path, filename);
+			sprintf_s(buffer, "%s%s.mp4", inPath, filename);
 
 			std::string name = buffer;
 			if (!processor.SetInput(name))
@@ -184,7 +183,7 @@ int main()
 			// output: images
 			/////////////////////////
 			char buffer[100];
-			sprintf_s(buffer, "%s%s", path, filename);
+			sprintf_s(buffer, "%s%s", outPath, filename);
 
 			processor.SetOutput(buffer, ".jpg");
 		}
@@ -196,7 +195,7 @@ int main()
 			// output: video
 			/////////////////////////
 			char buffer[100];
-			sprintf_s(buffer, "%s%s.mp4", path, filename );
+			sprintf_s(buffer, "%s%s.mp4", outPath, filename );
 
 			processor.SetOutput(buffer);
 		}
