@@ -14,9 +14,7 @@
 #define BLACK  cv::Scalar(   0,   0,   0 )
 #define PURPLE cv::Scalar( 255, 112, 132 )
 
-#define PORT "\\\\.\\COM4"
-
-#define DEBUG_SERIAL
+//#define DEBUG_SERIAL
 
 //=======================================================================
 // helper function to show type
@@ -45,15 +43,15 @@ std::string type2str(int type)
 }//std::string type2str(int type)
 
 //=======================================================================
-BotManager::BotManager()
+BotManager::BotManager( char* com )
 : m_TableFound( false )
 , m_BandWidth( 0 )
-, m_SerialPort( PORT )
 , m_ShowDebugImg( false )
 , m_ShowOutPutImg( true )
 , m_ManualPickTableCorners( false )
 {
 	m_FpsCalculator.SetBufferSize( 10 );
+	m_pSerialPort = std::make_shared<SerialPort>( com );
 }
 
 //=======================================================================
@@ -63,7 +61,8 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 	{
 		output = input.clone();
 	}
-
+	/*
+	//=====================================
 	//debug
 	if ( m_Debug )
 	{
@@ -80,7 +79,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 
 	char msg[40];
 
-	int res = m_SerialPort.ReadSerialPort<char>( msg, 40 );
+	int res = m_pSerialPort->ReadSerialPort<char>( msg, 40 );
 	bool toPrint = false;
 
 	for ( int i = 0; i < 40; i++ )
@@ -98,6 +97,8 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 	}
 
 	return;
+	//=====================================
+	*/
 
 	// find table range
 	char windowName[] = "corners";
@@ -484,18 +485,18 @@ void BotManager::OnMouse( int event, int x, int y, int f, void* data )
 bool BotManager::SendBotMessage()
 {
 	// message lay out :
-	// 0, 1: for sync use, "AA"
+	// 0, 1: Initial sync markers
 	// 2, 3: desired robot pos X
 	// 4, 5: desired robot pos Y
 	// 6, 7: detected robot pos X
 	// 8, 9: detected robot pos Y
 	// 10, 11: desired speed
 	// 12, 13: sync "BB"
-	BYTE message[14];
+	BYTE message[12];
 
-	// Initial sync "AA"
-	message[0] = 0x41;
-	message[1] = 0x41;
+	// Initial sync markers
+	message[0] = 0x7F;
+	message[1] = 0x7F;
 
 	// table size is 1003 x 597, which is within 2 bytes (2^16 = 65536, 2^8 = 256)
 	// so we use 2 bytes to store position. Similarly for speed
@@ -527,11 +528,11 @@ bool BotManager::SendBotMessage()
 	message[10] = ( speed >> 8 ) & 0xFF;
 	message[11] = speed & 0xFF;
 
-	// Ending sync "BB"
-	message[12] = 0x42;
-	message[13] = 0x42;
+	//// Ending sync "BB"
+	//message[12] = 0x42;
+	//message[13] = 0x42;
 
-	return m_SerialPort.WriteSerialPort<BYTE>( message, 14 );
+	return m_pSerialPort->WriteSerialPort<BYTE>( message, 12 );
 } // SendBotMessage
 
 //=======================================================================
@@ -539,7 +540,7 @@ void BotManager::ReceiveMessage()
 {
     char msg[200];
 
-    int res = m_SerialPort.ReadSerialPort<char>( msg, 200 );
+    int res = m_pSerialPort->ReadSerialPort<char>( msg, 200 );
     std::cout << msg << std::endl;
 
 } // ReceiveMessage

@@ -14,7 +14,7 @@
 class SerialPort
 {
 public:
-	
+
     SerialPort(char *portName);
     ~SerialPort();
 

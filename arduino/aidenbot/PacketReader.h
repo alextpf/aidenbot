@@ -16,9 +16,7 @@ class PacketReader
 {
 public:
     PacketReader();
-
     bool      ReadPacket();
-    bool      ReadPacket2();
     uint16_t  ExtractParamInt(uint8_t pos);
     
     RobotPos  GetDesiredBotPos()
@@ -34,12 +32,6 @@ public:
     int       GetDesiredMotorSpeed()
     {
       return m_DesiredMotorSpeed;
-    }
-    //debug
-    void recvBytesWithStartEndMarkers();
-    bool IsPacketRead()
-    {
-      return m_IsPacketRead;
     }
     
     void showNewData();

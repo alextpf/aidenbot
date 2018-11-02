@@ -49,7 +49,7 @@ bool ReadConfig( std::vector<int> & tmp, const int entries )
 int main()
 {
 	std::vector<int> tmp;
-	if ( !ReadConfig( tmp, 8 ) ) // read configuration file
+	if ( !ReadConfig( tmp, 9 ) ) // read configuration file
 	{
 		return 0;
 	}
@@ -62,10 +62,14 @@ int main()
 	bool showOutputImg  = tmp[5] == 1 ? true : false;
 	bool manualPickTableCorners = tmp[6] == 1 ? true : false;
 	int delay			= tmp[7];
+	int com				= tmp[8];
+
+	char comPort[20];
+	sprintf_s( comPort, "\\\\.\\COM%d", com);
 
 	// Create video procesor instance
 	VideoProcessor processor;
-	BotManager segmentor;
+	BotManager segmentor( comPort );
 	CheckHSV hsvChecker;
 
 	if ( !segmentor.IsSerialConnected() )

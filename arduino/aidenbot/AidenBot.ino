@@ -10,7 +10,7 @@
 
 long curr_time;                 // used in main loop
 long prev_time;
-bool testmode = true;
+bool testmode = false;
 //
 HBot hBot;
 PacketReader reader;
@@ -78,46 +78,37 @@ void loop()
     
     if (testmode)
     {
-      //testMovements();
+      testMovements();
     }
-    
-    if ( hBot.GetLoopCounter() % 10 == 0 )
+      
+    if( reader.ReadPacket() )
     {
-      //hBot.UpdatePosStraight();  // update straight line motion algorithm
-    }
-    
-    //if(false)
-    {
-#ifdef DEBUG_PACKET_READER
-    Serial.println( "Desired bot pos = " );
-    Serial.println( reader.GetDesiredBotPos().m_X );
-    Serial.println( reader.GetDesiredBotPos().m_Y );
-
-    Serial.println( "Detected bot pos = " );
-    Serial.println( reader.GetDetectedBotPos().m_X );
-    Serial.println( reader.GetDetectedBotPos().m_Y );
-
-    Serial.println( "Desired Motor Speed = " );
-    Serial.println( reader.GetDesiredMotorSpeed() );
-#endif
-    }
-    
-    //debug    
-    if( reader.ReadPacket2() )
-    {
+    #ifdef SHOW_LOG      
       //reader.showNewData();
-      Serial.println( "Desired bot pos = " );
-      Serial.println( reader.GetDesiredBotPos().m_X );
-      Serial.println( reader.GetDesiredBotPos().m_Y );
+      Serial.print( reader.GetDesiredBotPos().m_X );
+      Serial.print(' ');
+      Serial.print( reader.GetDesiredBotPos().m_Y );
+      Serial.print(' ');
   
-      Serial.println( "Detected bot pos = " );
-      Serial.println( reader.GetDetectedBotPos().m_X );
-      Serial.println( reader.GetDetectedBotPos().m_Y );
+      Serial.print( reader.GetDetectedBotPos().m_X );
+      Serial.print(' ');
+      Serial.print( reader.GetDetectedBotPos().m_Y );
+      Serial.print(' ');
   
-      Serial.println( "Desired Motor Speed = " );
-      Serial.println( reader.GetDesiredMotorSpeed() );
+      Serial.print( reader.GetDesiredMotorSpeed() );
+      Serial.println();
+    #endif    
+      // there's new data coming
+      hBot.SetMaxAbsSpeed( reader.GetDesiredMotorSpeed() );
+      hBot.SetPosStraight( reader.GetDesiredBotPos().m_X, reader.GetDesiredBotPos().m_Y );
+      
     }
     
     hBot.Update(); // internally update 
+    
+    if ( hBot.GetLoopCounter() % 10 == 0 )
+    {
+      hBot.UpdatePosStraight();  // update straight line motion algorithm
+    } 
   } 
 }

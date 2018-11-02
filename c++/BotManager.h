@@ -5,6 +5,7 @@
 #include <opencv2/video.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include <memory>
 #include <fstream>
 #include <list>
 
@@ -18,7 +19,7 @@
 class BotManager : public FrameProcessor
 {
 public:
-	BotManager();
+	BotManager( char* com );
 	~BotManager() {}
 
 	void Process(cv::Mat & input, cv::Mat & output) override;
@@ -43,7 +44,7 @@ public:
 
 	bool IsSerialConnected()
 	{
-		return m_SerialPort.IsConnected();
+		return m_pSerialPort->IsConnected();
 	}
 private:
 
@@ -85,7 +86,7 @@ private:
 	clock_t			m_CurrTime;
 	Camera			m_Camera;
 	Robot			m_Robot;
-	SerialPort		m_SerialPort;
+	std::shared_ptr<SerialPort>		m_pSerialPort;
 	bool			m_ShowDebugImg;
 	bool			m_ShowOutPutImg;
 	bool			m_ManualPickTableCorners;

@@ -9,14 +9,13 @@ PacketReader::PacketReader()
 {}
 
 //==========================================================================
-bool PacketReader::ReadPacket2()
+bool PacketReader::ReadPacket()
 {
     const byte numBytes = 12; // 10 byte data + 2 bytes sync markers
     static bool inSync = false; // true: ready; false: not ready
     static byte counter = 0;
     
-    byte startMarker = 0x41; // 'A'
-    byte endMarker = 0x42; // 'B'
+    byte startMarker = 0x7F;
 
     byte tmp;
     bool ret = false;
@@ -83,7 +82,7 @@ bool PacketReader::ReadPacket2()
         }
     }    
     return ret;
-} // ReadPacket2
+} // ReadPacket
 
 //==========================================================================
 uint16_t PacketReader::ExtractParamInt(uint8_t pos)
@@ -100,48 +99,6 @@ uint16_t PacketReader::ExtractParamInt(uint8_t pos)
   return (u.d); 
 } // ExtractParamInt
 
-//DEBUG
-void PacketReader::recvBytesWithStartEndMarkers() 
-{
-    const byte numBytes = 11;
-    static boolean recvInProgress = false;
-    static byte ndx = 0;
-    byte startMarker = 0x3C;
-    byte endMarker = 0x3E;
-    byte rb;
-   
-
-    while (Serial.available() > 0 && m_IsPacketRead == false) 
-    {
-        rb = Serial.read();
-
-        if (recvInProgress == true) 
-        {
-            if (rb != endMarker) 
-            {                
-                m_Buffer[ndx] = rb;
-                ndx++;
-                
-                if (ndx >= numBytes) 
-                {
-                    ndx = numBytes - 1;
-                }
-            }
-            else 
-            {
-                m_Buffer[ndx] = '\0'; // terminate the string
-                recvInProgress = false;
-                ndx = 0;
-                m_IsPacketRead = true;
-            }
-        }
-        else if (rb == startMarker) 
-        {
-            recvInProgress = true;
-        }
-    }
-}
-
 void PacketReader::showNewData() 
 {
     if (m_IsPacketRead == true) 
@@ -154,4 +111,4 @@ void PacketReader::showNewData()
         Serial.println();
         m_IsPacketRead = false;
     }
-}
+}//showNewData
