@@ -49,7 +49,7 @@ bool TableFinder::Refine4Edges(
 	ok = ok && RefineBottomEdge(corners, bandWidth, img );
 
 	// find the 4 corners, by the intersection of 4 edges
-	
+
 	float s1, s2;
 	ok = ok && Utility::FindLineIntersection( m_LeftEdge, m_TopEdge, m_TopLeft, s1, s2 );
 	ok = ok && Utility::FindLineIntersection( m_RightEdge, m_TopEdge, m_TopRight, s1, s2 );
@@ -76,7 +76,7 @@ bool TableFinder::Refine4Edges(
 	m_Right = ( m_TopRight.x + m_LowerRight.x ) * 0.5f;
 	m_Top = ( m_TopLeft.y + m_TopRight.y ) * 0.5f;
 	m_Bottom = ( m_LowerLeft.y + m_LowerRight.y ) * 0.5f;
-	
+
 	m_PixToMM = TABLE_LENGTH / ( m_Right - m_Left );
 	return true;
 }//Refine4Edge
@@ -199,7 +199,7 @@ bool TableFinder::RefineBottomEdge(
 	tmpCorners.push_back(corners[3]);
 
     cv::Point o_ul, o_ur, o_ll, o_lr; // debug use
-	
+
 #ifdef DEBUG
     cv::Scalar color = cv::Scalar( 0, 255, 0 ); // green
 
@@ -287,7 +287,7 @@ bool TableFinder::FilterLines(
 	}
 
 	return false;
-	
+
 }// FilterLines
 
 //===================================================================================

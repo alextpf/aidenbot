@@ -6,7 +6,7 @@ class FPSCalculator
 public:
 	FPSCalculator();
 
-	int GetFPS();
+	unsigned int GetFPS();
 	void AddFrameTime( const int dt /*ms*/ );
 	void SetBufferSize( const int m )
 	{

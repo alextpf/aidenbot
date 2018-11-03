@@ -46,7 +46,7 @@ public:
 
 	void SetRobotPos(const cv::Point& pos);
 	cv::Point GetRobotPos() const;
-
+	cv::Point GetBouncePos() const;
 private:
 	/////////////////////////////
 	// Puck
@@ -59,6 +59,7 @@ private:
 	cv::Point		m_PrevPuckPos;        // previous pos. mm. Corresponds to puckOldCoordX. Updated in reading from the camera, when new puck pos comes in
 	cv::Point		m_CurrPredictPos;
 	cv::Point		m_PrevPredictPos;
+	cv::Point		m_BouncePos;
 	int				m_PredictXAttack;     // predicted X coordinate for attack
 
 	//////////////

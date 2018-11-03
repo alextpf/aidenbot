@@ -50,6 +50,7 @@ BotManager::BotManager( char* com )
 , m_ShowDebugImg( false )
 , m_ShowOutPutImg( true )
 , m_ManualPickTableCorners( false )
+, m_NumFrame( 0 )
 {
 	m_FpsCalculator.SetBufferSize( 10 );
 	m_pSerialPort = std::make_shared<SerialPort>( com );
@@ -62,6 +63,10 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 	{
 		output = input.clone();
 	}
+
+	// increment frame number
+	m_NumFrame++;
+
 	/*
 	//=====================================
 	//debug
@@ -335,6 +340,14 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 			cv::imshow( "Mask:", m_Mask );
 		} // DEBUG
 
+		// Log table corners
+		cv::Point tl( static_cast<int>( m_TableFinder.GetLeft() ), static_cast<int>( m_TableFinder.GetTop() ) );
+		cv::Point tr( static_cast<int>( m_TableFinder.GetRight() ), static_cast<int>( m_TableFinder.GetTop() ) );
+		cv::Point ll( static_cast<int>( m_TableFinder.GetLeft() ), static_cast<int>( m_TableFinder.GetBottom() ) );
+		cv::Point lr( static_cast<int>( m_TableFinder.GetRight() ), static_cast<int>( m_TableFinder.GetBottom() ) );
+
+		m_Logger.WriteTableCorners( tl, tr, ll, lr );
+
 		m_TableFound = true;
 	} // if ( !m_TableFound )
 
@@ -356,6 +369,19 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 			cv::line( output, LowerLeft, LowerRight, GREEN, 2 );
 		}
 
+        // get time stamp
+		clock_t curr = clock();
+
+		unsigned int dt = static_cast<unsigned int>( ( curr - m_CurrTime ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
+
+		//debug
+		//dt = 50; // ms, 20 FPS, for debug purpose
+
+		// calculate FPS
+		m_FpsCalculator.AddFrameTime( dt );
+		unsigned int fps = m_FpsCalculator.GetFPS();
+		//===========================================
+
 		// find puck and robot position
         DiskFinder diskFinder;
         Contours contours;
@@ -369,12 +395,13 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 		cv::Vec6i redThresh( 160, 110, 110, 179, 255, 220 ); // lowH, lowS, lowV, highH, highS, highV
 		cv::Vec6i orangeThresh( 0, 110, 110, 20, 255, 220 ); // lowH, lowS, lowV, highH, highS, highV
 
-		const bool hasPuck = diskFinder.FindDisk2Thresh(
+		const bool puckFound = diskFinder.FindDisk2Thresh(
 			contours, center, hsvImg, redThresh, orangeThresh, m_Mask );
 
-        if( !hasPuck )
+        if( !puckFound )
         {
-            std::cout << "can't find puck" << std::endl;
+            // std::cout << "can't find puck" << std::endl;
+			m_Logger.LogStatus( m_NumFrame, dt, fps );
             return;
         }
 
@@ -409,20 +436,9 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 
         //m_Camera.SetRobotPos( robotPos );
 
-        // get time stamp
-		clock_t curr = clock();
-
-		int dt = static_cast<int>( ( curr - m_CurrTime ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
-
-		//debug
-		//dt = 50; // ms, for debug purpose
-
         // skip processing if 1st frame
 		if ( /*dt < 2000 &&*/ m_CurrTime > 0)
 		{
-			// calculate FPS
-			m_FpsCalculator.AddFrameTime( dt );
-			int fps = m_FpsCalculator.GetFPS();
 
             // do prediction work
 			m_Camera.CamProcess( dt );
@@ -458,6 +474,11 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
             // send the message by com port over to Arduino
             SendBotMessage();
 
+			m_Logger.LogStatus(
+				m_NumFrame, dt, fps,
+				center, m_Robot.GetDesiredRobotPos(),
+				m_Robot.GetDesiredRobotSpeed(),
+			);
 #ifdef DEBUG_SERIAL
             ReceiveMessage();
 #endif // DEBUG

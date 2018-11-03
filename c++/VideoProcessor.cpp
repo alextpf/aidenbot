@@ -1,14 +1,13 @@
 #include "VideoProcessor.h"
 
-#define FRAME_WIDTH 360
-#define FRAME_HEIGHT 640
+#define FRAME_WIDTH 640
+#define FRAME_HEIGHT 360
 
 //=======================================================================
 VideoProcessor::VideoProcessor()
 : m_CallIt( false )
 , m_Delay( -1 )
 , m_DownSampleRate( 1 ) // no downsample
-, m_FNumber( 0 )
 , m_TotalFrame( 0 )
 , m_Stop( false )
 , m_Digits( 0 )
@@ -91,7 +90,6 @@ void VideoProcessor::WriteNextFrame( cv::Mat& frame )
 //=======================================================================
 bool VideoProcessor::SetInput( std::string filename )
 {
-    m_FNumber = 0;
     m_TotalFrame = 0;
     // In case a resource was already
     // associated with the VideoCapture instance
@@ -105,7 +103,6 @@ bool VideoProcessor::SetInput( std::string filename )
 //=======================================================================
 bool VideoProcessor::SetInput( int id )
 {
-    m_FNumber = 0;
     m_TotalFrame = 0;
     // In case a resource was already
     // associated with the VideoCapture instance
@@ -122,7 +119,6 @@ bool VideoProcessor::SetInput( int id )
 //=======================================================================
 void VideoProcessor::SetInput( const std::vector<std::string>& imgs )
 {
-    m_FNumber = 0;
     m_TotalFrame = 0;
     // In case a resource was already
     // associated with the VideoCapture instance
@@ -209,7 +205,7 @@ void VideoProcessor::SetFrameProcessor( FrameProcessor* frameProcessorPtr )
 	if( m_FrameProcessor != NULL )
 	{
 		CallProcess();
-	}    
+	}
 }
 
 //=======================================================================
@@ -347,7 +343,7 @@ bool VideoProcessor::SetFrameNumber( long pos )
 			// move to position in vector
 			m_ItImg = m_Images.begin() + pos;
 			return true;
-		}        
+		}
     }
     else
     {
@@ -433,10 +429,6 @@ void VideoProcessor::Run()
             {
                 m_FrameProcessor->Process( frame, output );
             }
-
-            // increment frame number
-            m_FNumber++;
-            //std::cout << m_FNumber << std::endl;//print the number for debug
         }
         else
         {

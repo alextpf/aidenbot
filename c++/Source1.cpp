@@ -104,7 +104,7 @@ int main()
 	//char inPath[] = "E:/alex/aidenbot2/data/";
 	char inPath[] = "C:/Users/alex_/Documents/Arduino/aidenbot/v2/aidenbot/data/webcam/";
 	char outPath[] = "C:/tmp/";
-	char filename[] = "vid";
+	char filename[] = "pic";
 
 	int webCamId = 1; // 0: default (laptop's camera), 1: external connected cam
 

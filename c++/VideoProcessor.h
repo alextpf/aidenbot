@@ -15,7 +15,7 @@ class FrameProcessor
 public:
 	FrameProcessor() : m_Debug( false )
 	{}
-					 
+
 	// processing method
     virtual void Process( cv::Mat &input, cv::Mat &output ) = 0;
 	bool m_Debug;
@@ -105,12 +105,6 @@ public:
     void SetDelay( int d )
     {
         m_Delay = d;
-    }
-
-    // a count is kept of the processed frames
-    long GetNumberOfProcessedFrames()
-    {
-        return m_FNumber;
     }
 
     // return the size of the video frame
@@ -227,9 +221,7 @@ private:
     // whether to down sample the image to save computation power
     unsigned int m_DownSampleRate;
 
-    // number of processed frames
-    long m_FNumber;
-
+    // number of frames
     long m_TotalFrame;
 
     // stop at this frame number

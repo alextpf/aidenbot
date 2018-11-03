@@ -5,20 +5,20 @@ FPSCalculator::FPSCalculator()
 {}
 
 //=============================================
-int FPSCalculator::GetFPS()
+unsigned int FPSCalculator::GetFPS()
 {
 	float s = static_cast<float>( m_FrameTimeBuffer.size() );
-	
+
 	float sum( 0 );
 
 	std::list<int>::iterator it = m_FrameTimeBuffer.begin();
-	
+
 	for ( int i = 0; i < s; i++, it++ )
 	{
 		sum += static_cast<float>( *it );
 	}
-	
-	int fps = static_cast<int>( s / sum * 1000.0f + 0.5f );
+
+	unsigned int fps = static_cast<unsigned int>( s / sum * 1000.0f + 0.5f );
 
 	return fps;
 }

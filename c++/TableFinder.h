@@ -21,7 +21,7 @@ public:
 		unsigned int minVote,
 		float minLength,
 		float maxGap);
-	
+
 	bool Refine4Edges(
 		const std::vector<cv::Point> & corners,
 		unsigned int bandWidth,
@@ -53,17 +53,17 @@ public:
 	{
 		m_TopLeft = p;
 	}
-	
+
 	void SetTopRight( const cv::Point& p )
 	{
 		m_TopRight = p;
 	}
-	
+
 	void SetLowerLeft( const cv::Point& p )
 	{
 		m_LowerLeft = p;
 	}
-	
+
 	void SetLowerRight( const cv::Point& p )
 	{
 		m_LowerRight = p;
