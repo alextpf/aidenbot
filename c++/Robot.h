@@ -54,6 +54,11 @@ public:
 	{
 		m_DesiredSpeed = s;
 	}
+
+	unsigned int GetRobotStatus() const
+	{
+		return m_RobotStatus;
+	}
 private:
 	// 0: Init
 	// 1: Defense

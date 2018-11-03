@@ -11,10 +11,24 @@ public:
 	Logger();
 
 	void WriteTableCorners(
-		cv::Point& TopLeft,
-		cv::Point& TopRight,
-		cv::Point& LowerLeft,
-		cv::Point& LowerRight );
+		const cv::Point& TopLeft,
+		const cv::Point& TopRight,
+		const cv::Point& LowerLeft,
+		const cv::Point& LowerRight ) const;
 
-	void LogStatus( long numFrame, unsigned int dt, unsigned int fps );
+	void LogStatus(
+		const long numFrame,
+		const unsigned int dt,
+		const unsigned int fps ) const;
+
+	void LogStatus(
+		const long numFrame,
+		const unsigned int dt,
+		const unsigned int fps,
+		const cv::Point& puckPos,
+		const cv::Point& bouncePos,
+		const cv::Point& botPos,
+		const int botSpeed,
+		const int predictStatus,
+		const unsigned int botStatus ) const;
 }; // Logger

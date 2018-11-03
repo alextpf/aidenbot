@@ -476,8 +476,11 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 
 			m_Logger.LogStatus(
 				m_NumFrame, dt, fps,
-				center, m_Robot.GetDesiredRobotPos(),
+				center, m_Camera.GetBouncePos(),
+				m_Robot.GetDesiredRobotPos(),
 				m_Robot.GetDesiredRobotSpeed(),
+				m_Camera.GetPredictStatus(),
+				m_Robot.GetRobotStatus()
 			);
 #ifdef DEBUG_SERIAL
             ReceiveMessage();
