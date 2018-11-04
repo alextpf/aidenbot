@@ -31,4 +31,7 @@ public:
 		const int botSpeed,
 		const int predictStatus,
 		const unsigned int botStatus ) const;
+
+private:
+
 }; // Logger

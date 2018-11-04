@@ -346,7 +346,10 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 		cv::Point ll( static_cast<int>( m_TableFinder.GetLeft() ), static_cast<int>( m_TableFinder.GetBottom() ) );
 		cv::Point lr( static_cast<int>( m_TableFinder.GetRight() ), static_cast<int>( m_TableFinder.GetBottom() ) );
 
-		m_Logger.WriteTableCorners( tl, tr, ll, lr );
+		if ( m_IsLog )
+		{
+			m_Logger.WriteTableCorners( tl, tr, ll, lr );
+		}
 
 		m_TableFound = true;
 	} // if ( !m_TableFound )
@@ -392,105 +395,126 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
         cv::cvtColor( input, hsvImg, CV_BGR2HSV );
 
 		// 1. find puck
-		cv::Vec6i redThresh( 160, 110, 110, 179, 255, 220 ); // lowH, lowS, lowV, highH, highS, highV
-		cv::Vec6i orangeThresh( 0, 110, 110, 20, 255, 220 ); // lowH, lowS, lowV, highH, highS, highV
-
 		const bool puckFound = diskFinder.FindDisk2Thresh(
-			contours, center, hsvImg, redThresh, orangeThresh, m_Mask );
+			contours, center, hsvImg, m_RedThresh, m_OrangeThresh, m_Mask );
 
-        if( !puckFound )
+        if( puckFound )
         {
             // std::cout << "can't find puck" << std::endl;
-			m_Logger.LogStatus( m_NumFrame, dt, fps );
-            return;
-        }
-
-		//draw puck center
-		if ( m_ShowOutPutImg )
-		{
-			const int radius = 15;
-			const int thickness = 2;
-			cv::circle( output, center, radius, GREEN, thickness );
-		}
-
-        // convert screen coordinate to table coordinate
-		const cv::Point puckPos = m_TableFinder.ImgToTableCoordinate( center ); // mm, in table coordinate
-
-		m_Camera.SetCurrPuckPos( puckPos );
-
-        // 2. find robot
-
-        //cv::Vec6i orangeThresh( 0, 110, 110, 20, 255, 220 ); // lowH, lowS, lowV, highH, highS, highV
-
-        //const bool hasRobot = diskFinder.FindDisk1Thresh(
-        //    contours, center, hsvImg, redThresh, m_Mask );
-
-        //if( !hasRobot )
-        //{
-        //    std::cout << "can't find Robot" << std::endl;
-        //    return;
-        //}
-
-        //// convert screen coordinate to table coordinate
-        //const cv::Point robotPos = m_TableFinder.ImgToTableCoordinate( center ); // mm, in table coordinate
-
-        //m_Camera.SetRobotPos( robotPos );
-
-        // skip processing if 1st frame
-		if ( /*dt < 2000 &&*/ m_CurrTime > 0)
-		{
-
-            // do prediction work
-			m_Camera.CamProcess( dt );
-
+			//draw puck center
 			if ( m_ShowOutPutImg )
 			{
-				// show FPS on screen
-				const std::string text = "FPS = " + std::to_string( fps );
-				cv::Point origin( 520, 25 ); // upper right
-				int thickness = 1;
-				int lineType = 8;
-
-				cv::putText( output, text, origin, cv::FONT_HERSHEY_SIMPLEX, 0.5, MEDIUM_PURPLE, thickness, lineType );
-
-				// draw previous pos
-				cv::Point prevPos = m_Camera.GetPrevPuckPos(); // mm, table coordinate
-				prevPos = m_TableFinder.TableToImgCoordinate( prevPos );
-
-				cv::line( output, prevPos, center, cv::Scalar( 130,221,238 )/**/, 2 );
-
-				// draw prediction on screen
-				cv::Point predPos = m_Camera.GetCurrPredictPos();
-				predPos = m_TableFinder.TableToImgCoordinate( predPos );
-				cv::line( output, predPos, center, PURPLE, 2 );
+				const int radius = 15;
+				const int thickness = 2;
+				cv::circle( output, center, radius, GREEN, thickness );
 			}
 
-            // determine robot strategy
-			m_Robot.NewDataStrategy( m_Camera );
+			// convert screen coordinate to table coordinate
+			const cv::Point puckPos = m_TableFinder.ImgToTableCoordinate( center ); // mm, in table coordinate
 
-            // determine robot position
-            m_Robot.RobotMoveDecision( m_Camera );
+			m_Camera.SetCurrPuckPos( puckPos );
 
-            // send the message by com port over to Arduino
-            SendBotMessage();
+			// 2. find robot
 
-			m_Logger.LogStatus(
-				m_NumFrame, dt, fps,
-				center, m_Camera.GetBouncePos(),
-				m_Robot.GetDesiredRobotPos(),
-				m_Robot.GetDesiredRobotSpeed(),
-				m_Camera.GetPredictStatus(),
-				m_Robot.GetRobotStatus()
-			);
+			//cv::Vec6i orangeThresh( 0, 110, 110, 20, 255, 220 ); // lowH, lowS, lowV, highH, highS, highV
+
+			//const bool hasRobot = diskFinder.FindDisk1Thresh(
+			//    contours, center, hsvImg, redThresh, m_Mask );
+
+			//if( !hasRobot )
+			//{
+			//    std::cout << "can't find Robot" << std::endl;
+			//    return;
+			//}
+
+			//// convert screen coordinate to table coordinate
+			//const cv::Point robotPos = m_TableFinder.ImgToTableCoordinate( center ); // mm, in table coordinate
+
+			//m_Camera.SetRobotPos( robotPos );
+
+			// skip processing if 1st frame
+			if ( /*dt < 2000 &&*/ m_CurrTime > 0 )
+			{
+
+				// do prediction work
+				m_Camera.CamProcess( dt );
+
+				if ( m_ShowOutPutImg )
+				{
+					// show FPS on screen
+					const std::string text = "FPS = " + std::to_string( fps );
+					cv::Point origin( 520, 25 ); // upper right
+					int thickness = 1;
+					int lineType = 8;
+
+					cv::putText( output, text, origin, cv::FONT_HERSHEY_SIMPLEX, 0.5, MEDIUM_PURPLE, thickness, lineType );
+
+					// draw previous pos
+					cv::Point prevPos = m_Camera.GetPrevPuckPos(); // mm, table coordinate
+					prevPos = m_TableFinder.TableToImgCoordinate( prevPos );
+
+					cv::line( output, prevPos, center, cv::Scalar( 130, 221, 238 )/**/, 2 );
+
+					// draw prediction on screen
+					cv::Point predPos = m_Camera.GetCurrPredictPos();
+					predPos = m_TableFinder.TableToImgCoordinate( predPos );
+
+					// draw bound pos if there's one
+					cv::Point bouncePos = m_Camera.GetBouncePos();
+					if ( bouncePos.x == -1 && bouncePos.y == -1 )
+					{
+						// no bounce
+						cv::line( output, predPos, center, PURPLE, 2 );
+					}
+					else
+					{
+						// have one bounce
+						bouncePos = m_TableFinder.TableToImgCoordinate( bouncePos );
+						cv::line( output, bouncePos, center, PURPLE, 2 );
+						cv::line( output, predPos, bouncePos, PURPLE, 2 );
+					}
+				}
+
+				// determine robot strategy
+				m_Robot.NewDataStrategy( m_Camera );
+
+				// determine robot position
+				m_Robot.RobotMoveDecision( m_Camera );
+
+				// send the message by com port over to Arduino
+				SendBotMessage();
+
+				if ( m_IsLog )
+				{
+					m_Logger.LogStatus(
+						m_NumFrame, dt, fps,
+						center, m_Camera.GetBouncePos(),
+						m_Robot.GetDesiredRobotPos(),
+						m_Robot.GetDesiredRobotSpeed(),
+						m_Camera.GetPredictStatus(),
+						m_Robot.GetRobotStatus() );
+				}
+
 #ifdef DEBUG_SERIAL
-            ReceiveMessage();
+				ReceiveMessage();
 #endif // DEBUG
 
-		}
+			} // if ( /*dt < 2000 &&*/ m_CurrTime > 0 )
+
+			m_Camera.SetPrevPuckPos( puckPos );
+        }
+		else
+		{
+			if ( m_IsLog )
+			{
+				m_Logger.LogStatus( m_NumFrame, dt, fps );
+			}
+
+		} // if( puckFound )
 
         // update time stamp and puck position
         m_CurrTime = curr;
-		m_Camera.SetPrevPuckPos( puckPos );
+
 	} // if ( m_TableFound )
 
 }//Process

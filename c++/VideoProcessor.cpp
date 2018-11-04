@@ -27,9 +27,9 @@ bool VideoProcessor::ReadNextFrame( cv::Mat& frame )
 
     if( m_Images.size() == 0 )
     {
-        ////////////////
-        // it's video
-        ////////////////
+        //////////////////////////
+        // it's video or webcam
+        //////////////////////////
         ok = m_Capture.read( m_TmpFrame );
     }
     else

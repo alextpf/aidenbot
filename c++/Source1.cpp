@@ -12,6 +12,7 @@
 #include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\VideoProcessor.h"
 #include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\BotManager.h"
 #include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\CheckHSV.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\ImgComposer.h"
 
 using namespace cv;
 using namespace std;
@@ -48,21 +49,49 @@ bool ReadConfig( std::vector<int> & tmp, const int entries )
 //========================================
 int main()
 {
+	//////////////////
+	// variables
+	//////////////////
+
+	//char inPath[] = "E:/alex/aidenbot2/data/";
+	const char inPath[]		= "C:/tmp/data set2/";
+	const char outPath[]	= "C:/tmp/";
+	const char filename[]	= "pic";
+
+	const int webCamId		= 1; // 0: default (laptop's camera), 1: external connected cam
+	const int startFrame	= 0;// frame number we want to start at
+	const int endFrame		= 1029;
+
+	//////////////////////
+	// Read from config
+	//////////////////////
 	std::vector<int> tmp;
-	if ( !ReadConfig( tmp, 9 ) ) // read configuration file
+	if ( !ReadConfig( tmp, 22 ) ) // read configuration file
 	{
 		return 0;
 	}
 
-	int operation		= tmp[0]; // 1. run the program, 2. check HSV, 3. record webcam images only
-	int inputType		= tmp[1];
-	int outputType		= tmp[2];
-	bool showDebugImg	= tmp[3] == 1 ? true : false;
-	bool showInputImg	= tmp[4] == 1 ? true : false;
-	bool showOutputImg  = tmp[5] == 1 ? true : false;
-	bool manualPickTableCorners = tmp[6] == 1 ? true : false;
-	int delay			= tmp[7];
-	int com				= tmp[8];
+	const int operation		= tmp[0]; // 1. run the program, 2. check HSV, 3. record webcam images only
+	const int inputType		= tmp[1];
+	const int outputType	= tmp[2];
+	const bool showDebugImg	= tmp[3] == 1 ? true : false;
+	bool showInputImg		= tmp[4] == 1 ? true : false;
+	if ( operation == 2/*check hsv*/ )
+	{
+		showInputImg = true;
+	}
+	const bool showOutputImg			= tmp[5] == 1 ? true : false;
+	const bool manualPickTableCorners	= tmp[6] == 1 ? true : false;
+	const int delay			= tmp[7];
+	const int com			= tmp[8];
+
+	cv::Vec6i red;
+	red[0] = tmp[9];	red[1] = tmp[10];	red[2] = tmp[11];	red[3] = tmp[12];	red[4] = tmp[13];	red[5] = tmp[14];
+
+	cv::Vec6i orange;
+	orange[0] = tmp[15];	orange[1] = tmp[16];	orange[2] = tmp[17];	orange[3] = tmp[18];	orange[4] = tmp[19];	orange[5] = tmp[20];
+
+	const bool isLog		= tmp[21] == 1 ? true : false;
 
 	char comPort[20];
 	sprintf_s( comPort, "\\\\.\\COM%d", com);
@@ -71,17 +100,21 @@ int main()
 	VideoProcessor processor;
 	BotManager segmentor( comPort );
 	CheckHSV hsvChecker;
+	ImgComposer imgComposer;
 
-	//if ( !segmentor.IsSerialConnected() )
-	//{
-	//	std::cout << "serial port is not connected" << std::endl; // check "PORT" definition in BotManager.cpp
-	//	return -1;
-	//}
+	if ( operation == 1 && inputType == 2 && !segmentor.IsSerialConnected() )
+	{
+		std::cout << "serial port is not connected" << std::endl; // check "PORT" definition in BotManager.cpp
+		return -1;
+	}
 
 	segmentor.SetShowDebugImg( showDebugImg );
 	segmentor.SetShowOutPutImg( showOutputImg );
 	segmentor.SetManualPickTableCorners( manualPickTableCorners );
 	segmentor.SetBandWidth(10);
+	segmentor.SetRedThreshold( red );
+	segmentor.SetOrangeThreshold( orange );
+	segmentor.SetIsLog( isLog );
 
 	FrameProcessor * proc = NULL;
 	switch ( operation )
@@ -93,30 +126,13 @@ int main()
 		proc = &hsvChecker;
 		break;
 	case 3:
+		break;
+	case 4:
+		proc = &imgComposer;
+		break;
 	default:
 		break;
 	}
-
-	//////////////////
-	// variables
-	//////////////////
-
-	//char inPath[] = "E:/alex/aidenbot2/data/";
-	char inPath[] = "C:/Users/alex_/Documents/Arduino/aidenbot/v2/aidenbot/data/webcam/";
-	char outPath[] = "C:/tmp/";
-	char filename[] = "pic";
-
-	int webCamId = 1; // 0: default (laptop's camera), 1: external connected cam
-
-	// note: 213 - 380 good samples
-    // 452 - 507 samples for attack
-	// 653 - 700
-	//int num =  755; //249;
-	//int startFrame =  754;//248;// frame number we want to start at
-	int num = 719;
-	int startFrame = 516;// frame number we want to start at
-	//int num = 184;
-	//int startFrame = 183;// frame number we want to start at
 
 	/////////////////////////////////////////////////////
 	// Input
@@ -130,7 +146,7 @@ int main()
 			/////////////////////////
 			std::vector<std::string> imgs;
 
-			for (int i = 0; i < num; i++)
+			for (int i = 0; i < endFrame; i++)
 			{
 				char buffer[100];
 				sprintf_s(buffer, "%s%s%03i.jpg", inPath, filename,i);

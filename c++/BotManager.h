@@ -47,6 +47,22 @@ public:
 	{
 		return m_pSerialPort->IsConnected();
 	}
+
+	void SetRedThreshold( const cv::Vec6i& red )
+	{
+		m_RedThresh = red;
+	}
+
+	void SetOrangeThreshold( const cv::Vec6i& orange )
+	{
+		m_OrangeThresh = orange;
+	}
+
+	void SetIsLog( const bool isLog )
+	{
+		m_IsLog = isLog;
+	}
+
 private:
 
 	// send the message to Arduino over com port
@@ -94,4 +110,7 @@ private:
 	FPSCalculator	m_FpsCalculator;
 	Logger			m_Logger;
 	long			m_NumFrame;
+	cv::Vec6i		m_RedThresh;
+	cv::Vec6i		m_OrangeThresh;
+	bool			m_IsLog;
 };
