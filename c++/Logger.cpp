@@ -54,6 +54,8 @@ void Logger::LogStatus(
 	const unsigned int fps,
 	const cv::Point& puckPos,
 	const cv::Point& bouncePos,
+	const cv::Point& predPos,
+	const cv::Point& prevPos,
 	const cv::Point& botPos,
 	const int botSpeed,
 	const int predictStatus,
@@ -71,6 +73,10 @@ void Logger::LogStatus(
 	logFile << puckPos.x << " " << puckPos.y << std::endl;
 	logFile << "bounce pos: \n";
 	logFile << bouncePos.x << " " << bouncePos.y << std::endl;
+	logFile << "predict pos: \n";
+	logFile << predPos.x << " " << predPos.y << std::endl;
+	logFile << "previous pos: \n";
+	logFile << prevPos.x << " " << prevPos.y << std::endl;
 	logFile << "desired bot pos: \n";
 	logFile << botPos.x << " " << botPos.y << std::endl;
 	logFile << "desired bot speed: \n";

@@ -54,13 +54,16 @@ int main()
 	//////////////////
 
 	//char inPath[] = "E:/alex/aidenbot2/data/";
-	const char inPath[]		= "C:/tmp/data set2/";
-	const char outPath[]	= "C:/tmp/";
+// C:/Users/alex_/Documents/Arduino/aidenbot/v2/aidenbot/data/webcam
+
+	const char inPath[]		= "C:/tmp/data set1/";
+	//const char inPath[]		= "C:/Users/alex_/Documents/Arduino/aidenbot/v2/aidenbot/data/webcam/";
+	const char outPath[]	= "C:/tmp/result1/";
 	const char filename[]	= "pic";
 
 	const int webCamId		= 1; // 0: default (laptop's camera), 1: external connected cam
-	const int startFrame	= 0;// frame number we want to start at
-	const int endFrame		= 1029;
+	const int startFrame	= 81;//+138;// frame number we want to start at
+	const int endFrame		= 890;
 
 	//////////////////////
 	// Read from config
@@ -249,6 +252,5 @@ int main()
 	// Start the Process
 	processor.Run();
 
-	cv::waitKey();
 	return 0;
 }

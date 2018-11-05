@@ -64,7 +64,7 @@ bool DiskFinder::FindDisk2Thresh(
 #endif // DEBUG
 
 	return FindDiskInternal( contours, center, hsvImg, res );
-	
+
 }// FindDisk2Thresh
 
 //===================================================================================
@@ -96,8 +96,8 @@ bool DiskFinder::FindDiskInternal(
 	{
 		// 1. test area
 		double area = cv::contourArea( tmpContours[i] );
-		double areaLow = 500.0;
-		double areaHigh = 850.0;
+		static double areaLow = 480.0;
+		static double areaHigh = 850.0;
 		if ( area > areaLow && area < areaHigh )
 		{
 			// 2. test roundness

@@ -14,6 +14,7 @@
 #define BLACK  cv::Scalar(   0,   0,   0 )
 #define PURPLE cv::Scalar( 255, 112, 132 )
 #define MEDIUM_PURPLE cv::Scalar( 219, 112, 147 )
+#define CORNER_WIN "corners"
 
 //#define DEBUG_SERIAL
 
@@ -107,256 +108,14 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 	*/
 
 	// find table range
-	char windowName[] = "corners";
-
 	if ( !m_TableFound )
 	{
-		cv::Point TopLeft;
-		cv::Point TopRight;
-		cv::Point LowerLeft;
-		cv::Point LowerRight;
-
-		// user-picked 4 corners
-		cv::imshow( windowName, input );
-		cv::setMouseCallback( windowName, OnMouse, &m_Corners );
-		while ( m_Corners.size() < 4 )
-		{
-			size_t m = m_Corners.size();
-			if ( m > 0 )
-			{
-				cv::circle( input, m_Corners[m - 1], 3, GREEN, 2 );
-			}
-
-			cv::imshow( windowName, input );
-			cv::waitKey( 10 );
-		}
-
-		// last point
-		cv::circle( input, m_Corners[3], 3, GREEN, 2 );
-
-		cv::imshow( windowName, input );
-		cv::waitKey( 10 );
-		// order the 4 corners
-		OrderCorners();
-
-		if ( m_ShowDebugImg )
-		{
-			// draw the bands around 4 picked corners
-			// m_Corners is arranged by: ul, ur, ll, lr
-			cv::circle( input, m_Corners[0], 3, GREEN, 2 );
-			cv::circle( input, m_Corners[1], 3, RED, 2 );
-			cv::circle( input, m_Corners[2], 3, BLUE, 2 );
-			cv::circle( input, m_Corners[3], 3, WHITE, 2 );
-
-			cv::imshow( "ORder:", input );
-		} // DEBUG
-
-		if ( !m_ManualPickTableCorners )
-		{
-			// blur image first by Gaussian
-			int kernelSize = 3;
-			double std = 2.0;
-
-			cv::GaussianBlur( input, input, cv::Size( kernelSize, kernelSize ), std, std );
-
-			if ( m_ShowDebugImg )
-			{
-				cv::imshow( "gauss:", input );
-			} // DEBUG
-
-			// convert to gray scale
-			cv::Mat tmp;
-			cv::cvtColor( input, tmp, cv::COLOR_RGB2GRAY );
-
-			cv::Mat tmp2 = tmp.clone();
-
-			// adaptive threshold
-			int adaptiveMethod = cv::ADAPTIVE_THRESH_MEAN_C;
-			int thresholdType = cv::THRESH_BINARY;
-			int blockSiz = 55;
-
-			cv::adaptiveThreshold( tmp2, tmp2, 255, adaptiveMethod, thresholdType, blockSiz, 5 );
-			//cv::threshold(tmp, tmp1, 128, 255, cv::THRESH_BINARY_INV);
-
-			// close, fill the "holes" in the foreground
-			//cv::dilate( tmp2, tmp2, cv::Mat(), cv::Point( -1, -1 ), 2/*num iteration*/ );
-	  //      cv::erode( tmp2, tmp2, cv::Mat(), cv::Point( -1, -1 ), 2/*num iteration*/ );
-
-			cv::Mat ellipse = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 5, 5 ) );
-			cv::morphologyEx( tmp2, tmp2, cv::MORPH_CLOSE, ellipse, cv::Point( -1, -1 ), 1/*num iteration*/ );
-
-			if ( m_ShowDebugImg )
-			{
-				cv::imshow( "adaptiveThreshold + closing:", tmp2 );
-			} // DEBUG
-
-			std::vector< std::vector< cv::Point > > contours;
-			std::vector< cv::Vec4i > hierarchy;
-			cv::findContours( tmp2, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE );
-
-			//find the contour that's greater than some sizes, i.e. the table
-			double thresh = tmp2.size().width * tmp2.size().height * 0.5;
-
-			std::vector< std::vector< cv::Point > > leftOver;
-			for ( int i = 0; i < contours.size(); i++ )
-			{
-				double area = cv::contourArea( contours[i] );
-				if ( area > thresh )
-				{
-					leftOver.push_back( contours[i] );
-				}
-			}
-
-			if ( leftOver.size() == 1 )
-			{
-				tmp2 = cv::Mat::zeros( tmp2.size(), CV_8UC1 );
-				drawContours( tmp2, leftOver, 0, 255/*color*/, cv::FILLED );
-				// do closing to clean noise again
-				cv::morphologyEx( tmp2, tmp2, cv::MORPH_CLOSE, ellipse, cv::Point( -1, -1 ), 1/*num iteration*/ );
-
-				if ( m_ShowDebugImg )
-				{
-					cv::imshow( "contour:", tmp2 );
-				} // DEBUG
-			}
-			else
-			{
-				// threshold failed, bail out
-				tmp2 = tmp.clone();
-			}
-
-			// canny low & heigh threshold
-			int low = 50;
-			int high = 100;
-
-			cv::Canny( tmp2, tmp2, low, high );
-
-			// dilate Canny results
-			cv::dilate( tmp2, tmp2, cv::Mat(), cv::Point( -1, -1 ), 2 /*num iteration*/ );
-
-			if ( m_ShowDebugImg )
-			{
-				cv::imshow( "canny:", tmp2 );
-			} // DEBUG
-
-			// mask out anything that's outside of the user-picked band
-			MaskCanny( tmp2 );
-
-			if ( m_ShowDebugImg )
-			{
-				cv::Mat copy = input.clone();
-
-				// draw bounds
-				cv::Scalar color = GREEN; // green
-
-				cv::line( copy, m_o_ul, m_o_ur, color );
-				cv::line( copy, m_o_ul, m_o_ll, color );
-				cv::line( copy, m_o_ur, m_o_lr, color );
-				cv::line( copy, m_o_ll, m_o_lr, color );
-
-				cv::line( copy, m_i_ul, m_i_ur, color );
-				cv::line( copy, m_i_ul, m_i_ll, color );
-				cv::line( copy, m_i_ur, m_i_lr, color );
-				cv::line( copy, m_i_ll, m_i_lr, color );
-
-				cv::imshow( "bound:", copy );
-			} // DEBUG
-
-			// Hough line transform
-			double dRho = 1.0f;
-			double dTheta = CV_PI / 180.0f;
-			unsigned int minVote = 80;//360 / 2;
-			float minLength = 50.0f;// 360 / 2;
-			float maxGap = 10.0f;
-			//LineFinder::METHOD m = LineFinder::METHOD::TRAD;
-			LineFinder::METHOD m = LineFinder::METHOD::PROB;
-
-			m_TableFinder.SetMethod( m );
-			m_TableFinder.SetDeltaRho( dRho );
-			m_TableFinder.SetDeltaTheta( dTheta );
-			m_TableFinder.SetMinVote( minVote );
-			m_TableFinder.SetMinLength( minLength );
-			m_TableFinder.SetMaxGap( maxGap );
-
-			if ( m == LineFinder::METHOD::PROB )
-			{
-				const std::vector<cv::Vec4i>& lines = m_TableFinder.FindLinesP( tmp2 );
-
-				if ( m_ShowDebugImg )
-				{
-					//cv::Mat copy = input.clone();
-					m_TableFinder.DrawDetectedLines( input, BLUE );
-					cv::imshow( "HoughLine:", input );
-				} // DEBUG
-
-				// filter out the lines that's out of bound
-				if ( !m_TableFinder.Refine4Edges( m_Corners, m_BandWidth, input/*debug use*/ ) )
-				{
-					std::cout << "error" << std::endl;
-					return;
-				}
-			}
-			else
-			{
-				const std::vector<cv::Vec2f>& lines = m_TableFinder.FindLines( tmp2 );
-			}
-
-			if ( m_ShowDebugImg )
-			{
-				m_TableFinder.DrawTableLines( input, RED );
-				cv::imshow( "Filtered HoughLine:", input );
-			} // DEBUG
-
-			// 4 corners
-			TopLeft = m_TableFinder.GetTopLeft();
-			TopRight = m_TableFinder.GetTopRight();
-			LowerLeft = m_TableFinder.GetLowerLeft();
-			LowerRight = m_TableFinder.GetLowerRight();
-
-		}
-		else
-		{
-			// corners is arranged by: ul, ur, ll, lr
-			TopLeft = m_Corners[0];
-			TopRight = m_Corners[1];
-			LowerLeft = m_Corners[2];
-			LowerRight = m_Corners[3];
-		} // if ( !m_ManualPickTableCorners )
-
-		// construct mask based on table 4 corners
-		std::vector< cv::Point > tmpContour;
-		tmpContour.push_back( TopRight );
-		tmpContour.push_back( TopLeft );
-		tmpContour.push_back( LowerLeft );
-		tmpContour.push_back( LowerRight );
-
-		std::vector< std::vector< cv::Point > > tableContour;
-		tableContour.push_back( tmpContour );
-		m_Mask = cv::Mat::zeros( input.size(), CV_8UC1 );
-		drawContours( m_Mask, tableContour, 0, 255/*color*/, cv::FILLED );
-
-		if ( m_ShowDebugImg )
-		{
-			cv::imshow( "Mask:", m_Mask );
-		} // DEBUG
-
-		// Log table corners
-		cv::Point tl( static_cast<int>( m_TableFinder.GetLeft() ), static_cast<int>( m_TableFinder.GetTop() ) );
-		cv::Point tr( static_cast<int>( m_TableFinder.GetRight() ), static_cast<int>( m_TableFinder.GetTop() ) );
-		cv::Point ll( static_cast<int>( m_TableFinder.GetLeft() ), static_cast<int>( m_TableFinder.GetBottom() ) );
-		cv::Point lr( static_cast<int>( m_TableFinder.GetRight() ), static_cast<int>( m_TableFinder.GetBottom() ) );
-
-		if ( m_IsLog )
-		{
-			m_Logger.WriteTableCorners( tl, tr, ll, lr );
-		}
-
-		m_TableFound = true;
+		FindTable( input );
 	} // if ( !m_TableFound )
 
 	if ( m_TableFound )
 	{
-		cv::destroyWindow( windowName );
+		cv::destroyWindow( CORNER_WIN );
 
 		if ( m_ShowOutPutImg )
 		{
@@ -378,7 +137,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 		unsigned int dt = static_cast<unsigned int>( ( curr - m_CurrTime ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
 
 		//debug
-		//dt = 50; // ms, 20 FPS, for debug purpose
+		dt = 50; // ms, 20 FPS, for debug purpose
 
 		// calculate FPS
 		m_FpsCalculator.AddFrameTime( dt );
@@ -433,11 +192,28 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 			//m_Camera.SetRobotPos( robotPos );
 
 			// skip processing if 1st frame
+			cv::Point prevPos;
+			cv::Point predPos;
+			cv::Point bouncePos;
+			cv::Point botPos;
+
 			if ( /*dt < 2000 &&*/ m_CurrTime > 0 )
 			{
-
 				// do prediction work
 				m_Camera.CamProcess( dt );
+
+				prevPos = m_Camera.GetPrevPuckPos(); // mm, table coordinate
+				prevPos = m_TableFinder.TableToImgCoordinate( prevPos );
+
+				predPos = m_Camera.GetCurrPredictPos();
+				predPos = m_TableFinder.TableToImgCoordinate( predPos );
+
+				bouncePos = m_Camera.GetBouncePos();
+				const bool isBounce = bouncePos.x != -1;
+				if ( isBounce )
+				{
+					bouncePos = m_TableFinder.TableToImgCoordinate( bouncePos );
+				}
 
 				if ( m_ShowOutPutImg )
 				{
@@ -450,30 +226,27 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 					cv::putText( output, text, origin, cv::FONT_HERSHEY_SIMPLEX, 0.5, MEDIUM_PURPLE, thickness, lineType );
 
 					// draw previous pos
-					cv::Point prevPos = m_Camera.GetPrevPuckPos(); // mm, table coordinate
-					prevPos = m_TableFinder.TableToImgCoordinate( prevPos );
 
-					cv::line( output, prevPos, center, cv::Scalar( 130, 221, 238 )/**/, 2 );
+					cv::line( output, prevPos, center, cv::Scalar( 130, 221, 238 ), 2 );
 
 					// draw prediction on screen
-					cv::Point predPos = m_Camera.GetCurrPredictPos();
-					predPos = m_TableFinder.TableToImgCoordinate( predPos );
-
-					// draw bound pos if there's one
-					cv::Point bouncePos = m_Camera.GetBouncePos();
-					if ( bouncePos.x == -1 && bouncePos.y == -1 )
+					int predictStatus = m_Camera.GetPredictStatus();
+					if ( predictStatus == 1 || predictStatus == 2 )
 					{
-						// no bounce
-						cv::line( output, predPos, center, PURPLE, 2 );
+						// draw bounce pos if there's one
+						if ( !isBounce )
+						{
+							// no bounce
+							cv::line( output, predPos, center, PURPLE, 2 );
+						}
+						else
+						{
+							// have one bounce
+							cv::line( output, bouncePos, center, PURPLE, 2 );
+							cv::line( output, predPos, bouncePos, PURPLE, 2 );
+						}
 					}
-					else
-					{
-						// have one bounce
-						bouncePos = m_TableFinder.TableToImgCoordinate( bouncePos );
-						cv::line( output, bouncePos, center, PURPLE, 2 );
-						cv::line( output, predPos, bouncePos, PURPLE, 2 );
-					}
-				}
+				}//if ( m_ShowOutPutImg )
 
 				// determine robot strategy
 				m_Robot.NewDataStrategy( m_Camera );
@@ -481,27 +254,38 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 				// determine robot position
 				m_Robot.RobotMoveDecision( m_Camera );
 
+				if ( m_ShowOutPutImg )
+				{
+					// Show desired robot position
+					const int radius = 5;
+					const int thickness = 2;
+					botPos = m_Robot.GetDesiredRobotPos();
+					botPos = m_TableFinder.TableToImgCoordinate( botPos );
+					cv::circle( output, botPos, radius, BLUE, thickness );
+				}//if ( m_ShowOutPutImg )
+
 				// send the message by com port over to Arduino
 				SendBotMessage();
-
-				if ( m_IsLog )
-				{
-					m_Logger.LogStatus(
-						m_NumFrame, dt, fps,
-						center, m_Camera.GetBouncePos(),
-						m_Robot.GetDesiredRobotPos(),
-						m_Robot.GetDesiredRobotSpeed(),
-						m_Camera.GetPredictStatus(),
-						m_Robot.GetRobotStatus() );
-				}
-
 #ifdef DEBUG_SERIAL
 				ReceiveMessage();
 #endif // DEBUG
-
 			} // if ( /*dt < 2000 &&*/ m_CurrTime > 0 )
 
 			m_Camera.SetPrevPuckPos( puckPos );
+
+			if ( m_IsLog )
+			{
+				m_Logger.LogStatus(
+					m_NumFrame, dt, fps,
+					center, // img coordinate
+					bouncePos, // img coordinate
+					predPos, // img coordinate
+					prevPos, // img coordinate
+					botPos, // img coordinate
+					m_Robot.GetDesiredRobotSpeed(),
+					m_Camera.GetPredictStatus(),
+					m_Robot.GetRobotStatus() );
+			}
         }
 		else
 		{
@@ -518,6 +302,252 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 	} // if ( m_TableFound )
 
 }//Process
+
+//=======================================================================
+void BotManager::FindTable( cv::Mat & input )
+{
+	cv::Point TopLeft;
+	cv::Point TopRight;
+	cv::Point LowerLeft;
+	cv::Point LowerRight;
+
+	cv::imshow( CORNER_WIN, input );
+	cv::setMouseCallback( CORNER_WIN, OnMouse, &m_Corners );
+
+	// user-picked 4 corners
+	while ( m_Corners.size() < 4 )
+	{
+		size_t m = m_Corners.size();
+		if ( m > 0 )
+		{
+			cv::circle( input, m_Corners[m - 1], 3, GREEN, 2 );
+		}
+
+		cv::imshow( CORNER_WIN, input );
+		cv::waitKey( 10 );
+	}
+
+	// last point
+	cv::circle( input, m_Corners[3], 3, GREEN, 2 );
+
+	cv::imshow( CORNER_WIN, input );
+	cv::waitKey( 10 );
+	// order the 4 corners
+	OrderCorners();
+
+	if ( m_ShowDebugImg )
+	{
+		// draw the bands around 4 picked corners
+		// m_Corners is arranged by: ul, ur, ll, lr
+		cv::circle( input, m_Corners[0], 3, GREEN, 2 );
+		cv::circle( input, m_Corners[1], 3, RED, 2 );
+		cv::circle( input, m_Corners[2], 3, BLUE, 2 );
+		cv::circle( input, m_Corners[3], 3, WHITE, 2 );
+
+		cv::imshow( "ORder:", input );
+	} // DEBUG
+
+	if ( !m_ManualPickTableCorners )
+	{
+		// blur image first by Gaussian
+		int kernelSize = 3;
+		double std = 2.0;
+
+		cv::GaussianBlur( input, input, cv::Size( kernelSize, kernelSize ), std, std );
+
+		if ( m_ShowDebugImg )
+		{
+			cv::imshow( "gauss:", input );
+		} // DEBUG
+
+		  // convert to gray scale
+		cv::Mat tmp;
+		cv::cvtColor( input, tmp, cv::COLOR_RGB2GRAY );
+
+		cv::Mat tmp2 = tmp.clone();
+
+		// adaptive threshold
+		int adaptiveMethod = cv::ADAPTIVE_THRESH_MEAN_C;
+		int thresholdType = cv::THRESH_BINARY;
+		int blockSiz = 55;
+
+		cv::adaptiveThreshold( tmp2, tmp2, 255, adaptiveMethod, thresholdType, blockSiz, 5 );
+		//cv::threshold(tmp, tmp1, 128, 255, cv::THRESH_BINARY_INV);
+
+		// close, fill the "holes" in the foreground
+		//cv::dilate( tmp2, tmp2, cv::Mat(), cv::Point( -1, -1 ), 2/*num iteration*/ );
+		//      cv::erode( tmp2, tmp2, cv::Mat(), cv::Point( -1, -1 ), 2/*num iteration*/ );
+
+		cv::Mat ellipse = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 5, 5 ) );
+		cv::morphologyEx( tmp2, tmp2, cv::MORPH_CLOSE, ellipse, cv::Point( -1, -1 ), 1/*num iteration*/ );
+
+		if ( m_ShowDebugImg )
+		{
+			cv::imshow( "adaptiveThreshold + closing:", tmp2 );
+		} // DEBUG
+
+		std::vector< std::vector< cv::Point > > contours;
+		std::vector< cv::Vec4i > hierarchy;
+		cv::findContours( tmp2, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE );
+
+		//find the contour that's greater than some sizes, i.e. the table
+		double thresh = tmp2.size().width * tmp2.size().height * 0.5;
+
+		std::vector< std::vector< cv::Point > > leftOver;
+		for ( int i = 0; i < contours.size(); i++ )
+		{
+			double area = cv::contourArea( contours[i] );
+			if ( area > thresh )
+			{
+				leftOver.push_back( contours[i] );
+			}
+		}
+
+		if ( leftOver.size() == 1 )
+		{
+			tmp2 = cv::Mat::zeros( tmp2.size(), CV_8UC1 );
+			drawContours( tmp2, leftOver, 0, 255/*color*/, cv::FILLED );
+			// do closing to clean noise again
+			cv::morphologyEx( tmp2, tmp2, cv::MORPH_CLOSE, ellipse, cv::Point( -1, -1 ), 1/*num iteration*/ );
+
+			if ( m_ShowDebugImg )
+			{
+				cv::imshow( "contour:", tmp2 );
+			} // DEBUG
+		}
+		else
+		{
+			// threshold failed, bail out
+			tmp2 = tmp.clone();
+		}
+
+		// canny low & heigh threshold
+		int low = 50;
+		int high = 100;
+
+		cv::Canny( tmp2, tmp2, low, high );
+
+		// dilate Canny results
+		cv::dilate( tmp2, tmp2, cv::Mat(), cv::Point( -1, -1 ), 2 /*num iteration*/ );
+
+		if ( m_ShowDebugImg )
+		{
+			cv::imshow( "canny:", tmp2 );
+		} // DEBUG
+
+		  // mask out anything that's outside of the user-picked band
+		MaskCanny( tmp2 );
+
+		if ( m_ShowDebugImg )
+		{
+			cv::Mat copy = input.clone();
+
+			// draw bounds
+			cv::Scalar color = GREEN; // green
+
+			cv::line( copy, m_o_ul, m_o_ur, color );
+			cv::line( copy, m_o_ul, m_o_ll, color );
+			cv::line( copy, m_o_ur, m_o_lr, color );
+			cv::line( copy, m_o_ll, m_o_lr, color );
+
+			cv::line( copy, m_i_ul, m_i_ur, color );
+			cv::line( copy, m_i_ul, m_i_ll, color );
+			cv::line( copy, m_i_ur, m_i_lr, color );
+			cv::line( copy, m_i_ll, m_i_lr, color );
+
+			cv::imshow( "bound:", copy );
+		} // DEBUG
+
+		  // Hough line transform
+		double dRho = 1.0f;
+		double dTheta = CV_PI / 180.0f;
+		unsigned int minVote = 80;//360 / 2;
+		float minLength = 50.0f;// 360 / 2;
+		float maxGap = 10.0f;
+		//LineFinder::METHOD m = LineFinder::METHOD::TRAD;
+		LineFinder::METHOD m = LineFinder::METHOD::PROB;
+
+		m_TableFinder.SetMethod( m );
+		m_TableFinder.SetDeltaRho( dRho );
+		m_TableFinder.SetDeltaTheta( dTheta );
+		m_TableFinder.SetMinVote( minVote );
+		m_TableFinder.SetMinLength( minLength );
+		m_TableFinder.SetMaxGap( maxGap );
+
+		if ( m == LineFinder::METHOD::PROB )
+		{
+			const std::vector<cv::Vec4i>& lines = m_TableFinder.FindLinesP( tmp2 );
+
+			if ( m_ShowDebugImg )
+			{
+				//cv::Mat copy = input.clone();
+				m_TableFinder.DrawDetectedLines( input, BLUE );
+				cv::imshow( "HoughLine:", input );
+			} // DEBUG
+
+			  // filter out the lines that's out of bound
+			if ( !m_TableFinder.Refine4Edges( m_Corners, m_BandWidth, input/*debug use*/ ) )
+			{
+				std::cout << "error" << std::endl;
+				return;
+			}
+		}
+		else
+		{
+			const std::vector<cv::Vec2f>& lines = m_TableFinder.FindLines( tmp2 );
+		}
+
+		if ( m_ShowDebugImg )
+		{
+			m_TableFinder.DrawTableLines( input, RED );
+			cv::imshow( "Filtered HoughLine:", input );
+		} // DEBUG
+
+		  // 4 corners
+		TopLeft = m_TableFinder.GetTopLeft();
+		TopRight = m_TableFinder.GetTopRight();
+		LowerLeft = m_TableFinder.GetLowerLeft();
+		LowerRight = m_TableFinder.GetLowerRight();
+	}
+	else
+	{
+		// corners is arranged by: ul, ur, ll, lr
+		TopLeft = m_Corners[0];
+		TopRight = m_Corners[1];
+		LowerLeft = m_Corners[2];
+		LowerRight = m_Corners[3];
+	} // if ( !m_ManualPickTableCorners )
+
+	  // construct mask based on table 4 corners
+	std::vector< cv::Point > tmpContour;
+	tmpContour.push_back( TopRight );
+	tmpContour.push_back( TopLeft );
+	tmpContour.push_back( LowerLeft );
+	tmpContour.push_back( LowerRight );
+
+	std::vector< std::vector< cv::Point > > tableContour;
+	tableContour.push_back( tmpContour );
+	m_Mask = cv::Mat::zeros( input.size(), CV_8UC1 );
+	drawContours( m_Mask, tableContour, 0, 255/*color*/, cv::FILLED );
+
+	if ( m_ShowDebugImg )
+	{
+		cv::imshow( "Mask:", m_Mask );
+	} // DEBUG
+
+	  // Log table corners
+	cv::Point tl( static_cast<int>( m_TableFinder.GetLeft() ), static_cast<int>( m_TableFinder.GetTop() ) );
+	cv::Point tr( static_cast<int>( m_TableFinder.GetRight() ), static_cast<int>( m_TableFinder.GetTop() ) );
+	cv::Point ll( static_cast<int>( m_TableFinder.GetLeft() ), static_cast<int>( m_TableFinder.GetBottom() ) );
+	cv::Point lr( static_cast<int>( m_TableFinder.GetRight() ), static_cast<int>( m_TableFinder.GetBottom() ) );
+
+	if ( m_IsLog )
+	{
+		m_Logger.WriteTableCorners( tl, tr, ll, lr );
+	}
+
+	m_TableFound = true;
+} // FindTable
 
 //=======================================================================
 void BotManager::OnMouse( int event, int x, int y, int f, void* data )

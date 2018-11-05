@@ -27,6 +27,8 @@ public:
 		const unsigned int fps,
 		const cv::Point& puckPos,
 		const cv::Point& bouncePos,
+		const cv::Point& predPos,
+		const cv::Point& prevPos,
 		const cv::Point& botPos,
 		const int botSpeed,
 		const int predictStatus,

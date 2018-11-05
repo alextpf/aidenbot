@@ -65,6 +65,9 @@ public:
 
 private:
 
+	// wrapper function to find table corners
+	void FindTable( cv::Mat & input );
+
 	// send the message to Arduino over com port
 	bool SendBotMessage();
 

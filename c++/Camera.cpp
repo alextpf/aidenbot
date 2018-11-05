@@ -23,7 +23,8 @@ void Camera::CamProcess( int dt /*ms*/ )
 	cv::Point posDif = m_CurrPuckPos - m_PrevPuckPos;
 
 	m_PrevPuckSpeed = m_CurrPuckSpeed; // update old speed
-	m_CurrPuckSpeed = static_cast<cv::Point2f>( posDif * 100 ) / dt; // speed in dm/ms (we use this units to not overflow the variable)
+	const cv::Point2f tmp = static_cast<cv::Point2f>( posDif * 100 );
+	m_CurrPuckSpeed = tmp / dt; // speed in dm/ms (we use this units to not overflow the variable)
 
 	m_BouncePos.x = -1;
 	m_BouncePos.y = -1;
@@ -154,7 +155,7 @@ void Camera::CamProcess( int dt /*ms*/ )
 				m_PredictTimeDefence = static_cast<int>( ( ROBOT_DEFENSE_POSITION_DEFAULT + PUCK_SIZE - m_CurrPuckPos.y ) * 100.0f / m_CurrPuckSpeed.y ) - VISION_SYSTEM_LAG; // in ms
 				m_PredictTimeAttack = static_cast<int>( ( ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT + PUCK_SIZE - m_CurrPuckPos.y ) * 100.0f / m_CurrPuckSpeed.y ) - VISION_SYSTEM_LAG; // in ms
 			}
-		}
+		} // puck has a bounce with side wall?
 	}
 	else // // Puck is moving slowly or to the other side
 	{
