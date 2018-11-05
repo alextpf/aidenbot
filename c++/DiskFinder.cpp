@@ -1,6 +1,6 @@
 #include "DiskFinder.h"
 
-//#define DEBUG
+#define DEBUG
 //===================================================================================
 bool DiskFinder::FindDisk1Thresh(
 	Contours& contours,
@@ -96,7 +96,7 @@ bool DiskFinder::FindDiskInternal(
 	{
 		// 1. test area
 		double area = cv::contourArea( tmpContours[i] );
-		static double areaLow = 480.0;
+		static double areaLow = 450.0;
 		static double areaHigh = 850.0;
 		if ( area > areaLow && area < areaHigh )
 		{

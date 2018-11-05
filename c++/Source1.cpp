@@ -76,14 +76,23 @@ int main()
 
 	const int operation		= tmp[0]; // 1. run the program, 2. check HSV, 3. record webcam images only
 	const int inputType		= tmp[1];
-	const int outputType	= tmp[2];
+	int outputType			= tmp[2];
 	const bool showDebugImg	= tmp[3] == 1 ? true : false;
 	bool showInputImg		= tmp[4] == 1 ? true : false;
+	bool showOutputImg		= tmp[5] == 1 ? true : false;
+
 	if ( operation == 2/*check hsv*/ )
 	{
 		showInputImg = true;
+		showOutputImg = false;
+		outputType = 2;
 	}
-	const bool showOutputImg			= tmp[5] == 1 ? true : false;
+	else if ( operation == 4 ) // create resulting imgs by Log.txt
+	{
+		showInputImg = false;
+		showOutputImg = false;
+	}
+
 	const bool manualPickTableCorners	= tmp[6] == 1 ? true : false;
 	const int delay			= tmp[7];
 	const int com			= tmp[8];
