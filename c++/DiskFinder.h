@@ -7,7 +7,7 @@
 
 typedef std::vector<std::vector<cv::Point> > Contours;
 
-class DiskFinder 
+class DiskFinder
 {
 public:
 	//============================================
@@ -30,6 +30,16 @@ public:
 		const cv::Vec6i& thresh2,
 		const cv::Mat& mask = cv::Mat() );
 
+	void SetAreaLow( const double low )
+	{
+		m_AreaLow = low;
+	}
+
+	void SetAreaHigh( const double high )
+	{
+		m_AreaHigh = high;
+	}
+
 private:
 
 	bool FindDiskInternal(
@@ -37,4 +47,7 @@ private:
 		cv::Point& center,
 		const cv::Mat& input,
 		const cv::Mat& mask = cv::Mat() );
+
+	double	m_AreaLow;
+	double	m_AreaHigh;
 }; // DiskFinder

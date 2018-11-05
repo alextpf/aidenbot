@@ -13,6 +13,7 @@
 #include "videoprocessor.h"
 #include "Camera.h"
 #include "Robot.h"
+#include "DiskFinder.h"
 #include "SerialPort.h"
 #include "FPSCalculator.h"
 #include "Logger.h"
@@ -63,6 +64,15 @@ public:
 		m_IsLog = isLog;
 	}
 
+	void SetPuckAreaThreshLow( const double low )
+	{
+		m_DiskFinder.SetAreaLow( low );
+	}
+
+	void SetPuckAreaThreshHigh( const double high )
+	{
+		m_DiskFinder.SetAreaHigh( high );
+	}
 private:
 
 	// wrapper function to find table corners
@@ -116,4 +126,5 @@ private:
 	cv::Vec6i		m_RedThresh;
 	cv::Vec6i		m_OrangeThresh;
 	bool			m_IsLog;
+	DiskFinder		m_DiskFinder;
 };

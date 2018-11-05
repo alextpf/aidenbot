@@ -69,7 +69,7 @@ int main()
 	// Read from config
 	//////////////////////
 	std::vector<int> tmp;
-	if ( !ReadConfig( tmp, 22 ) ) // read configuration file
+	if ( !ReadConfig( tmp, 24 ) ) // read configuration file
 	{
 		return 0;
 	}
@@ -80,21 +80,8 @@ int main()
 	const bool showDebugImg	= tmp[3] == 1 ? true : false;
 	bool showInputImg		= tmp[4] == 1 ? true : false;
 	bool showOutputImg		= tmp[5] == 1 ? true : false;
-
-	if ( operation == 2/*check hsv*/ )
-	{
-		showInputImg = true;
-		showOutputImg = false;
-		outputType = 2;
-	}
-	else if ( operation == 4 ) // create resulting imgs by Log.txt
-	{
-		showInputImg = false;
-		showOutputImg = false;
-	}
-
 	const bool manualPickTableCorners	= tmp[6] == 1 ? true : false;
-	const int delay			= tmp[7];
+	int delay				= tmp[7];
 	const int com			= tmp[8];
 
 	cv::Vec6i red;
@@ -104,6 +91,22 @@ int main()
 	orange[0] = tmp[15];	orange[1] = tmp[16];	orange[2] = tmp[17];	orange[3] = tmp[18];	orange[4] = tmp[19];	orange[5] = tmp[20];
 
 	const bool isLog		= tmp[21] == 1 ? true : false;
+	const double areaLow	= static_cast<double>( tmp[22] );
+	const double areaHigh	= static_cast<double>( tmp[23] );
+
+	if ( operation == 2/*check hsv*/ )
+	{
+		showInputImg = true;
+		showOutputImg = false;
+		outputType = 2;
+	}
+	else if ( operation == 4 ) // create resulting imgs by Log.txt
+	{
+		outputType = 0;
+		showInputImg = false;
+		showOutputImg = false;
+		delay = 1;
+	}
 
 	char comPort[20];
 	sprintf_s( comPort, "\\\\.\\COM%d", com);
@@ -127,6 +130,8 @@ int main()
 	segmentor.SetRedThreshold( red );
 	segmentor.SetOrangeThreshold( orange );
 	segmentor.SetIsLog( isLog );
+	segmentor.SetPuckAreaThreshLow( areaLow );
+	segmentor.SetPuckAreaThreshHigh( areaHigh );
 
 	FrameProcessor * proc = NULL;
 	switch ( operation )

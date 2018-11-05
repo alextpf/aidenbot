@@ -87,7 +87,9 @@ bool DiskFinder::FindDiskInternal(
 #endif // DEBUG
 
 	std::vector<std::vector<cv::Point> > tmpContours;
+	std::vector<std::vector<cv::Point> > tmpContours2;
 	std::vector<cv::Vec4i> hierarchy;
+	std::vector<double> roundness;
 
 	cv::findContours( mask, tmpContours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
 
@@ -96,30 +98,44 @@ bool DiskFinder::FindDiskInternal(
 	{
 		// 1. test area
 		double area = cv::contourArea( tmpContours[i] );
-		static double areaLow = 450.0;
-		static double areaHigh = 850.0;
-		if ( area > areaLow && area < areaHigh )
+		if ( area > m_AreaLow && area < m_AreaHigh )
 		{
 			// 2. test roundness
 			double perimeter = cv::arcLength( tmpContours[i], true /*is closed*/ );
-			double roundness = perimeter * perimeter  *  0.78539815 / area; // if it's a circle, = 1, because perimeter = 2 * PI * r, area = PI * r^2
+			double tmpRoundness = perimeter * perimeter  *  0.78539815 / area; // if it's a circle, = 1, because perimeter = 2 * PI * r, area = PI * r^2
 
-			if ( roundness < 20.0 && roundness > 0.05 )
+			if ( tmpRoundness < 20.0 && tmpRoundness > 0.05 )
 			{
 				// survived
-
-#ifdef DEBUG
-				cv::Mat img = cv::Mat::zeros( input.size(), CV_8U );
-				cv::drawContours( img, tmpContours, i, cv::Scalar( 255 ), 2, 8, hierarchy, 0, cv::Point() );
-				cv::imshow( "puck", img );
-#endif // DEBUG
-				contours.push_back( tmpContours[i] );
+				tmpContours2.push_back( tmpContours[i] );
+				roundness.push_back( tmpRoundness );
 			}
 		}
 	} // for ( int i = 0; i< puckContours.size(); i++ )
 
-	if ( contours.size() == 1 )
+	if ( tmpContours2.size() == 1 )
 	{
+		contours.push_back( tmpContours2[0] );
+		cv::Moments m = cv::moments( contours[0] );
+		center.x = static_cast<int>( m.m10 / m.m00 );
+		center.y = static_cast<int>( m.m01 / m.m00 );
+	}
+	else if ( tmpContours2.size() > 1 )
+	{
+		// choose the one that has the closest-to-1 roundness
+		double minDiff = 100000.0;
+		int idx = -1;
+		for ( int i = 0; i < tmpContours2.size(); i++ )
+		{
+			double absDif = std::abs( roundness[i] - 1.0 );
+			if ( absDif < minDiff )
+			{
+				idx = i;
+				minDiff = absDif;
+			}
+		} // for
+		contours.push_back( tmpContours2[idx] );
+
 		cv::Moments m = cv::moments( contours[0] );
 		center.x = static_cast<int>( m.m10 / m.m00 );
 		center.y = static_cast<int>( m.m01 / m.m00 );

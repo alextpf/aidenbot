@@ -1,5 +1,4 @@
 #include "BotManager.h"
-#include "DiskFinder.h"
 #include "Utility.h"
 
 #define PI							3.1415926
@@ -145,7 +144,6 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 		//===========================================
 
 		// find puck and robot position
-        DiskFinder diskFinder;
         Contours contours;
         cv::Point center;
 
@@ -154,7 +152,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
         cv::cvtColor( input, hsvImg, CV_BGR2HSV );
 
 		// 1. find puck
-		const bool puckFound = diskFinder.FindDisk2Thresh(
+		const bool puckFound = m_DiskFinder.FindDisk2Thresh(
 			contours, center, hsvImg, m_RedThresh, m_OrangeThresh, m_Mask );
 
         if( puckFound )
@@ -177,7 +175,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 
 			//cv::Vec6i orangeThresh( 0, 110, 110, 20, 255, 220 ); // lowH, lowS, lowV, highH, highS, highV
 
-			//const bool hasRobot = diskFinder.FindDisk1Thresh(
+			//const bool hasRobot = m_DiskFinder.FindDisk1Thresh(
 			//    contours, center, hsvImg, redThresh, m_Mask );
 
 			//if( !hasRobot )
