@@ -46,7 +46,7 @@ void Camera::CamProcess( int dt /*ms*/ )
 
 	float SPEED_THRESH = 50.0f;
 
-	if ( speedDif.x < SPEED_THRESH || speedDif.x < SPEED_THRESH )
+	if ( speedDif.x < SPEED_THRESH || speedDif.y < SPEED_THRESH )
 	{
 		m_AverageSpeed = ( m_CurrPuckSpeed + m_PrevPuckSpeed ) * 0.5f;
 	}
