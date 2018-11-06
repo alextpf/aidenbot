@@ -1,6 +1,6 @@
 #include "DiskFinder.h"
 
-#define DEBUG
+//#define DEBUG
 //===================================================================================
 bool DiskFinder::FindDisk1Thresh(
 	Contours& contours,

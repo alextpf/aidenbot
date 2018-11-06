@@ -120,11 +120,13 @@ private:
 	bool			m_ShowDebugImg;
 	bool			m_ShowOutPutImg;
 	bool			m_ManualPickTableCorners;
-	FPSCalculator	m_FpsCalculator;
-	Logger			m_Logger;
 	long			m_NumFrame;
 	cv::Vec6i		m_RedThresh;
 	cv::Vec6i		m_OrangeThresh;
 	bool			m_IsLog;
+	unsigned int	m_NumConsecutiveNonPuck; // number of consecutive frames that no puck is detected
 	DiskFinder		m_DiskFinder;
+	FPSCalculator	m_FpsCalculator;
+	Logger			m_Logger;
+
 };

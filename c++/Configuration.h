@@ -63,8 +63,8 @@
 #define ZERO_SPEED        65535
 
 #define MIN_PUCK_Y_SPEED1        -280                    // used in Robot::newDataStrategy()
-#define MIN_PUCK_Y_SPEED2        -160                    // used in Robot::newDataStrategy()      
-#define PREDICT_TIME_THRESHOLD    500
+#define MIN_PUCK_Y_SPEED2        -160                    // used in Robot::newDataStrategy()
+#define BOT_MOVE_TIME_THRESHOLD   600
 #define MIN_ABS_Y_SPEED           60
 #define MIN_ABS_X_SPEED           100
 #define MIN_PREDICT_TIME          150                   // used in Robot::robotStrategy()

@@ -62,7 +62,7 @@ int main()
 	const char filename[]	= "pic";
 
 	const int webCamId		= 1; // 0: default (laptop's camera), 1: external connected cam
-	const int startFrame	= 81;//+138;// frame number we want to start at
+	const int startFrame	= 81+152;//+138;// frame number we want to start at
 	const int endFrame		= 890;
 
 	//////////////////////

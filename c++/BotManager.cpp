@@ -51,6 +51,7 @@ BotManager::BotManager( char* com )
 , m_ShowOutPutImg( true )
 , m_ManualPickTableCorners( false )
 , m_NumFrame( 0 )
+, m_NumConsecutiveNonPuck( 0 )
 {
 	m_FpsCalculator.SetBufferSize( 10 );
 	m_pSerialPort = std::make_shared<SerialPort>( com );
@@ -157,6 +158,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 
         if( puckFound )
         {
+
             // std::cout << "can't find puck" << std::endl;
 			//draw puck center
 			if ( m_ShowOutPutImg )
@@ -197,6 +199,11 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 
 			if ( /*dt < 2000 &&*/ m_CurrTime > 0 )
 			{
+				if ( m_NumConsecutiveNonPuck > 1 )
+				{
+					m_Camera.SetPrevPuckPos( cv::Point( 0, 0 ) ); // reset
+				}
+
 				// do prediction work
 				m_Camera.CamProcess( dt );
 
@@ -284,9 +291,14 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 					m_Camera.GetPredictStatus(),
 					m_Robot.GetRobotStatus() );
 			}
+
+			m_NumConsecutiveNonPuck = 0;
         }
 		else
 		{
+			// puck not found
+			m_NumConsecutiveNonPuck++;
+
 			if ( m_IsLog )
 			{
 				m_Logger.LogStatus( m_NumFrame, dt, fps );

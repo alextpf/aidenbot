@@ -58,7 +58,7 @@ void Robot::NewDataStrategy( Camera& cam )
         else
         {
             // Predicted position X is out of table range
-            if( cam.GetPredictTimeDefence() < PREDICT_TIME_THRESHOLD )
+            if( cam.GetPredictTimeDefence() < BOT_MOVE_TIME_THRESHOLD )
             {
                 // predicted hit time is small, i.e. puck approcahing soon
                 m_RobotStatus = 1;  // Defense
@@ -69,11 +69,11 @@ void Robot::NewDataStrategy( Camera& cam )
                 m_RobotStatus = 0;
             }
         }
-	} // if ( cam.GetPredictStatus() == 1 )
+	} // direct impact
 	else if ( cam.GetPredictStatus() == 2 )
 	{
         // Prediction with side bounce
-		if ( cam.GetPredictTimeDefence() < PREDICT_TIME_THRESHOLD )
+		if ( cam.GetPredictTimeDefence() < BOT_MOVE_TIME_THRESHOLD )
 		{
 			// Limit movement
 			m_RobotStatus = 1; // only defense mode
@@ -82,7 +82,7 @@ void Robot::NewDataStrategy( Camera& cam )
 		{
 			m_RobotStatus = 0; // no risk
 		}
-	} // if ( cam.GetPredictStatus() == 2)
+	} // with a bounce
 
 	// If the puck is moving slowly in the robot field we could start an attack
 	if ( cam.GetPredictStatus() == 0 &&
@@ -165,14 +165,14 @@ void Robot::RobotMoveDecision( Camera& cam )
 		{
             if( !IsOwnGoal( cam ) )
             {
-                attackPredictPos = cam.PredictPuckPos( 500 );
+                attackPredictPos = cam.PredictPuckPos( BOT_MOVE_TIME_THRESHOLD );
 
                 if( ( attackPredictPos.x > PUCK_SIZE * 3 ) &&
                     ( attackPredictPos.x < TABLE_WIDTH - PUCK_SIZE * 3 ) &&
                     ( attackPredictPos.y > PUCK_SIZE * 4 ) &&
                     ( attackPredictPos.y < ROBOT_CENTER_Y - PUCK_SIZE * 5 ) )
                 {
-                    m_AttackTime = clock() + static_cast<clock_t>( 500 * CLOCKS_PER_SEC / 1000.0f );  // Prepare an attack in 500ms
+                    m_AttackTime = clock() + static_cast<clock_t>( BOT_MOVE_TIME_THRESHOLD * CLOCKS_PER_SEC / 1000.0f );  // Prepare an attack in 500ms
 
                     // Go to pre-attack position
                     m_DesiredRobotPos.x = attackPredictPos.x;
@@ -193,7 +193,7 @@ void Robot::RobotMoveDecision( Camera& cam )
                     m_DesiredSpeed = static_cast<int>( MAX_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
                 }
             } // if( !IsOwnGoal( cam ) )
-		}
+		} // if ( m_AttackTime == 0 )
 		else
 		{
 			if ( m_AttackStatus == 1 )
@@ -210,7 +210,7 @@ void Robot::RobotMoveDecision( Camera& cam )
 
                         m_AttackStatus = 2; // Attacking
                     }
-                    else  // m_AttackStatus=1 but it´s no time to attack yet
+                    else  // m_AttackStatus = 1 but it's not the time to attack yet
                     {
                         // Go to pre-attack position
                         attackPredictPos = cam.PredictPuckPos( 500 );

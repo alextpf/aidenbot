@@ -161,7 +161,7 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 	if ( puckFound )
 	{
 		// draw puck contour
-		const int radius = 15;
+		int radius = 15;
 		const int thickness = 2;
 		cv::circle( output, puckPos, radius, GREEN, thickness );
 
@@ -183,10 +183,10 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 				cv::line( output, predPos, puckPos, PURPLE, 2 );
 			} // if ( hasBounce )
 
-			const int radius = 5;
-			const int thickness = 2;
-			cv::circle( output, botPos, radius, BLUE, thickness );
 		} // if ( predictStatus == 1 || predictStatus == 2 )
+
+		radius = 5;
+		cv::circle( output, botPos, radius, BLUE, thickness );
 	} // if ( puckFound )
 
 	///////////////////////////////////////////////////////////

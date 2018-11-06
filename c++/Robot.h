@@ -66,6 +66,10 @@ private:
 	// 3: Atack
 	unsigned int		m_RobotStatus;
 	clock_t			    m_AttackTime;
+
+	// 0: wait for attack
+	// 1: ready to attack
+	// 2: after firing attack
 	unsigned int		m_AttackStatus;
 
 	cv::Point			  m_DesiredRobotPos;

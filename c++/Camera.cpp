@@ -35,7 +35,7 @@ void Camera::CamProcess( int dt /*ms*/ )
 		m_CurrPuckSpeed.y < -1000 ||
 		m_CurrPuckSpeed.y >  1000 )
 	{
-		std::cout << "NOISE" << std::endl;
+		//std::cout << "NOISE" << std::endl;
 		m_PredictStatus = -1;
 		m_PrevPredictPos.x = -1;
 
@@ -91,8 +91,7 @@ void Camera::CamProcess( int dt /*ms*/ )
 			m_BouncePos.y = static_cast<int>( static_cast<float>( m_BouncePos.x - m_CurrPuckPos.x ) * slope ) + m_CurrPuckPos.y;
 
 			m_PredictTimeDefence = static_cast<int>( static_cast<float>( m_BouncePos.y - m_CurrPuckPos.y ) * 100.0f / m_CurrPuckSpeed.y ); // time until bouce
-
-																																		   // bounce prediction => slope change  with the bounce, we only need to change the sign, easy!!
+																																					   // bounce prediction => slope change  with the bounce, we only need to change the sign, easy!!
 			slope = -slope;
 
 			m_CurrPredictPos.y = ROBOT_DEFENSE_POSITION_DEFAULT + PUCK_SIZE;
@@ -127,11 +126,11 @@ void Camera::CamProcess( int dt /*ms*/ )
 					m_PrevPredictPos.x = m_CurrPredictPos.x;
 
 					// We introduce a factor (120 instead of 100) to model the bounce (20% loss in speed)(to improcve...)
-					m_PredictTimeDefence += static_cast<int>( ( m_CurrPredictPos.y - m_CurrPuckPos.y ) * 120.0f / m_CurrPuckSpeed.y ); // in ms
+					m_PredictTimeDefence += static_cast<int>( ( m_CurrPredictPos.y - m_BouncePos.y ) * 120.0f / m_CurrPuckSpeed.y ); // in ms
 					m_PredictTimeDefence -= VISION_SYSTEM_LAG;
 				}
 			}
-		}
+		} // puck has a bounce with side wall
 		else
 		{
 			// No bounce, direct impact
@@ -155,7 +154,7 @@ void Camera::CamProcess( int dt /*ms*/ )
 				m_PredictTimeDefence = static_cast<int>( ( ROBOT_DEFENSE_POSITION_DEFAULT + PUCK_SIZE - m_CurrPuckPos.y ) * 100.0f / m_CurrPuckSpeed.y ) - VISION_SYSTEM_LAG; // in ms
 				m_PredictTimeAttack = static_cast<int>( ( ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT + PUCK_SIZE - m_CurrPuckPos.y ) * 100.0f / m_CurrPuckSpeed.y ) - VISION_SYSTEM_LAG; // in ms
 			}
-		} // puck has a bounce with side wall?
+		} // // No bounce, direct impact
 	}
 	else // // Puck is moving slowly or to the other side
 	{
