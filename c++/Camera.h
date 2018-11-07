@@ -8,6 +8,12 @@
 class Camera
 {
 public:
+    // -1 : error: noise
+    // 0 : No risk,
+    // 1 : Puck is moving to our field directly fast, with no bounce
+    // 2 : Puck is moving to our field fast, with a bounce
+    enum PREDICT_STATUS { ERROR = -1, NO_RISK, DIRECT_IMPACT, ONE_BOUNCE };
+
 	Camera();
 	~Camera();
 
@@ -32,7 +38,7 @@ public:
 
 	cv::Point PredictPuckPos( int predictTime );
 
-	int GetPredictStatus() const;
+    PREDICT_STATUS GetPredictStatus() const;
 
 	cv::Point GetCurrPredictPos() const;
 
@@ -74,15 +80,13 @@ private:
 	cv::Point2f		m_PrevPuckSpeed;      // previous speed. dm/ms
 	cv::Point2f		m_AverageSpeed;
 
-	// 0 : No risk,
-	// 1 : Puck is moving to our field directly, with no bounce
-	// 2 : Puck is moving to our field with a bounce
-	// 3 : ?
-	// -1 : error: noise
-	int				m_PredictStatus;
-
 	// Bounce
 	int				m_NumPredictBounce;     // number of bounce predicted
+
+    //////////////
+	// speed
+	//////////////
+    PREDICT_STATUS	m_PredictStatus;
 
 	// 0: has no bounce; direct impact
 	// 1: has 1 bounce

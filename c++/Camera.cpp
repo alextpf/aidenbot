@@ -5,7 +5,7 @@
 //=========================================================
 Camera::Camera()
     : m_PredictXAttack( 0 )
-    , m_PredictStatus( 0 )
+    , m_PredictStatus( NO_RISK )
     , m_NumPredictBounce( 0 )
     , m_PredictBounceStatus( 0 )
     , m_PredictTimeDefence( 0 )
@@ -36,7 +36,7 @@ void Camera::CamProcess( int dt /*ms*/ )
 		m_CurrPuckSpeed.y >  1000 )
 	{
 		//std::cout << "NOISE" << std::endl;
-		m_PredictStatus = -1;
+		m_PredictStatus = ERROR;
 		m_PrevPredictPos.x = -1;
 
 		return;
@@ -79,7 +79,7 @@ void Camera::CamProcess( int dt /*ms*/ )
 		if ( m_CurrPredictPos.x < PUCK_SIZE ||
 			m_CurrPredictPos.x > TABLE_WIDTH - PUCK_SIZE )
 		{
-			m_PredictStatus = 2;
+			m_PredictStatus = ONE_BOUNCE;
 			m_PredictBounceStatus = 1;
 
 			// We start a new prediction
@@ -103,7 +103,7 @@ void Camera::CamProcess( int dt /*ms*/ )
 				m_NumPredictBounce = 2;
 				// We do nothing then... with two bounces there are small risk of goal...
 				m_PrevPredictPos.x = -1;
-				m_PredictStatus = 0; // no risk
+				m_PredictStatus = NO_RISK; // no risk
 			}
 			else
 			{
@@ -135,7 +135,7 @@ void Camera::CamProcess( int dt /*ms*/ )
 		else
 		{
 			// No bounce, direct impact
-			m_PredictStatus = 1;
+			m_PredictStatus = DIRECT_IMPACT;
 			m_NumPredictBounce = 0;
 
 			if ( m_PredictBounceStatus == 1 )  // This is the first direct impact trajectory after a bounce
@@ -161,7 +161,7 @@ void Camera::CamProcess( int dt /*ms*/ )
 	{
 		// Puck is moving slowly, or to the other side
 		m_PrevPredictPos.x = -1;
-		m_PredictStatus = 0;
+		m_PredictStatus = NO_RISK;
 		m_NumPredictBounce = 0;
 		m_PredictBounceStatus = 0;
 	}//if ( m_AverageSpeed.y < -50 )
@@ -218,7 +218,7 @@ int Camera::GetPredictTimeAttack() const
 }
 
 //=========================================================
-int Camera::GetPredictStatus() const
+Camera::PREDICT_STATUS Camera::GetPredictStatus() const
 {
     return m_PredictStatus;
 }

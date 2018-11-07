@@ -235,8 +235,9 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 					cv::line( output, prevPos, center, cv::Scalar( 130, 221, 238 ), 2 );
 
 					// draw prediction on screen
-					int predictStatus = m_Camera.GetPredictStatus();
-					if ( predictStatus == 1 || predictStatus == 2 )
+                    Camera::PREDICT_STATUS predictStatus = m_Camera.GetPredictStatus();
+					if ( predictStatus == Camera::PREDICT_STATUS::DIRECT_IMPACT || 
+                         predictStatus == Camera::PREDICT_STATUS::ONE_BOUNCE )
 					{
 						// draw bounce pos if there's one
 						if ( !isBounce )
