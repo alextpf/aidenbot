@@ -137,7 +137,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 		unsigned int dt = static_cast<unsigned int>( ( curr - m_CurrTime ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
 
 		//debug
-		dt = 50; // ms, 20 FPS, for debug purpose
+		//dt = 50; // ms, 20 FPS, for debug purpose
 
 		// calculate FPS
 		m_FpsCalculator.AddFrameTime( dt );
@@ -287,9 +287,13 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 					predPos, // img coordinate
 					prevPos, // img coordinate
 					botPos, // img coordinate
+					m_Camera.GetCurrPuckSpeed(),
+					m_Camera.GetPredictTimeDefence(), // ms
+					m_Camera.GetPredictBounceStatus(),
 					m_Robot.GetDesiredRobotSpeed(),
 					m_Camera.GetPredictStatus(),
-					m_Robot.GetRobotStatus() );
+					m_Robot.GetRobotStatus(),
+					m_Robot.GetAttackStatus() );
 			}
 
 			m_NumConsecutiveNonPuck = 0;
@@ -495,7 +499,7 @@ void BotManager::FindTable( cv::Mat & input )
 				cv::imshow( "HoughLine:", input );
 			} // DEBUG
 
-			  // filter out the lines that's out of bound
+			// filter out the lines that's out of bound
 			if ( !m_TableFinder.Refine4Edges( m_Corners, m_BandWidth, input/*debug use*/ ) )
 			{
 				std::cout << "error" << std::endl;

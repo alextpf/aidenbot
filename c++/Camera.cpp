@@ -48,7 +48,7 @@ void Camera::CamProcess( int dt /*ms*/ )
 
 	if ( speedDif.x < SPEED_THRESH || speedDif.y < SPEED_THRESH )
 	{
-		m_AverageSpeed = ( m_CurrPuckSpeed + m_PrevPuckSpeed ) * 0.5f;
+		m_AverageSpeed = m_CurrPuckSpeed * 0.7f + m_PrevPuckSpeed * 0.3f;
 	}
 	else
 	{
@@ -108,6 +108,7 @@ void Camera::CamProcess( int dt /*ms*/ )
 			else
 			{
 				m_NumPredictBounce = 1;
+
 				// only one side bounce...
 				// If the puckSpeedY has changed a lot this mean that the puck has touched one side
 				if ( std::abs( m_CurrPuckSpeed.y - m_PrevPuckSpeed.y ) > 50 )
@@ -155,9 +156,10 @@ void Camera::CamProcess( int dt /*ms*/ )
 				m_PredictTimeAttack = static_cast<int>( ( ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT + PUCK_SIZE - m_CurrPuckPos.y ) * 100.0f / m_CurrPuckSpeed.y ) - VISION_SYSTEM_LAG; // in ms
 			}
 		} // // No bounce, direct impact
-	}
-	else // // Puck is moving slowly or to the other side
+	}// coming fast into our field
+	else
 	{
+		// Puck is moving slowly, or to the other side
 		m_PrevPredictPos.x = -1;
 		m_PredictStatus = 0;
 		m_NumPredictBounce = 0;
@@ -169,7 +171,7 @@ void Camera::CamProcess( int dt /*ms*/ )
 cv::Point Camera::PredictPuckPos( int predictTime )
 {
 	predictTime += VISION_SYSTEM_LAG;
-	cv::Point tmpPos( m_AverageSpeed * m_PredictTimeDefence / 100.0f );
+	cv::Point tmpPos( m_AverageSpeed * predictTime / 100.0f );
 	return m_CurrPuckPos + tmpPos;
 } // PredictPuckYPos
 

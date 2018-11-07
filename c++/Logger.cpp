@@ -45,7 +45,7 @@ void Logger::LogStatus(
 	logFile << "-1" << std::endl; // indicate that the puck can't be found for this frame
 
 	logFile.close();
-}
+} // LogStatus
 
 //============================================================================
 void Logger::LogStatus(
@@ -57,9 +57,14 @@ void Logger::LogStatus(
 	const cv::Point& predPos,
 	const cv::Point& prevPos,
 	const cv::Point& botPos,
+	const cv::Point& puckSpeed,
+	const int predictTimeDefence,
+	const unsigned int predictBounceStatus,
 	const int botSpeed,
 	const int predictStatus,
-	const unsigned int botStatus ) const
+	const unsigned int botStatus,
+	const unsigned int attackStatus
+) const
 {
 	std::ofstream logFile;
 	logFile.open( "Log.txt", std::ios_base::app ); // append
@@ -79,12 +84,20 @@ void Logger::LogStatus(
 	logFile << prevPos.x << " " << prevPos.y << std::endl;
 	logFile << "desired bot pos: \n";
 	logFile << botPos.x << " " << botPos.y << std::endl;
+	logFile << "current puck speed: \n";
+	logFile << puckSpeed.x << " " << puckSpeed.y << std::endl;
+	logFile << "predict time defence: \n";
+	logFile << predictTimeDefence << std::endl;
+	logFile << "predict Bounce Status: \n";
+	logFile << predictBounceStatus << std::endl;
 	logFile << "desired bot speed: \n";
 	logFile << botSpeed << std::endl;
 	logFile << "predict status: \n";
 	logFile << predictStatus << std::endl;
 	logFile << "bot status: \n";
 	logFile << botStatus << std::endl;
+	logFile << "attack status: \n";
+	logFile << attackStatus << std::endl;
 
 	logFile.close();
-}
+} // LogStatus

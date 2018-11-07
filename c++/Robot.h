@@ -59,6 +59,12 @@ public:
 	{
 		return m_RobotStatus;
 	}
+
+	unsigned int GetAttackStatus() const
+	{
+		return m_AttackStatus;
+	}
+
 private:
 	// 0: Init
 	// 1: Defense
@@ -72,8 +78,8 @@ private:
 	// 2: after firing attack
 	unsigned int		m_AttackStatus;
 
-	cv::Point			  m_DesiredRobotPos;
+	cv::Point			m_DesiredRobotPos;
 
 	// robot speed in steps/seg
-	int             m_DesiredSpeed;
+	int					m_DesiredSpeed;
 }; // Robot

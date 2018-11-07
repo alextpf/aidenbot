@@ -65,8 +65,10 @@
 #define MIN_PUCK_Y_SPEED1        -280                    // used in Robot::newDataStrategy()
 #define MIN_PUCK_Y_SPEED2        -160                    // used in Robot::newDataStrategy()
 #define BOT_MOVE_TIME_THRESHOLD   600
-#define MIN_ABS_Y_SPEED           60
-#define MIN_ABS_X_SPEED           100
+#define ATTACK_TIME_THRESHOLD     500
+#define IMPACT_TIME_THRESHOLD     200
+#define MIN_ABS_Y_SPEED           100
+#define MIN_ABS_X_SPEED           140
 #define MIN_PREDICT_TIME          150                   // used in Robot::robotStrategy()
 #define STOP_COEF         1800//1800
 //========================================================================================================================================

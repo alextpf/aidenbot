@@ -47,6 +47,11 @@ public:
 	void SetRobotPos(const cv::Point& pos);
 	cv::Point GetRobotPos() const;
 	cv::Point GetBouncePos() const;
+
+	unsigned int GetPredictBounceStatus()
+	{
+		return m_PredictBounceStatus;
+	}
 private:
 	/////////////////////////////
 	// Puck
@@ -78,7 +83,10 @@ private:
 
 	// Bounce
 	int				m_NumPredictBounce;     // number of bounce predicted
-	int				m_PredictBounceStatus; //
+
+	// 0: has no bounce; direct impact
+	// 1: has 1 bounce
+	unsigned int	m_PredictBounceStatus; //
 
 	// Time
 	int				m_PredictTimeDefence;

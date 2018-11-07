@@ -78,7 +78,7 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 	cv::Point predPos( 0, 0 );
 	cv::Point prevPos( 0, 0 );
 	cv::Point botPos( 0, 0 );
-	bool hasBounce;
+	bool hasBounce( false );
 	int predictStatus( -1 );
 
 	const bool puckFound = puckPos.x != -1;
@@ -124,6 +124,18 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 		stream >> botPos.x;
 		stream >> botPos.y;
 
+		// current puck speed
+		std::getline( log, line ); // get description, skip
+		std::getline( log, line );
+
+		// predictTimeDefence
+		std::getline( log, line ); // get description, skip
+		std::getline( log, line );
+
+		// predictBounceStatus
+		std::getline( log, line ); // get description, skip
+		std::getline( log, line );
+
 		// desired bot speed
 		std::getline( log, line ); // get description, skip
 		std::getline( log, line );
@@ -138,6 +150,11 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 		std::getline( log, line ); // get description, skip
 		std::getline( log, line );
 		int botStatus = stoi( line );
+
+		// attack status
+		std::getline( log, line ); // get description, skip
+		std::getline( log, line );
+		int attackStatus = stoi( line );
 	} // if ( puckPos.x == -1 )
 
 	/////////////////

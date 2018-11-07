@@ -27,7 +27,7 @@ bool DiskFinder::FindDisk1Thresh(
 	cv::imshow( "res + mask", res );
 #endif // DEBUG
 
-	return FindDiskInternal( contours, center, hsvImg, res );
+	return FindDiskInternal( contours, center, res );
 
 }// FindDisk1Thresh
 
@@ -63,7 +63,7 @@ bool DiskFinder::FindDisk2Thresh(
 	cv::imshow( "res + mask", res );
 #endif // DEBUG
 
-	return FindDiskInternal( contours, center, hsvImg, res );
+	return FindDiskInternal( contours, center, res );
 
 }// FindDisk2Thresh
 
@@ -71,7 +71,6 @@ bool DiskFinder::FindDisk2Thresh(
 bool DiskFinder::FindDiskInternal(
 	Contours& contours,
 	cv::Point& center,
-	const cv::Mat& input,
 	const cv::Mat& mask )
 {
 	cv::Mat ellipse = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 5, 5 ) );

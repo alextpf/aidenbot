@@ -45,7 +45,6 @@ private:
 	bool FindDiskInternal(
 		Contours& contours,
 		cv::Point& center,
-		const cv::Mat& input,
 		const cv::Mat& mask = cv::Mat() );
 
 	double	m_AreaLow;
