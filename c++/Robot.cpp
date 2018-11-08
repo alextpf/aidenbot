@@ -8,7 +8,7 @@
 
 //====================================================================================================================
 Robot::Robot()
-	: m_RobotStatus( 0 )
+	: m_RobotStatus( BOT_STATUS::INIT )
 	, m_AttackTime( 0 )
 	, m_AttackStatus( 0 )
     , m_DesiredSpeed( 0 )
@@ -33,7 +33,7 @@ cv::Point Robot::GetDesiredRobotPos()
 //====================================================================================================================
 void Robot::NewDataStrategy( Camera& cam )
 {
-	m_RobotStatus = 0; // Going to initial position (defense)
+	m_RobotStatus = BOT_STATUS::INIT; // Going to initial position (defense)
 
     switch( cam.GetPredictStatus() )
     {
@@ -44,7 +44,7 @@ void Robot::NewDataStrategy( Camera& cam )
                     std::abs( cam.GetCurrPuckSpeed().y ) < MIN_ABS_Y_SPEED &&
                     std::abs( cam.GetCurrPuckSpeed().x ) < MIN_ABS_X_SPEED )
                 {
-                    m_RobotStatus = 3; // attack
+                    m_RobotStatus = BOT_STATUS::ATTACK;
                 }
             }
             break;
@@ -65,12 +65,12 @@ void Robot::NewDataStrategy( Camera& cam )
 						if ( cam.GetPuckAvgSpeed().y > MIN_PUCK_Y_SPEED1 )
 						{
 							// puck is moving not so fast
-							m_RobotStatus = 2;  // defense+attack
+							m_RobotStatus = BOT_STATUS::DEFENCE_AND_ATTACK;
 						}
 						else
 						{
 							// puck is moving fast
-							m_RobotStatus = 1;  // only defense
+                            m_RobotStatus = BOT_STATUS::DEFENCE;
 						}
 					}
 					else
@@ -79,12 +79,12 @@ void Robot::NewDataStrategy( Camera& cam )
 						if ( cam.GetPredictTimeDefence() < BOT_MOVE_TIME_THRESHOLD )
 						{
 							// predicted hit time is small, i.e. puck approcahing soon
-							m_RobotStatus = 1;  // Defense
+							m_RobotStatus = BOT_STATUS::DEFENCE;
 						}
 						else
 						{
 							// predicted hit time is large, i.e. no risk
-							m_RobotStatus = 0;
+							m_RobotStatus = BOT_STATUS::INIT;
 						}
 					}
 				}
@@ -94,12 +94,12 @@ void Robot::NewDataStrategy( Camera& cam )
 					if ( cam.GetPuckAvgSpeed().y > MIN_PUCK_Y_SPEED2 )
 					{
 						// puck is moving not so fast
-						m_RobotStatus = 2;  // defense+attack
+						m_RobotStatus = BOT_STATUS::DEFENCE_AND_ATTACK;
 					}
 					else
 					{
 						// puck is moving fast
-						m_RobotStatus = 1;  // only defense
+						m_RobotStatus = BOT_STATUS::DEFENCE;
 					}
 
 				}
@@ -112,11 +112,11 @@ void Robot::NewDataStrategy( Camera& cam )
                 if( cam.GetPredictTimeDefence() < BOT_MOVE_TIME_THRESHOLD )
                 {
                     // Limit movement
-                    m_RobotStatus = 1; // only defense mode
+                    m_RobotStatus = BOT_STATUS::DEFENCE;
                 }
                 else
                 {
-                    m_RobotStatus = 0; // no risk
+                    m_RobotStatus = BOT_STATUS::INIT;
                 }
             }
             break;
@@ -135,7 +135,7 @@ void Robot::RobotMoveDecision( Camera& cam )
 
 	switch ( m_RobotStatus )
 	{
-	case 0: // Go to init position
+	case BOT_STATUS::INIT: // Go to init position
 	{
 		if ( !IsOwnGoal( cam ) )
         {
@@ -148,7 +148,7 @@ void Robot::RobotMoveDecision( Camera& cam )
 	}
 	break;
 
-	case 1: // Defense mode (only move on X axis on the defense line)
+	case BOT_STATUS::DEFENCE: // Defense mode (only move on X axis on the defense line)
 	{
 		cv::Point pos = cam.GetCurrPredictPos();
 		const int maxX = TABLE_WIDTH - PUCK_SIZE * 3;
@@ -172,7 +172,7 @@ void Robot::RobotMoveDecision( Camera& cam )
 	} // case 1
 	break;
 
-	case 2: // Defense+attack
+	case BOT_STATUS::DEFENCE_AND_ATTACK: 
 	{
 		if ( cam.GetPredictTimeAttack() < MIN_PREDICT_TIME ) // If time is less than 150ms we start the attack
 		{
@@ -189,7 +189,7 @@ void Robot::RobotMoveDecision( Camera& cam )
 	} // case 2
 	break;
 
-	case 3: // ATTACK MODE
+	case BOT_STATUS::ATTACK: 
 	{
 		cv::Point attackPredictPos;
 
@@ -265,7 +265,7 @@ void Robot::RobotMoveDecision( Camera& cam )
 				{
 					//Serial.print( "RESET" );
 					m_AttackTime = 0;
-					m_RobotStatus = 0;
+					m_RobotStatus = BOT_STATUS::INIT;
 					m_AttackStatus = 0;
 				}
 			} // if ( m_AttackStatus == 2 )

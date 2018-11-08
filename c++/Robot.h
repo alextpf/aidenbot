@@ -15,6 +15,12 @@
 class Robot
 {
 public:
+    // 0: Init
+    // 1: Defense
+    // 2: Defense+Atack
+    // 3: Atack
+    enum BOT_STATUS { INIT = 0, DEFENCE, DEFENCE_AND_ATTACK, ATTACK };
+
 	Robot();
 	~Robot();
 
@@ -55,7 +61,7 @@ public:
 		m_DesiredSpeed = s;
 	}
 
-	unsigned int GetRobotStatus() const
+    BOT_STATUS GetRobotStatus() const
 	{
 		return m_RobotStatus;
 	}
@@ -66,11 +72,8 @@ public:
 	}
 
 private:
-	// 0: Init
-	// 1: Defense
-	// 2: Defense+Atack
-	// 3: Atack
-	unsigned int		m_RobotStatus;
+	
+    BOT_STATUS		    m_RobotStatus;
 	clock_t			    m_AttackTime;
 
 	// 0: wait for attack
