@@ -64,6 +64,7 @@
 
 #define MIN_PUCK_Y_SPEED1        -280                    // used in Robot::newDataStrategy()
 #define MIN_PUCK_Y_SPEED2        -160                    // used in Robot::newDataStrategy()
+#define FAST_IN_Y_SPEED			 -50
 #define BOT_MOVE_TIME_THRESHOLD   600
 #define ATTACK_TIME_THRESHOLD     500
 #define IMPACT_TIME_THRESHOLD     200

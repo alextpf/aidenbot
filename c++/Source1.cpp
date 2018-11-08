@@ -6,14 +6,14 @@
 #include <opencv2/video.hpp>
 #include <opencv2/imgproc.hpp>
 
-#include "D:\alex\aidenbot2\c++\VideoProcessor.h"
-#include "D:\alex\aidenbot2\c++\BotManager.h"
-#include "D:\alex\aidenbot2\c++\CheckHSV.h"
-#include "D:\alex\aidenbot2\c++\ImgComposer.h"
-//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\VideoProcessor.h"
-//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\BotManager.h"
-//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\CheckHSV.h"
-//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\ImgComposer.h"
+//#include "D:\alex\aidenbot2\c++\VideoProcessor.h"
+//#include "D:\alex\aidenbot2\c++\BotManager.h"
+//#include "D:\alex\aidenbot2\c++\CheckHSV.h"
+//#include "D:\alex\aidenbot2\c++\ImgComposer.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\VideoProcessor.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\BotManager.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\CheckHSV.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\ImgComposer.h"
 
 using namespace cv;
 using namespace std;
@@ -58,12 +58,13 @@ int main()
 // C:/Users/alex_/Documents/Arduino/aidenbot/v2/aidenbot/data/webcam
 
 	const char inPath[]		= "C:/tmp/data set1/";
+	//const char inPath[] = "C:/tmp/result1/";
 	//const char inPath[]		= "C:/Users/alex_/Documents/Arduino/aidenbot/v2/aidenbot/data/webcam/";
 	const char outPath[]	= "C:/tmp/result1/";
 	const char filename[]	= "pic";
 
 	const int webCamId		= 1; // 0: default (laptop's camera), 1: external connected cam
-	const int startFrame	= 81;//+138;// frame number we want to start at
+	const int startFrame	= 81+154;// frame number we want to start at
 	const int endFrame		= 890;
 
 	//////////////////////
@@ -231,7 +232,11 @@ int main()
 			char buffer[100];
 			sprintf_s(buffer, "%s%s.mp4", outPath, filename );
 
-			processor.SetOutput(buffer);
+			int codec = CV_FOURCC( 'D', 'I', 'V', 'X' );
+			int fps = 20;
+			//int codec = CV_FOURCC( 'P', 'I', 'M', '1' );
+
+			processor.SetOutput( buffer, codec, fps );
 		}
 		break;
 

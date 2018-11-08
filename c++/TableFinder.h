@@ -27,6 +27,8 @@ public:
 		unsigned int bandWidth,
         cv::Mat& img /*debug use*/);
 
+	void AvgCorners();
+
 	void DrawTableLines(cv::Mat &image, cv::Scalar color = cv::Scalar(255, 255, 255));
 
 	const cv::Point& GetTopLeft()

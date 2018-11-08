@@ -51,38 +51,58 @@ void Robot::NewDataStrategy( Camera& cam )
 
         case Camera::PREDICT_STATUS::DIRECT_IMPACT:
             {
-                // Puck is moving to our field directly, with no bounce; Direct impact
-                cv::Point predictPos = cam.GetCurrPredictPos();
+				const unsigned int prevNumPredictBounce = cam.GetPrevNumPredictBounce();
 
-                if( ( predictPos.x > ROBOT_MIN_X + PUCK_SIZE * 2 ) &&
-                    ( predictPos.x < ROBOT_MAX_X - PUCK_SIZE * 2 ) )
-                {
-                    // Predicted position X is within table range
-                    if( cam.GetPuckAvgSpeed().y > MIN_PUCK_Y_SPEED1 )
-                    {
-                        // puck is moving not so fast
-                        m_RobotStatus = 2;  // defense+attack
-                    }
-                    else
-                    {
-                        // puck is moving fast
-                        m_RobotStatus = 1;  // only defense
-                    }
-                }
-                else
-                {
-                    // Predicted position X is out of table range
-                    if( cam.GetPredictTimeDefence() < BOT_MOVE_TIME_THRESHOLD )
-                    {
-                        // predicted hit time is small, i.e. puck approcahing soon
-                        m_RobotStatus = 1;  // Defense
-                    }
-                    else
-                    {
-                        // predicted hit time is large, i.e. no risk
-                        m_RobotStatus = 0;
-                    }
-                }
+				if ( prevNumPredictBounce == 0 )
+				{
+					// Puck is moving to our field directly, with no bounce; Direct impact
+					cv::Point predictPos = cam.GetCurrPredictPos();
+
+					if ( ( predictPos.x > ROBOT_MIN_X + PUCK_SIZE * 2 ) &&
+						( predictPos.x < ROBOT_MAX_X - PUCK_SIZE * 2 ) )
+					{
+						// Predicted position X is within table range
+						if ( cam.GetPuckAvgSpeed().y > MIN_PUCK_Y_SPEED1 )
+						{
+							// puck is moving not so fast
+							m_RobotStatus = 2;  // defense+attack
+						}
+						else
+						{
+							// puck is moving fast
+							m_RobotStatus = 1;  // only defense
+						}
+					}
+					else
+					{
+						// Predicted position X is out of table range
+						if ( cam.GetPredictTimeDefence() < BOT_MOVE_TIME_THRESHOLD )
+						{
+							// predicted hit time is small, i.e. puck approcahing soon
+							m_RobotStatus = 1;  // Defense
+						}
+						else
+						{
+							// predicted hit time is large, i.e. no risk
+							m_RobotStatus = 0;
+						}
+					}
+				}
+				else if ( prevNumPredictBounce == 1 )
+				{
+					// puck coming from a bounce, this is the first frame after the bounce
+					if ( cam.GetPuckAvgSpeed().y > MIN_PUCK_Y_SPEED2 )
+					{
+						// puck is moving not so fast
+						m_RobotStatus = 2;  // defense+attack
+					}
+					else
+					{
+						// puck is moving fast
+						m_RobotStatus = 1;  // only defense
+					}
+
+				}
             }
             break;
 
@@ -103,7 +123,7 @@ void Robot::NewDataStrategy( Camera& cam )
         default:
             break;
     } // switch
-		 
+
 } // Robot::NewDataStrategy
 
 //====================================================================================================================

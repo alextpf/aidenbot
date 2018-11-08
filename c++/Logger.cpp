@@ -59,7 +59,7 @@ void Logger::LogStatus(
 	const cv::Point& botPos,
 	const cv::Point& puckSpeed,
 	const int predictTimeDefence,
-	const unsigned int predictBounceStatus,
+	const unsigned int numBounce,
 	const int botSpeed,
 	const int predictStatus,
 	const unsigned int botStatus,
@@ -88,8 +88,8 @@ void Logger::LogStatus(
 	logFile << puckSpeed.x << " " << puckSpeed.y << std::endl;
 	logFile << "predict time defence: \n";
 	logFile << predictTimeDefence << std::endl;
-	logFile << "predict Bounce Status: \n";
-	logFile << predictBounceStatus << std::endl;
+	logFile << "predicted number of Bounce: \n";
+	logFile << numBounce << std::endl;
 	logFile << "desired bot speed: \n";
 	logFile << botSpeed << std::endl;
 	logFile << "predict status: \n";

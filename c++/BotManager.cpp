@@ -236,7 +236,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 
 					// draw prediction on screen
                     Camera::PREDICT_STATUS predictStatus = m_Camera.GetPredictStatus();
-					if ( predictStatus == Camera::PREDICT_STATUS::DIRECT_IMPACT || 
+					if ( predictStatus == Camera::PREDICT_STATUS::DIRECT_IMPACT ||
                          predictStatus == Camera::PREDICT_STATUS::ONE_BOUNCE )
 					{
 						// draw bounce pos if there's one
@@ -290,7 +290,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 					botPos, // img coordinate
 					m_Camera.GetCurrPuckSpeed(),
 					m_Camera.GetPredictTimeDefence(), // ms
-					m_Camera.GetPredictBounceStatus(),
+					m_Camera.GetCurrNumPredictBounce(),
 					m_Robot.GetDesiredRobotSpeed(),
 					m_Camera.GetPredictStatus(),
 					m_Robot.GetRobotStatus(),
@@ -531,6 +531,13 @@ void BotManager::FindTable( cv::Mat & input )
 		TopRight = m_Corners[1];
 		LowerLeft = m_Corners[2];
 		LowerRight = m_Corners[3];
+
+		m_TableFinder.SetTopLeft( TopLeft );
+		m_TableFinder.SetTopRight( TopRight );
+		m_TableFinder.SetLowerLeft( LowerLeft );
+		m_TableFinder.SetLowerRight( LowerRight );
+
+		m_TableFinder.AvgCorners();
 	} // if ( !m_ManualPickTableCorners )
 
 	  // construct mask based on table 4 corners

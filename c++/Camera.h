@@ -30,7 +30,8 @@ public:
 	// Main function
 	void CamProcess( int dt /*ms*/ );
 
-	int GetNumPredictBounce();
+	unsigned int GetCurrNumPredictBounce();
+	unsigned int GetPrevNumPredictBounce();
 
 	int GetPredictTimeDefence() const;
 
@@ -54,11 +55,10 @@ public:
 	cv::Point GetRobotPos() const;
 	cv::Point GetBouncePos() const;
 
-	unsigned int GetPredictBounceStatus()
-	{
-		return m_PredictBounceStatus;
-	}
 private:
+
+	bool HasBounce( const int x ) const;
+
 	/////////////////////////////
 	// Puck
 	/////////////////////////////
@@ -80,19 +80,20 @@ private:
 	cv::Point2f		m_PrevPuckSpeed;      // previous speed. dm/ms
 	cv::Point2f		m_AverageSpeed;
 
+	//////////////
 	// Bounce
-	int				m_NumPredictBounce;     // number of bounce predicted
+	//////////////
+	unsigned int	m_CurrNumPredictBounce;     // number of bounce predicted
+	unsigned int	m_PrevNumPredictBounce;     // number of bounce predicted
 
     //////////////
-	// speed
+	// status
 	//////////////
     PREDICT_STATUS	m_PredictStatus;
 
-	// 0: has no bounce; direct impact
-	// 1: has 1 bounce
-	unsigned int	m_PredictBounceStatus; //
-
+	//////////////
 	// Time
+	//////////////
 	int				m_PredictTimeDefence;
 	int				m_PredictTimeAttack;
 

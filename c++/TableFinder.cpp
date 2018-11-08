@@ -35,6 +35,15 @@ cv::Point TableFinder::TableToImgCoordinate( cv::Point p )
 
 	return ret;
 } // ImgToTableCoordinate
+void TableFinder::AvgCorners()
+{
+	m_Left = ( m_TopLeft.x + m_LowerLeft.x ) * 0.5f;
+	m_Right = ( m_TopRight.x + m_LowerRight.x ) * 0.5f;
+	m_Top = ( m_TopLeft.y + m_TopRight.y ) * 0.5f;
+	m_Bottom = ( m_LowerLeft.y + m_LowerRight.y ) * 0.5f;
+
+	m_PixToMM = TABLE_LENGTH / ( m_Right - m_Left );
+} // AvgCorners
 
 //===================================================================================
 bool TableFinder::Refine4Edges(
@@ -71,13 +80,7 @@ bool TableFinder::Refine4Edges(
 
 	cv::imshow( "table:", img );
 #endif
-
-	m_Left = ( m_TopLeft.x + m_LowerLeft.x ) * 0.5f;
-	m_Right = ( m_TopRight.x + m_LowerRight.x ) * 0.5f;
-	m_Top = ( m_TopLeft.y + m_TopRight.y ) * 0.5f;
-	m_Bottom = ( m_LowerLeft.y + m_LowerRight.y ) * 0.5f;
-
-	m_PixToMM = TABLE_LENGTH / ( m_Right - m_Left );
+	AvgCorners();
 	return true;
 }//Refine4Edge
 

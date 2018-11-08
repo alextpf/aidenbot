@@ -6,8 +6,8 @@
 Camera::Camera()
     : m_PredictXAttack( 0 )
     , m_PredictStatus( NO_RISK )
-    , m_NumPredictBounce( 0 )
-    , m_PredictBounceStatus( 0 )
+    , m_CurrNumPredictBounce( 0 )
+	, m_PrevNumPredictBounce( 0 )
     , m_PredictTimeDefence( 0 )
     , m_PredictTimeAttack( 0 )
 {}
@@ -60,7 +60,7 @@ void Camera::CamProcess( int dt /*ms*/ )
 	// It's time to predict...
 	// Based on current & previous position we predict the future
 	// Posible impact? speed Y is negative when the puck is moving to the robot
-	if ( m_AverageSpeed.y < -50 )  //-25
+	if ( m_AverageSpeed.y < FAST_IN_Y_SPEED )
 	{
 		// Puck is comming...
 		// We need to predict the puck position when it reaches our goal Y position = defense_position
@@ -76,11 +76,10 @@ void Camera::CamProcess( int dt /*ms*/ )
 		m_PredictXAttack = m_CurrPredictPos.x;
 
 		// puck has a bounce with side wall?
-		if ( m_CurrPredictPos.x < PUCK_SIZE ||
-			m_CurrPredictPos.x > TABLE_WIDTH - PUCK_SIZE )
+		const bool hasBounce = HasBounce( m_CurrPredictPos.x );
+		if ( hasBounce )
 		{
 			m_PredictStatus = ONE_BOUNCE;
-			m_PredictBounceStatus = 1;
 
 			// We start a new prediction
 
@@ -97,17 +96,17 @@ void Camera::CamProcess( int dt /*ms*/ )
 			m_CurrPredictPos.y = ROBOT_DEFENSE_POSITION_DEFAULT + PUCK_SIZE;
 			m_CurrPredictPos.x = static_cast<int>( static_cast<float>( m_CurrPredictPos.y - m_BouncePos.y ) / slope ) + m_BouncePos.x;
 
-			if ( m_CurrPredictPos.x < PUCK_SIZE ||
-				m_CurrPredictPos.x > TABLE_WIDTH - PUCK_SIZE ) // New bounce with side wall?
+			const bool hasAnotherBounce = HasBounce( m_CurrPredictPos.x );
+			if ( hasAnotherBounce ) // New bounce with side wall?
 			{
-				m_NumPredictBounce = 2;
+				m_CurrNumPredictBounce = 2;
 				// We do nothing then... with two bounces there are small risk of goal...
 				m_PrevPredictPos.x = -1;
 				m_PredictStatus = NO_RISK; // no risk
 			}
 			else
 			{
-				m_NumPredictBounce = 1;
+				m_CurrNumPredictBounce = 1;
 
 				// only one side bounce...
 				// If the puckSpeedY has changed a lot this mean that the puck has touched one side
@@ -136,20 +135,19 @@ void Camera::CamProcess( int dt /*ms*/ )
 		{
 			// No bounce, direct impact
 			m_PredictStatus = DIRECT_IMPACT;
-			m_NumPredictBounce = 0;
+			m_CurrNumPredictBounce = 0;
 
-			if ( m_PredictBounceStatus == 1 )  // This is the first direct impact trajectory after a bounce
-			{
-				// We dont predict nothing new...
-				m_PredictBounceStatus = 0;
-			}
-			else
+			// ==1 means the first direct impact trajectory after a bounce.
+			// We dont predict, because the previous pos is before bounce, so the calculated
+			// offset & speed is not correct.
+			if ( m_PrevNumPredictBounce == 0 )
 			{
 				// average of the results (some noise filtering)
 				if ( m_PrevPredictPos.x > 0 )
 				{
 					m_CurrPredictPos.x = static_cast<int>( ( m_PrevPredictPos.x + m_CurrPredictPos.x ) * 0.5f );
 				}
+
 				m_PrevPredictPos.x = m_CurrPredictPos.x;
 
 				m_PredictTimeDefence = static_cast<int>( ( ROBOT_DEFENSE_POSITION_DEFAULT + PUCK_SIZE - m_CurrPuckPos.y ) * 100.0f / m_CurrPuckSpeed.y ) - VISION_SYSTEM_LAG; // in ms
@@ -162,10 +160,16 @@ void Camera::CamProcess( int dt /*ms*/ )
 		// Puck is moving slowly, or to the other side
 		m_PrevPredictPos.x = -1;
 		m_PredictStatus = NO_RISK;
-		m_NumPredictBounce = 0;
-		m_PredictBounceStatus = 0;
 	}//if ( m_AverageSpeed.y < -50 )
+
+	m_PrevNumPredictBounce = m_CurrNumPredictBounce;
 } // CamProcess
+
+//=========================================================
+bool Camera::HasBounce( const int x ) const
+{
+	return x < PUCK_SIZE || x > TABLE_WIDTH - PUCK_SIZE;
+}
 
 //=========================================================
 cv::Point Camera::PredictPuckPos( int predictTime )
@@ -200,9 +204,15 @@ cv::Point Camera::GetPrevPuckPos() const
 }
 
 //=========================================================
-int Camera::GetNumPredictBounce()
+unsigned int Camera::GetCurrNumPredictBounce()
 {
-    return m_NumPredictBounce;
+    return m_CurrNumPredictBounce;
+}
+
+//=========================================================
+unsigned int Camera::GetPrevNumPredictBounce()
+{
+	return m_PrevNumPredictBounce;
 }
 
 //=========================================================
