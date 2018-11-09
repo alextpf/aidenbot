@@ -291,7 +291,8 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 					m_Robot.GetDesiredRobotSpeed(),
 					m_Camera.GetPredictStatus(),
 					m_Robot.GetRobotStatus(),
-					m_Robot.GetAttackStatus() );
+					m_Robot.GetAttackStatus(),
+					m_Robot.GetAttackTime() );
 			}
 
 			m_NumConsecutiveNonPuck = 0;

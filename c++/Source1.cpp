@@ -64,7 +64,7 @@ int main()
 	const char filename[]	= "pic";
 
 	const int webCamId		= 1; // 0: default (laptop's camera), 1: external connected cam
-	const int startFrame	= 81+154;// frame number we want to start at
+	const int startFrame	= 81;// frame number we want to start at
 	const int endFrame		= 890;
 
 	//////////////////////
@@ -77,7 +77,7 @@ int main()
 	}
 
 	const int operation		= tmp[0]; // 1. run the program, 2. check HSV, 3. record webcam images only
-	const int inputType		= tmp[1];
+	int inputType			= tmp[1];
 	int outputType			= tmp[2];
 	const bool showDebugImg	= tmp[3] == 1 ? true : false;
 	bool showInputImg		= tmp[4] == 1 ? true : false;
@@ -96,18 +96,28 @@ int main()
 	const double areaLow	= static_cast<double>( tmp[22] );
 	const double areaHigh	= static_cast<double>( tmp[23] );
 
-	if ( operation == 2/*check hsv*/ )
+	switch ( operation )
 	{
+	case 2: //check hsv
 		showInputImg = true;
 		showOutputImg = false;
 		outputType = 2;
-	}
-	else if ( operation == 4 ) // create resulting imgs by Log.txt
-	{
-		outputType = 0;
+		break;
+	case 4: // create resulting imgs by Log.txt
+		outputType = 0; // images
 		showInputImg = false;
 		showOutputImg = false;
 		delay = 1;
+		break;
+	case 5: // create video from images
+		inputType = 0; //image
+		outputType = 1; // video
+		showInputImg = false;
+		showOutputImg = false;
+		delay = 1;
+		break;
+	default:
+		break;
 	}
 
 	char comPort[20];

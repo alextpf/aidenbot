@@ -1,0 +1,6 @@
+40 - 70: attack with 1 bounce => OK
+145 - 160: attack with 1 bounce => OK
+265 - 300: attack with 2 bounces => OK
+353 - 365: direct impact => OK
+545 - 585: direct impact
+702 - 743: attack with 1 bounce

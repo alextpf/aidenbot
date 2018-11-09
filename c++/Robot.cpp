@@ -59,7 +59,7 @@ void Robot::NewDataStrategy( Camera& cam )
 					cv::Point predictPos = cam.GetCurrPredictPos();
 
 					if ( ( predictPos.x > ROBOT_MIN_X + PUCK_SIZE * 2 ) &&
-						( predictPos.x < ROBOT_MAX_X - PUCK_SIZE * 2 ) )
+					 	 ( predictPos.x < ROBOT_MAX_X - PUCK_SIZE * 2 ) )
 					{
 						// Predicted position X is within table range
 						if ( cam.GetPuckAvgSpeed().y > MIN_PUCK_Y_SPEED1 )
@@ -88,7 +88,7 @@ void Robot::NewDataStrategy( Camera& cam )
 						}
 					}
 				}
-				else if ( prevNumPredictBounce == 1 )
+				else// if ( prevNumPredictBounce == 1 )
 				{
 					// puck coming from a bounce, this is the first frame after the bounce
 					if ( cam.GetPuckAvgSpeed().y > MIN_PUCK_Y_SPEED2 )
@@ -270,7 +270,7 @@ void Robot::RobotMoveDecision( Camera& cam )
 				}
 			} // if ( m_AttackStatus == ATTACK_STATUS::AFTER_ATTACK )
 		} // if (m_AttackTime == 0)
-	} // case 3
+	} // case BOT_STATUS::ATTACK:
 	break;
 	case 4: // The puck came from a bounce
 	{

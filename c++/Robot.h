@@ -76,6 +76,11 @@ public:
 		return m_AttackStatus;
 	}
 
+	clock_t GetAttackTime() const
+	{
+		return m_AttackTime;
+	}
+
 private:
 
     BOT_STATUS		    m_RobotStatus;

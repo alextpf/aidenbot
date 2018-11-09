@@ -137,7 +137,7 @@ void Camera::CamProcess( int dt /*ms*/ )
 			m_PredictStatus = DIRECT_IMPACT;
 			m_CurrNumPredictBounce = 0;
 
-			// ==1 means the first direct impact trajectory after a bounce.
+			// ==1 or 2 means the first direct impact trajectory after a bounce.
 			// We dont predict, because the previous pos is before bounce, so the calculated
 			// offset & speed is not correct.
 			if ( m_PrevNumPredictBounce == 0 )

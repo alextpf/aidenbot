@@ -63,7 +63,8 @@ void Logger::LogStatus(
 	const int botSpeed,
 	const int predictStatus,
 	const unsigned int botStatus,
-	const unsigned int attackStatus
+	const unsigned int attackStatus,
+	const clock_t attackTime
 ) const
 {
 	std::ofstream logFile;
@@ -96,8 +97,10 @@ void Logger::LogStatus(
 	logFile << predictStatus << std::endl;
 	logFile << "bot status ( 0: Init, 1: Defense, 2: Defense+Atack, 3: Atack ): \n";
 	logFile << botStatus << std::endl;
-	logFile << "attack status: \n";
+	logFile << "attack status (0: wait for attack, 1: ready to attack, 2: after firing attack ) only useful in BOT_STATUS::ATTACK mode: \n";
 	logFile << attackStatus << std::endl;
+	logFile << "attack time: \n";
+	logFile << attackTime << std::endl;
 
 	logFile.close();
 } // LogStatus

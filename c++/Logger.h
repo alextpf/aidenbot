@@ -2,6 +2,7 @@
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
+#include <time.h>
 
 class Logger
 {
@@ -36,7 +37,8 @@ public:
 		const int botSpeed,
 		const int predictStatus,
 		const unsigned int botStatus,
-		const unsigned int attackStatus ) const;
+		const unsigned int attackStatus,
+		const clock_t attackTime ) const;
 
 private:
 
