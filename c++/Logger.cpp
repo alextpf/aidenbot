@@ -92,9 +92,9 @@ void Logger::LogStatus(
 	logFile << numBounce << std::endl;
 	logFile << "desired bot speed: \n";
 	logFile << botSpeed << std::endl;
-	logFile << "predict status: \n";
+	logFile << "predict status ( -1 : error, 0 : No risk, 1. direct impact, 2. 1 bounce ): \n";
 	logFile << predictStatus << std::endl;
-	logFile << "bot status: \n";
+	logFile << "bot status ( 0: Init, 1: Defense, 2: Defense+Atack, 3: Atack ): \n";
 	logFile << botStatus << std::endl;
 	logFile << "attack status: \n";
 	logFile << attackStatus << std::endl;

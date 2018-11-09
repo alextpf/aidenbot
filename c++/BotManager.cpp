@@ -65,9 +65,6 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 		output = input.clone();
 	}
 
-	// increment frame number
-	m_NumFrame++;
-
 	/*
 	//=====================================
 	//debug
@@ -315,6 +312,9 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
         m_CurrTime = curr;
 
 	} // if ( m_TableFound )
+
+	// increment frame number
+	m_NumFrame++;
 
 }//Process
 

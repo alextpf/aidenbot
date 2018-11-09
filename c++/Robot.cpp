@@ -10,7 +10,7 @@
 Robot::Robot()
 	: m_RobotStatus( BOT_STATUS::INIT )
 	, m_AttackTime( 0 )
-	, m_AttackStatus( 0 )
+	, m_AttackStatus( ATTACK_STATUS::WAIT_FOR_ATTACK )
     , m_DesiredSpeed( 0 )
 {}
 
@@ -172,7 +172,7 @@ void Robot::RobotMoveDecision( Camera& cam )
 	} // case 1
 	break;
 
-	case BOT_STATUS::DEFENCE_AND_ATTACK: 
+	case BOT_STATUS::DEFENCE_AND_ATTACK:
 	{
 		if ( cam.GetPredictTimeAttack() < MIN_PREDICT_TIME ) // If time is less than 150ms we start the attack
 		{
@@ -189,7 +189,7 @@ void Robot::RobotMoveDecision( Camera& cam )
 	} // case 2
 	break;
 
-	case BOT_STATUS::ATTACK: 
+	case BOT_STATUS::ATTACK:
 	{
 		cv::Point attackPredictPos;
 
@@ -212,12 +212,12 @@ void Robot::RobotMoveDecision( Camera& cam )
 
                     m_DesiredSpeed = static_cast<int>( MAX_ABS_SPEED * 0.5 );
 
-                    m_AttackStatus = 1; // ready to attack
+                    m_AttackStatus = ATTACK_STATUS::READY_TO_ATTACK;
                 }
                 else
                 {
                     m_AttackTime = 0;  // Continue waiting for the right attack moment...
-                    m_AttackStatus = 0; // wait to attack
+					m_AttackStatus = ATTACK_STATUS::WAIT_FOR_ATTACK;
 
                     // And go to defense position
                     m_DesiredRobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
@@ -228,7 +228,7 @@ void Robot::RobotMoveDecision( Camera& cam )
 		} // if ( m_AttackTime == 0 )
 		else
 		{
-			if ( m_AttackStatus == 1 )
+			if ( m_AttackStatus == ATTACK_STATUS::READY_TO_ATTACK )
 			{
 				// ready to attack
                 if( !IsOwnGoal( cam ) )
@@ -241,9 +241,9 @@ void Robot::RobotMoveDecision( Camera& cam )
                         m_DesiredRobotPos.x = attackPredictPos.x;
                         m_DesiredRobotPos.y = attackPredictPos.y + PUCK_SIZE * 2;
 
-                        m_AttackStatus = 2; // Attacking
+                        m_AttackStatus = ATTACK_STATUS::AFTER_ATTACK;
                     }
-                    else  // m_AttackStatus = 1 but it's not the time to attack yet
+                    else  // m_AttackStatus = ATTACK_STATUS::READY_TO_ATTACK but it's not the time to attack yet
                     {
                         // Go to pre-attack position
                         attackPredictPos = cam.PredictPuckPos( ATTACK_TIME_THRESHOLD );
@@ -254,9 +254,9 @@ void Robot::RobotMoveDecision( Camera& cam )
                         m_DesiredSpeed = static_cast<int>( MAX_ABS_SPEED * 0.5 );
                     }
                 }//if( !IsOwnGoal( cam ) )
-			} // if (m_AttackStatus == 1) ; ready to attack
+			} // if (m_AttackStatus == ATTACK_STATUS::READY_TO_ATTACK)
 
-			if ( m_AttackStatus == 2 )
+			if ( m_AttackStatus == ATTACK_STATUS::AFTER_ATTACK )
 			{
 				// after firing attack
 				int dt = static_cast<int>( ( clock() - m_AttackTime ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
@@ -266,9 +266,9 @@ void Robot::RobotMoveDecision( Camera& cam )
 					//Serial.print( "RESET" );
 					m_AttackTime = 0;
 					m_RobotStatus = BOT_STATUS::INIT;
-					m_AttackStatus = 0;
+					m_AttackStatus = ATTACK_STATUS::WAIT_FOR_ATTACK;
 				}
-			} // if ( m_AttackStatus == 2 )
+			} // if ( m_AttackStatus == ATTACK_STATUS::AFTER_ATTACK )
 		} // if (m_AttackTime == 0)
 	} // case 3
 	break;

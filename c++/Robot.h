@@ -21,6 +21,11 @@ public:
     // 3: Atack
     enum BOT_STATUS { INIT = 0, DEFENCE, DEFENCE_AND_ATTACK, ATTACK };
 
+	// 0: wait for attack
+	// 1: ready to attack
+	// 2: after firing attack
+	enum ATTACK_STATUS { WAIT_FOR_ATTACK = 0, READY_TO_ATTACK, AFTER_ATTACK };
+
 	Robot();
 	~Robot();
 
@@ -66,20 +71,17 @@ public:
 		return m_RobotStatus;
 	}
 
-	unsigned int GetAttackStatus() const
+	ATTACK_STATUS GetAttackStatus() const
 	{
 		return m_AttackStatus;
 	}
 
 private:
-	
+
     BOT_STATUS		    m_RobotStatus;
 	clock_t			    m_AttackTime;
 
-	// 0: wait for attack
-	// 1: ready to attack
-	// 2: after firing attack
-	unsigned int		m_AttackStatus;
+	ATTACK_STATUS		m_AttackStatus;
 
 	cv::Point			m_DesiredRobotPos;
 
