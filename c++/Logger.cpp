@@ -64,8 +64,8 @@ void Logger::LogStatus(
 	const int predictStatus,
 	const unsigned int botStatus,
 	const unsigned int attackStatus,
-	const clock_t attackTime
-) const
+	const clock_t attackTime,
+	const cv::Point2f& avgPuckSpeed) const
 {
 	std::ofstream logFile;
 	logFile.open( "Log.txt", std::ios_base::app ); // append
@@ -101,6 +101,8 @@ void Logger::LogStatus(
 	logFile << attackStatus << std::endl;
 	logFile << "attack time: \n";
 	logFile << attackTime << std::endl;
+	logFile << "puck avg speed: \n";
+	logFile << avgPuckSpeed.x << " " << avgPuckSpeed.y << std::endl;
 
 	logFile.close();
 } // LogStatus

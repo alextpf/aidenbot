@@ -101,8 +101,8 @@ public:
 private:  
 
   RobotPos m_Pos;
-	Motor m_M1;
-	Motor m_M2;
+	Motor m_M1; // control X-axis
+	Motor m_M2; // control Y-axis. For 2-motor system, this represents 1 motor; for 3-motor system, this represents 2 motor (in sync)
 	uint32_t m_Time; // time stamp, in micro sec. 
   unsigned long m_LoopCounter; 
 };

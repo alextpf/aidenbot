@@ -199,10 +199,10 @@ void Robot::RobotMoveDecision( Camera& cam )
             {
                 attackPredictPos = cam.PredictPuckPos( ATTACK_TIME_THRESHOLD );
 
-                if( ( attackPredictPos.x > PUCK_SIZE * 3 ) &&
-                    ( attackPredictPos.x < TABLE_WIDTH - PUCK_SIZE * 3 ) &&
-                    ( attackPredictPos.y > PUCK_SIZE * 4 ) &&
-                    ( attackPredictPos.y < ROBOT_CENTER_Y - PUCK_SIZE * 5 ) )
+                if( ( attackPredictPos.x > PUCK_SIZE ) &&
+                    ( attackPredictPos.x < TABLE_WIDTH - PUCK_SIZE ) &&
+                    ( attackPredictPos.y > PUCK_SIZE * 2 ) &&
+                    ( attackPredictPos.y < ROBOT_CENTER_Y - PUCK_SIZE * 4 ) )
                 {
                     m_AttackTime = clock() + static_cast<clock_t>( ATTACK_TIME_THRESHOLD * CLOCKS_PER_SEC / 1000.0f );  // Prepare an attack in 500ms
 

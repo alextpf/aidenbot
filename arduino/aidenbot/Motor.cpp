@@ -219,9 +219,12 @@ void Motor::SetCurrSpeedInternal( uint16_t dt, int goalSpeed, MOTOR_NUM m )
     {
       SET(PORTF,1);
     }
-    else if ( m == M2 )
+    else if ( m == M2 ) // with 3-motor system, this represents 2 motors
     {
       SET(PORTF,7);
+#ifndef TWO_MOTOR
+      SET(PORTL,1);
+#endif
     }
   }
   else if ( ( m_CurrSpeed < 0 ) && ( m_Dir != -1 ) )
@@ -231,9 +234,12 @@ void Motor::SetCurrSpeedInternal( uint16_t dt, int goalSpeed, MOTOR_NUM m )
     {
       CLR(PORTF,1);
     }
-    else if ( m == M2 )
+    else if ( m == M2 ) // with 3-motor system, this represents 2 motors
     {
       CLR(PORTF,7);
+#ifndef TWO_MOTOR
+      CLR(PORTL,1);
+#endif      
     }
   }
 

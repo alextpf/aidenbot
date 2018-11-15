@@ -27,7 +27,13 @@ void setup()
   
   // Enable Motors
   digitalWrite(X_ENABLE_PIN    , LOW);
+
+#ifdef TWO_MOTOR  
   digitalWrite(Y_ENABLE_PIN    , LOW);
+#else
+  digitalWrite(Y_LEFT_ENABLE_PIN    , LOW);
+  digitalWrite(Y_RIGHT_ENABLE_PIN    , LOW);
+#endif  
   
   SetTimerInterrupt();
 
@@ -62,9 +68,8 @@ void setup()
   
   hBot.SetMaxAbsSpeed( MAX_ABS_SPEED );
   hBot.SetMaxAbsAccel( MAX_ABS_ACCEL );
-  hBot.SetPosStraight( ROBOT_CENTER_X, ROBOT_DEFENSE_POSITION_DEFAULT ); // this sets m_GoalStep, and internally set m_AbsGoalSpeed for M1 & M2
-//  hBot.SetPosStraight(ROBOT_MAX_X, ROBOT_MAX_Y); // upper right
-  
+  hBot.SetPosStraight( ROBOT_CENTER_X, ROBOT_INITIAL_POSITION_Y ); // this sets m_GoalStep, and internally set m_AbsGoalSpeed for M1 & M2
+
   prev_time = micros(); 
   hBot.SetTime( prev_time );
 }
@@ -82,6 +87,7 @@ void loop()
     }
       
     if( reader.ReadPacket() )
+    //if(false)
     {
     #ifdef SHOW_LOG      
       //reader.showNewData();

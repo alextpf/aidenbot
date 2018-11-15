@@ -10,14 +10,38 @@
 ////////////////////////////
 // Pin definition
 ////////////////////////////
+//#define TWO_MOTOR // two-motor system v.s. 3-motor system
+  #define X_STEP_PIN          54
+  #define X_DIR_PIN           55
+  #define X_ENABLE_PIN        38
 
-#define X_STEP_PIN          54
-#define X_DIR_PIN           55
-#define X_ENABLE_PIN        38
+#ifdef TWO_MOTOR
+  
+  #define Y_STEP_PIN          60
+  #define Y_DIR_PIN           61
+  #define Y_ENABLE_PIN        56
+#else // 3-motor system
+  // X MOTOR
+  //     X-STEP: A0    (PF0)
+  //     X-DIR:  A1    (PF1)
+  //     X-ENABLE: D38 (PD7)
+  // Y MOTOR (Y-LEFT)
+  //     Y-STEP: A6    (PF6)
+  //     Y-DIR:  A7    (PF7)
+  //     Y-ENABLE: A2  (PF2)
+  // Z MOTOR (Y-RIGHT)
+  //     Z-STEP: D46   (PL3)
+  //     Z-DIR:  D48   (PL1)
+  //     Z-ENABLE: A8  (PK0)
+  
+  #define Y_LEFT_STEP_PIN          60
+  #define Y_LEFT_DIR_PIN           61
+  #define Y_LEFT_ENABLE_PIN        56
 
-#define Y_STEP_PIN          60
-#define Y_DIR_PIN           61
-#define Y_ENABLE_PIN        56
+  #define Y_RIGHT_STEP_PIN         46
+  #define Y_RIGHT_DIR_PIN          48
+  #define Y_RIGHT_ENABLE_PIN       62
+#endif
 
 #define LED_PIN             13
 #define BAUD_RATE           115200

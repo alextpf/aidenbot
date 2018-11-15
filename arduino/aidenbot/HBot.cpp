@@ -14,16 +14,27 @@
 RobotPos HBot::MotorStepToHBotPos(long m1Step, long m2Step)
 {
   RobotPos pos;
+#ifdef TWO_MOTOR  
   pos.m_X = ( m1Step + m2Step ) * 0.5 / X_AXIS_STEPS_PER_UNIT;
   pos.m_Y = ( m1Step - m2Step ) * 0.5 / Y_AXIS_STEPS_PER_UNIT;
+#else
+  pos.m_X = m1Step / X_AXIS_STEPS_PER_UNIT;
+  pos.m_Y = m2Step / Y_AXIS_STEPS_PER_UNIT;
+#endif
   return pos;
 } // MotorStepToHBotPos
 
 //=========================================================
 void HBot::HBotPosToMotorStep(const RobotPos& pos, long& m1Step, long& m2Step)
 {
+#ifdef TWO_MOTOR  
   m1Step = (long)(pos.m_X + pos.m_Y) * (long)X_AXIS_STEPS_PER_UNIT;
   m2Step = (long)(pos.m_X - pos.m_Y) * (long)Y_AXIS_STEPS_PER_UNIT;
+#else
+  m1Step = (long)pos.m_X * (long)X_AXIS_STEPS_PER_UNIT;
+  m2Step = (long)pos.m_Y * (long)Y_AXIS_STEPS_PER_UNIT;
+#endif
+
 } // HBotPosToMotorStep
 
 ////////////////////////////////////////////

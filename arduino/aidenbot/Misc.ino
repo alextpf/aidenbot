@@ -1,16 +1,28 @@
+#include "Configuration.h"
 
 //================================================================
 void SetPINS()
 {
   pinMode(LED_PIN, OUTPUT);
-  
+
   pinMode(X_STEP_PIN, OUTPUT);
   pinMode(X_DIR_PIN, OUTPUT);
   pinMode(X_ENABLE_PIN, OUTPUT);
   
+  
+#ifdef TWO_MOTOR  
   pinMode(Y_STEP_PIN, OUTPUT);
   pinMode(Y_DIR_PIN, OUTPUT);
   pinMode(Y_ENABLE_PIN, OUTPUT);
+#else 
+  pinMode(Y_LEFT_STEP_PIN, OUTPUT);
+  pinMode(Y_LEFT_DIR_PIN, OUTPUT);
+  pinMode(Y_LEFT_ENABLE_PIN, OUTPUT);
+
+  pinMode(Y_RIGHT_STEP_PIN, OUTPUT);
+  pinMode(Y_RIGHT_DIR_PIN, OUTPUT);
+  pinMode(Y_RIGHT_ENABLE_PIN, OUTPUT);
+#endif
 } //SetPINS
 //================================================================
 void SetTimerInterrupt()
@@ -96,8 +108,12 @@ ISR(TIMER3_COMPA_vect)
   int8_t dir = hBot.GetM2().GetDir();
   if ( dir == 0 )
     return;
-
+#ifdef TWO_MOTOR
   SET(PORTF,6); // STEP Y-AXIS
+#else
+  SET(PORTF,6); // STEP Y-AXIS (Y-left)
+  SET(PORTL,3); // STEP Z-AXIS (Y-right)
+#endif
   
   long currStep = hBot.GetM2().GetCurrStep();
   hBot.GetM2().SetCurrStep( currStep + dir );
@@ -113,7 +129,12 @@ ISR(TIMER3_COMPA_vect)
     "nop" "\n\t"
     "nop" "\n\t"
     "nop");  // Wait 2 cycles. With the other instruction and this we ensure a more than 1 microsenconds step pulse
+#ifdef TWO_MOTOR
   CLR(PORTF,6);
+#else
+  CLR(PORTF,6);
+  CLR(PORTF,3);
+#endif
 }
 
 //================================================================

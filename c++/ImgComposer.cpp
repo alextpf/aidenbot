@@ -159,6 +159,10 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 		// attack time
 		std::getline( log, line ); // get description, skip
 		std::getline( log, line );
+
+		// puck average speed
+		std::getline( log, line ); // get description, skip
+		std::getline( log, line );
 	} // if ( puckPos.x == -1 )
 
 	/////////////////

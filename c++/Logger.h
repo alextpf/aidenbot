@@ -38,7 +38,8 @@ public:
 		const int predictStatus,
 		const unsigned int botStatus,
 		const unsigned int attackStatus,
-		const clock_t attackTime ) const;
+		const clock_t attackTime,
+		const cv::Point2f& avgPuckSpeed ) const;
 
 private:
 
