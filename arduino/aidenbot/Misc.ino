@@ -133,7 +133,7 @@ ISR(TIMER3_COMPA_vect)
   CLR(PORTF,6);
 #else
   CLR(PORTF,6);
-  CLR(PORTF,3);
+  CLR(PORTL,3);
 #endif
 }
 

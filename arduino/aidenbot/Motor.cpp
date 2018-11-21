@@ -46,6 +46,7 @@ void Motor::UpdateAccel()
       Serial.println(absSpeed);
       Serial.print("m_AbsAccel = ");
       Serial.println(m_AbsAccel);
+      Serial.println();
       //===========================
   #endif
   
@@ -58,6 +59,7 @@ void Motor::UpdateSpeed( uint16_t dt, MOTOR_NUM m )
   const long stepsToGoal = m_GoalStep - m_CurrStep; // error term
 
   #ifdef SHOW_LOG
+      Serial.println( "Motor::UpdateSpeed: " );
       Serial.print( "m_CurrStep= " );
       Serial.println( m_CurrStep );
       Serial.print( "stepsToGoal= " );
@@ -221,8 +223,10 @@ void Motor::SetCurrSpeedInternal( uint16_t dt, int goalSpeed, MOTOR_NUM m )
     }
     else if ( m == M2 ) // with 3-motor system, this represents 2 motors
     {
+#ifdef TWO_MOTOR      
       SET(PORTF,7);
-#ifndef TWO_MOTOR
+#else
+      SET(PORTF,7);
       SET(PORTL,1);
 #endif
     }
@@ -236,8 +240,10 @@ void Motor::SetCurrSpeedInternal( uint16_t dt, int goalSpeed, MOTOR_NUM m )
     }
     else if ( m == M2 ) // with 3-motor system, this represents 2 motors
     {
+#ifdef TWO_MOTOR      
       CLR(PORTF,7);
-#ifndef TWO_MOTOR
+#else
+      CLR(PORTF,7);
       CLR(PORTL,1);
 #endif      
     }

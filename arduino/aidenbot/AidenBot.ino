@@ -10,7 +10,7 @@
 
 long curr_time;                 // used in main loop
 long prev_time;
-bool testmode = false;
+bool testmode = true;
 //
 HBot hBot;
 PacketReader reader;
@@ -86,8 +86,8 @@ void loop()
       testMovements();
     }
       
-    if( reader.ReadPacket() )
-    //if(false)
+    //if( reader.ReadPacket() )
+    if(false)
     {
     #ifdef SHOW_LOG      
       //reader.showNewData();
@@ -113,6 +113,7 @@ void loop()
     hBot.Update(); // internally update 
     
     if ( hBot.GetLoopCounter() % 10 == 0 )
+    if(false)
     {
       hBot.UpdatePosStraight();  // update straight line motion algorithm
     } 
