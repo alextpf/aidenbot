@@ -59,24 +59,24 @@
 #define ROBOT_CENTER_Y  TABLE_LENGTH/2
 
 // Absolute Min and Max robot positions in mm (measured from center of robot pusher)
-#define ROBOT_MIN_X     50
-#define ROBOT_MIN_Y     80
+#define ROBOT_MIN_X     60
+#define ROBOT_MIN_Y     90
 #define ROBOT_MAX_X     TABLE_WIDTH-ROBOT_MIN_X
-#define ROBOT_MAX_Y     ROBOT_CENTER_Y-120
+#define ROBOT_MAX_Y     ROBOT_CENTER_Y-100
 
 // Initial robot position in mm
 // The robot must be at this position at start time
 // Default: Centered in X and minimun position in Y
 #define ROBOT_INITIAL_POSITION_X              TABLE_WIDTH/2
-#define ROBOT_INITIAL_POSITION_Y              80            // Measured from center of the robot pusher to the table border
+#define ROBOT_INITIAL_POSITION_Y              60            // Measured from center of the robot pusher to the table border
 
 // Robot defense and attack lines
 #define ROBOT_DEFENSE_POSITION_DEFAULT        120
 #define ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT 280
 #define ROBOT_DEFENSE_POSITION_MIN            60
-#define ROBOT_DEFENSE_POSITION_MAX            100
+#define ROBOT_DEFENSE_POSITION_MAX            150
 #define ROBOT_DEFENSE_ATTACK_POSITION_MIN     140
-#define ROBOT_DEFENSE_ATTACK_POSITION_MAX     360
+#define ROBOT_DEFENSE_ATTACK_POSITION_MAX     380
 
 #define PUCK_SIZE       22                        // PuckSize (puck radius in mm)
 //========================================================================================================================================
@@ -86,11 +86,11 @@
 
 // THIS VALUES DEPENDS ON YOUR ROBOT CONSTRUCTION (MOTORS, MECHANICS...)
 // RECOMMENDED VALUES FOR 12V POWER SUPPLY
-#define MAX_ABS_ACCEL         120//120//275                        // Maximun motor acceleration in (steps/seg2)/1000. Max recommended value:280
-#define MAX_ABS_SPEED         10000//22000//32000                    // Maximun speed in steps/seg. Max absolute value: 32767!!
+#define MAX_ABS_ACCEL         120//275                        // Maximun motor acceleration in (steps/seg2)/1000. Max recommended value:280
+#define MAX_ABS_SPEED         22000//32000                    // Maximun speed in steps/seg. Max absolute value: 32767!!
 
-#define MIN_ACCEL         70//70//100						// make sure this is not 0
-#define MIN_SPEED         1000//5000
+#define MIN_ACCEL         70//100						// make sure this is not 0
+#define MIN_SPEED         5000
 
 #define SCURVE_LOW_SPEED  2500
 

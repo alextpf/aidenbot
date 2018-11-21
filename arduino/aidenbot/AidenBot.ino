@@ -112,8 +112,7 @@ void loop()
     
     hBot.Update(); // internally update 
     
-    if ( hBot.GetLoopCounter() % 10 == 0 )
-    if(false)
+    if ( hBot.GetLoopCounter() % 10 == 0 )    
     {
       hBot.UpdatePosStraight();  // update straight line motion algorithm
     } 
