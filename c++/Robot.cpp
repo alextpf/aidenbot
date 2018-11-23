@@ -3,7 +3,7 @@
 // Modified by Alex Chen
 //////////////////////////////////////////////////////
 #include "Robot.h"
-#include "Configuration.h"
+#include "../arduino/aidenbot/Configuration.h"
 #include <iostream>
 
 //====================================================================================================================
@@ -129,7 +129,7 @@ void Robot::NewDataStrategy( Camera& cam )
 //====================================================================================================================
 void Robot::RobotMoveDecision( Camera& cam )
 {
-    m_DesiredSpeed = MAX_ABS_SPEED;
+    m_DesiredSpeed = MAX_Y_ABS_SPEED;
 
     cv::Point robotPos;
 
@@ -141,7 +141,7 @@ void Robot::RobotMoveDecision( Camera& cam )
         {
             m_DesiredRobotPos.x = ROBOT_CENTER_X;  //center X axis
             m_DesiredRobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
-            m_DesiredSpeed = static_cast<int>( MAX_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
+            m_DesiredSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
         }
 
 		m_AttackTime = 0;
@@ -210,7 +210,7 @@ void Robot::RobotMoveDecision( Camera& cam )
                     m_DesiredRobotPos.x = attackPredictPos.x;
                     m_DesiredRobotPos.y = attackPredictPos.y - PUCK_SIZE * 4;
 
-                    m_DesiredSpeed = static_cast<int>( MAX_ABS_SPEED * 0.5 );
+                    m_DesiredSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.5 );
 
                     m_AttackStatus = ATTACK_STATUS::READY_TO_ATTACK;
                 }
@@ -222,7 +222,7 @@ void Robot::RobotMoveDecision( Camera& cam )
                     // And go to defense position
                     m_DesiredRobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
                     m_DesiredRobotPos.x = ROBOT_CENTER_X;  //center X axis
-                    m_DesiredSpeed = static_cast<int>( MAX_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
+                    m_DesiredSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
                 }
             } // if( !IsOwnGoal( cam ) )
 		} // if ( m_AttackTime == 0 )
@@ -251,7 +251,7 @@ void Robot::RobotMoveDecision( Camera& cam )
                         m_DesiredRobotPos.x = attackPredictPos.x;
                         m_DesiredRobotPos.y = attackPredictPos.y - PUCK_SIZE * 4;
 
-                        m_DesiredSpeed = static_cast<int>( MAX_ABS_SPEED * 0.5 );
+                        m_DesiredSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.5 );
                     }
                 }//if( !IsOwnGoal( cam ) )
 			} // if (m_AttackStatus == ATTACK_STATUS::READY_TO_ATTACK)

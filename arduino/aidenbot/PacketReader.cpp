@@ -4,7 +4,7 @@
 //#define DEBUG_SERIAL
 //==========================================================================
 PacketReader::PacketReader()
-    : m_DesiredMotorSpeed( MAX_ABS_SPEED )
+    : m_DesiredMotorSpeed( MAX_Y_ABS_SPEED )
     , m_IsPacketRead( false )
 {}
 

@@ -2,11 +2,14 @@
 // Original Author: Jose Julio
 // Modified by Alex Chen
 //////////////////////////////////////////////////////
+// [note]: How to debug:
+// - define SHOW_LOG in configuration.h
+// - comment out "if( reader.ReadPacket() )" and enable "testmode"
+// - only print out few iterations, ex: add "&& hBot.GetLoopCounter()< 20"
+
 #include "Configuration.h"
 #include "HBot.h"
 #include "PacketReader.h"
-//#include "Camera.h"
-//#include "Robot.h"
 
 long curr_time;                 // used in main loop
 long prev_time;
@@ -14,8 +17,6 @@ bool testmode = true;
 //
 HBot hBot;
 PacketReader reader;
-//Camera cam;
-//Robot robot;
 
 //#define DEBUG_PACKET_READER
 void setup() 
@@ -27,14 +28,17 @@ void setup()
   
   // Enable Motors
   digitalWrite(X_ENABLE_PIN    , LOW);
-
+  digitalWrite(Y_ENABLE_PIN    , LOW);
+  
+  /*
 #ifdef TWO_MOTOR  
   digitalWrite(Y_ENABLE_PIN    , LOW);
 #else
   digitalWrite(Y_LEFT_ENABLE_PIN    , LOW);
   digitalWrite(Y_RIGHT_ENABLE_PIN    , LOW);
 #endif  
-  
+  */
+
   SetTimerInterrupt();
 
   // init HBot params
@@ -66,8 +70,11 @@ void setup()
   hBot.GetM1().SetCurrStep( m1s ); // this sets m_CurrStep for Motor1 & Motor2
   hBot.GetM2().SetCurrStep( m2s );
   
-  hBot.SetMaxAbsSpeed( MAX_ABS_SPEED );
-  hBot.SetMaxAbsAccel( MAX_ABS_ACCEL );
+  hBot.SetXMaxAbsSpeed( MAX_X_ABS_SPEED );
+  hBot.SetYMaxAbsSpeed( MAX_Y_ABS_SPEED );
+  hBot.SetXMaxAbsAccel( MAX_X_ABS_ACCEL );
+  hBot.SetYMaxAbsAccel( MAX_Y_ABS_ACCEL );
+
   hBot.SetPosStraight( ROBOT_CENTER_X, ROBOT_INITIAL_POSITION_Y ); // this sets m_GoalStep, and internally set m_AbsGoalSpeed for M1 & M2
 
   prev_time = micros(); 
@@ -105,9 +112,9 @@ void loop()
       Serial.println();
     #endif    
       // there's new data coming
-      hBot.SetMaxAbsSpeed( reader.GetDesiredMotorSpeed() );
-      hBot.SetPosStraight( reader.GetDesiredBotPos().m_X, reader.GetDesiredBotPos().m_Y );
-      
+      hBot.SetXMaxAbsSpeed( reader.GetDesiredMotorSpeed() );
+      hBot.SetYMaxAbsSpeed( reader.GetDesiredMotorSpeed() );
+      hBot.SetPosStraight( reader.GetDesiredBotPos().m_X, reader.GetDesiredBotPos().m_Y );      
     }
     
     hBot.Update(); // internally update 

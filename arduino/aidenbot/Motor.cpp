@@ -158,7 +158,14 @@ void Motor::UpdateSpeed( uint16_t dt, MOTOR_NUM m )
 //=========================================================
 void Motor::SetCurrSpeedInternal( uint16_t dt, int goalSpeed, MOTOR_NUM m )
 {
-  goalSpeed = constrain( goalSpeed, -MAX_ABS_SPEED, MAX_ABS_SPEED );
+  if( m == MOTOR_NUM::M1) // X
+  {
+    goalSpeed = constrain( goalSpeed, -MAX_X_ABS_SPEED, MAX_X_ABS_SPEED );
+  }
+  else
+  {
+    goalSpeed = constrain( goalSpeed, -MAX_Y_ABS_SPEED, MAX_Y_ABS_SPEED );
+  }
   
   // We limit acceleration => speed ramp
   const int absAccel = ((long)m_AbsAccel * (long)dt) / 1000; // We divide by 1000 because dt are in microseconds
@@ -226,7 +233,7 @@ void Motor::SetCurrSpeedInternal( uint16_t dt, int goalSpeed, MOTOR_NUM m )
 #ifdef TWO_MOTOR      
       SET(PORTF,7);
 #else
-      SET(PORTF,7);
+      //SET(PORTF,7);
       SET(PORTL,1);
 #endif
     }
@@ -243,7 +250,7 @@ void Motor::SetCurrSpeedInternal( uint16_t dt, int goalSpeed, MOTOR_NUM m )
 #ifdef TWO_MOTOR      
       CLR(PORTF,7);
 #else
-      CLR(PORTF,7);
+      //CLR(PORTF,7);
       CLR(PORTL,1);
 #endif      
     }

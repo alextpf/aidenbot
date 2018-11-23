@@ -1,5 +1,5 @@
 #include "Camera.h"
-#include "Configuration.h"
+#include "../arduino/aidenbot/Configuration.h"
 #include <iostream>
 
 //=========================================================

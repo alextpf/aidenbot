@@ -1,5 +1,10 @@
+
 #include "BotManager.h"
 #include "Utility.h"
+#include "../arduino/aidenbot/Configuration.h"
+
+#include <conio.h> // for getch
+#include <windows.h> // for kbhit
 
 #define PI							3.1415926
 #define DEG_TO_RAD					PI / 180.0f
@@ -60,7 +65,17 @@ BotManager::BotManager( char* com )
 //=======================================================================
 void BotManager::Process(cv::Mat & input, cv::Mat & output)
 {
-	if ( m_ShowOutPutImg )
+	// check if keyboard "h/H" is hit
+	if ( _kbhit() )
+	{
+		int key = _getch();
+		if ( key == 104 || key == 72 )
+		{
+			m_Debug = true;
+		}
+	}
+
+	//if ( m_ShowOutPutImg )
 	{
 		output = input.clone();
 	}
@@ -605,7 +620,16 @@ bool BotManager::SendBotMessage()
 	// so we use 2 bytes to store position. Similarly for speed
 
 	// desired robot pos
-	cv::Point desiredBotPos = m_Robot.GetDesiredRobotPos();
+	cv::Point desiredBotPos;
+	if ( m_Debug )
+	{
+		m_Debug = false;
+		desiredBotPos = cv::Point( ROBOT_CENTER_X, ROBOT_INITIAL_POSITION_Y );
+	}
+	else
+	{
+		desiredBotPos = m_Robot.GetDesiredRobotPos();
+	}
 
 	// Pos X (high byte, low byte)
 	message[2] = ( desiredBotPos.x >> 8 ) & 0xFF;

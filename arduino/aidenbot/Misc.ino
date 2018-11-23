@@ -9,7 +9,10 @@ void SetPINS()
   pinMode(X_DIR_PIN, OUTPUT);
   pinMode(X_ENABLE_PIN, OUTPUT);
   
-  
+  pinMode(Y_STEP_PIN, OUTPUT);
+  pinMode(Y_DIR_PIN, OUTPUT);
+  pinMode(Y_ENABLE_PIN, OUTPUT);
+  /*
 #ifdef TWO_MOTOR  
   pinMode(Y_STEP_PIN, OUTPUT);
   pinMode(Y_DIR_PIN, OUTPUT);
@@ -23,6 +26,7 @@ void SetPINS()
   pinMode(Y_RIGHT_DIR_PIN, OUTPUT);
   pinMode(Y_RIGHT_ENABLE_PIN, OUTPUT);
 #endif
+*/
 } //SetPINS
 //================================================================
 void SetTimerInterrupt()
@@ -108,10 +112,11 @@ ISR(TIMER3_COMPA_vect)
   int8_t dir = hBot.GetM2().GetDir();
   if ( dir == 0 )
     return;
+
 #ifdef TWO_MOTOR
   SET(PORTF,6); // STEP Y-AXIS
 #else
-  SET(PORTF,6); // STEP Y-AXIS (Y-left)
+  //SET(PORTF,6); // STEP Y-AXIS (Y-left)
   SET(PORTL,3); // STEP Z-AXIS (Y-right)
 #endif
   
@@ -132,7 +137,7 @@ ISR(TIMER3_COMPA_vect)
 #ifdef TWO_MOTOR
   CLR(PORTF,6);
 #else
-  CLR(PORTF,6);
+  //CLR(PORTF,6);
   CLR(PORTL,3);
 #endif
 }
