@@ -29,11 +29,11 @@
   //     Y-STEP: A6    (PF6)
   //     Y-DIR:  A7    (PF7)
   //     Y-ENABLE: A2  (PF2)
-  // Z MOTOR (Y-RIGHT) both left and right
+  // Z MOTOR (Y-RIGHT): the reason we can't use Z for both left and right is the power can't support
   //     Z-STEP: D46   (PL3)
   //     Z-DIR:  D48   (PL1)
   //     Z-ENABLE: A8  (PK0)
-  /*
+  
   #define Y_LEFT_STEP_PIN          60
   #define Y_LEFT_DIR_PIN           61
   #define Y_LEFT_ENABLE_PIN        56
@@ -41,11 +41,7 @@
   #define Y_RIGHT_STEP_PIN         46
   #define Y_RIGHT_DIR_PIN          48
   #define Y_RIGHT_ENABLE_PIN       62
-  */
-  #define Y_STEP_PIN          46
-  #define Y_DIR_PIN           48
-  #define Y_ENABLE_PIN        62
-
+  
 #endif
 
 #define LED_PIN             13
@@ -92,9 +88,9 @@
 // THIS VALUES DEPENDS ON YOUR ROBOT CONSTRUCTION (MOTORS, MECHANICS...)
 // RECOMMENDED VALUES FOR 12V POWER SUPPLY
 #define MAX_X_ABS_ACCEL         240//275                        // Maximun motor acceleration in (steps/seg2)/1000. Max recommended value:280
-#define MAX_Y_ABS_ACCEL         80
+#define MAX_Y_ABS_ACCEL         100
 #define MAX_X_ABS_SPEED         30000//32000                    // Maximun speed in steps/seg. Max absolute value: 32767!!
-#define MAX_Y_ABS_SPEED         15000
+#define MAX_Y_ABS_SPEED         20000
 
 #define MIN_ACCEL         50						// make sure this is not 0
 #define MIN_SPEED         5000

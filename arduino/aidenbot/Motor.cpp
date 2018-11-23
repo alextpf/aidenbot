@@ -233,7 +233,7 @@ void Motor::SetCurrSpeedInternal( uint16_t dt, int goalSpeed, MOTOR_NUM m )
 #ifdef TWO_MOTOR      
       SET(PORTF,7);
 #else
-      //SET(PORTF,7);
+      SET(PORTF,7);
       SET(PORTL,1);
 #endif
     }
@@ -250,7 +250,7 @@ void Motor::SetCurrSpeedInternal( uint16_t dt, int goalSpeed, MOTOR_NUM m )
 #ifdef TWO_MOTOR      
       CLR(PORTF,7);
 #else
-      //CLR(PORTF,7);
+      CLR(PORTF,7);
       CLR(PORTL,1);
 #endif      
     }

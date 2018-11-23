@@ -28,17 +28,14 @@ void setup()
   
   // Enable Motors
   digitalWrite(X_ENABLE_PIN    , LOW);
-  digitalWrite(Y_ENABLE_PIN    , LOW);
   
-  /*
 #ifdef TWO_MOTOR  
   digitalWrite(Y_ENABLE_PIN    , LOW);
 #else
   digitalWrite(Y_LEFT_ENABLE_PIN    , LOW);
   digitalWrite(Y_RIGHT_ENABLE_PIN    , LOW);
 #endif  
-  */
-
+  
   SetTimerInterrupt();
 
   // init HBot params
