@@ -88,9 +88,9 @@
 // THIS VALUES DEPENDS ON YOUR ROBOT CONSTRUCTION (MOTORS, MECHANICS...)
 // RECOMMENDED VALUES FOR 12V POWER SUPPLY
 #define MAX_X_ABS_ACCEL         240//275                        // Maximun motor acceleration in (steps/seg2)/1000. Max recommended value:280
-#define MAX_Y_ABS_ACCEL         100
-#define MAX_X_ABS_SPEED         30000//32000                    // Maximun speed in steps/seg. Max absolute value: 32767!!
-#define MAX_Y_ABS_SPEED         20000
+#define MAX_Y_ABS_ACCEL         100//140//100
+#define MAX_X_ABS_SPEED         27000//30000//32000                    // Maximun speed in steps/seg. Max absolute value: 32767!!
+#define MAX_Y_ABS_SPEED         20000//25000
 
 #define MIN_ACCEL         50						// make sure this is not 0
 #define MIN_SPEED         5000
@@ -116,9 +116,8 @@
 //////////////////////////////////
 
 // This depends on the pulley teeth. DEFAULT: 200(steps/rev)*8(microstepping) = 1600 steps/rev. 1600/32teeth*2mm(GT2) = 25 steps/mm
-// Alex note: I got 20 teeth pully. Due to the dimension of my table, the move can be wobbling, and so this factor doesn't need to be super accurate, it will be off slightly (~1-2cm) anyway.
-#define X_AXIS_STEPS_PER_UNIT 19
-#define Y_AXIS_STEPS_PER_UNIT 19
+#define X_AXIS_STEPS_PER_UNIT 16
+#define Y_AXIS_STEPS_PER_UNIT 16
 
 // CORRECTION FOR VISION SYSTEM LAG
 #define VISION_SYSTEM_LAG 60   // in miliseconds

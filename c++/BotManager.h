@@ -59,6 +59,11 @@ public:
 		m_OrangeThresh = orange;
 	}
 
+	void SetBlueThreshold( const cv::Vec6i& blue )
+	{
+		m_BlueThresh = blue;
+	}
+
 	void SetIsLog( const bool isLog )
 	{
 		m_IsLog = isLog;
@@ -121,8 +126,9 @@ private:
 	bool			m_ShowOutPutImg;
 	bool			m_ManualPickTableCorners;
 	long			m_NumFrame;
-	cv::Vec6i		m_RedThresh;
-	cv::Vec6i		m_OrangeThresh;
+	cv::Vec6i		m_RedThresh; // for puck
+	cv::Vec6i		m_OrangeThresh; // for puck
+	cv::Vec6i		m_BlueThresh; // for robot
 	bool			m_IsLog;
 	unsigned int	m_NumConsecutiveNonPuck; // number of consecutive frames that no puck is detected
 	DiskFinder		m_DiskFinder;

@@ -63,9 +63,9 @@ private:
 	// Puck
 	/////////////////////////////
 
-	//////////////
-	// position
-	//////////////
+	//////////////////
+	// puck position
+	//////////////////
 	cv::Point		m_CurrPuckPos;        // current pos. mm. Corresponds to puckCoordX/Y.
 	cv::Point		m_PrevPuckPos;        // previous pos. mm. Corresponds to puckOldCoordX. Updated in reading from the camera, when new puck pos comes in
 	cv::Point		m_CurrPredictPos;
@@ -74,7 +74,7 @@ private:
 	int				m_PredictXAttack;     // predicted X coordinate for attack
 
 	//////////////
-	// speed
+	// puck speed
 	//////////////
 	cv::Point2f		m_CurrPuckSpeed;      // current speed. dm/ms
 	cv::Point2f		m_PrevPuckSpeed;      // previous speed. dm/ms
@@ -85,6 +85,18 @@ private:
 	//////////////
 	unsigned int	m_CurrNumPredictBounce;     // number of bounce predicted
 	unsigned int	m_PrevNumPredictBounce;     // number of bounce predicted
+
+	//////////////////
+	// robot position
+	//////////////////
+	cv::Point		m_CurrBotPos;        // current pos. mm.
+	cv::Point		m_PrevBotPos;        // previous pos. mm.
+
+	//////////////
+	// bot speed
+	//////////////
+	cv::Point2f		m_CurrBotSpeed;      // current speed. dm/ms
+	cv::Point2f		m_AverageBotSpeed;
 
     //////////////
 	// status

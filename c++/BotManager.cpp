@@ -170,7 +170,6 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 
         if( puckFound )
         {
-
             // std::cout << "can't find puck" << std::endl;
 			//draw puck center
 			if ( m_ShowOutPutImg )
@@ -184,24 +183,6 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 			const cv::Point puckPos = m_TableFinder.ImgToTableCoordinate( center ); // mm, in table coordinate
 
 			m_Camera.SetCurrPuckPos( puckPos );
-
-			// 2. find robot
-
-			//cv::Vec6i orangeThresh( 0, 110, 110, 20, 255, 220 ); // lowH, lowS, lowV, highH, highS, highV
-
-			//const bool hasRobot = m_DiskFinder.FindDisk1Thresh(
-			//    contours, center, hsvImg, redThresh, m_Mask );
-
-			//if( !hasRobot )
-			//{
-			//    std::cout << "can't find Robot" << std::endl;
-			//    return;
-			//}
-
-			//// convert screen coordinate to table coordinate
-			//const cv::Point robotPos = m_TableFinder.ImgToTableCoordinate( center ); // mm, in table coordinate
-
-			//m_Camera.SetRobotPos( robotPos );
 
 			// skip processing if 1st frame
 			cv::Point prevPos;
@@ -324,6 +305,20 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 			}
 
 		} // if( puckFound )
+
+		//2. find robot
+		const bool hasRobot = m_DiskFinder.FindDisk1Thresh(
+		    contours, center, hsvImg, m_BlueThresh, m_Mask );
+
+		if( hasRobot )
+		{
+
+		}
+
+		// convert screen coordinate to table coordinate
+		const cv::Point robotPos = m_TableFinder.ImgToTableCoordinate( center ); // mm, in table coordinate
+
+		m_Camera.SetRobotPos( robotPos );
 
         // update time stamp and puck position
         m_CurrTime = curr;
