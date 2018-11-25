@@ -77,7 +77,9 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 	cv::Point bouncePos( 0, 0 );
 	cv::Point predPos( 0, 0 );
 	cv::Point prevPos( 0, 0 );
-	cv::Point botPos( 0, 0 );
+	cv::Point botPos( 0, 0 ); // desired pos
+	cv::Point detectedBotPos( 0, 0 ); // detected pos
+
 	bool hasBounce( false );
 	int predictStatus( -1 );
 
@@ -123,6 +125,15 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 
 		stream >> botPos.x;
 		stream >> botPos.y;
+
+		// detected bot position
+		std::getline( log, line ); // get description, skip
+		std::getline( log, line );
+		stream.str( line );
+		stream.seekg( 0 );
+
+		stream >> detectedBotPos.x;
+		stream >> detectedBotPos.y;
 
 		// current puck speed
 		std::getline( log, line ); // get description, skip
@@ -212,6 +223,9 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 
 		radius = 5;
 		cv::circle( output, botPos, radius, BLUE, thickness );
+
+		cv::circle( output, detectedBotPos, radius, RED, thickness );
+
 	} // if ( puckFound )
 
 	///////////////////////////////////////////////////////////

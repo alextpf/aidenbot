@@ -134,5 +134,5 @@ private:
 	DiskFinder		m_DiskFinder;
 	FPSCalculator	m_FpsCalculator;
 	Logger			m_Logger;
-
+	bool			m_CorrectMissingSteps;
 };

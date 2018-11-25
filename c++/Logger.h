@@ -31,6 +31,7 @@ public:
 		const cv::Point& predPos,
 		const cv::Point& prevPos,
 		const cv::Point& botPos,
+		const cv::Point& detectedBotPos,
 		const cv::Point& puckSpeed,
 		const int predictTimeDefence,
 		const unsigned int predictBounceStatus,

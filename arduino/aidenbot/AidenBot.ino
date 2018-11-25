@@ -111,7 +111,26 @@ void loop()
       // there's new data coming
       hBot.SetXMaxAbsSpeed( reader.GetDesiredMotorSpeed() );
       hBot.SetYMaxAbsSpeed( reader.GetDesiredMotorSpeed() );
-      hBot.SetPosStraight( reader.GetDesiredBotPos().m_X, reader.GetDesiredBotPos().m_Y );      
+      hBot.SetPosStraight( reader.GetDesiredBotPos().m_X, reader.GetDesiredBotPos().m_Y ); 
+
+      const RobotPos detectedBotPos = reader.GetDetectedBotPos();
+      if( detectedBotPos.m_X >= 0 && detectedBotPos.m_Y >= 0 )
+      {
+        long m1s, m2s;
+        HBot::HBotPosToMotorStep(detectedBotPos, m1s, m2s);
+  
+  #ifdef SHOW_LOG
+        // log
+        Serial.print("missing step correction: Motor1 step = ");
+        Serial.print( m1s );
+        Serial.print(", Motor2 step = ");
+        Serial.println( m2s ); Serial.println("");
+        //=============================================
+  #endif
+  
+        hBot.GetM1().SetCurrStep( m1s ); // this sets m_CurrStep for Motor1 & Motor2
+        hBot.GetM2().SetCurrStep( m2s );
+      }      
     }
     
     hBot.Update(); // internally update 

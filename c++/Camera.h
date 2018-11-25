@@ -27,8 +27,19 @@ public:
 
 	cv::Point GetPrevPuckPos() const;
 
+	// Current Bot Position
+	void SetCurrBotPos( const cv::Point& pos );
+
+	cv::Point GetCurrBotPos() const;
+
+	// Previous Bot Position
+	void SetPrevBotPos( const cv::Point& pos );
+
+	cv::Point GetPrevBotPos() const;
+
 	// Main function
 	void CamProcess( int dt /*ms*/ );
+	bool ToCorrectStep( int dt /*ms*/ );
 
 	unsigned int GetCurrNumPredictBounce();
 	unsigned int GetPrevNumPredictBounce();
@@ -51,8 +62,6 @@ public:
 
 	int GetPredictXAttack();
 
-	void SetRobotPos(const cv::Point& pos);
-	cv::Point GetRobotPos() const;
 	cv::Point GetBouncePos() const;
 
 private:
@@ -86,8 +95,12 @@ private:
 	unsigned int	m_CurrNumPredictBounce;     // number of bounce predicted
 	unsigned int	m_PrevNumPredictBounce;     // number of bounce predicted
 
+	/////////////////////////////
+	// Robot
+	/////////////////////////////
+
 	//////////////////
-	// robot position
+	// position
 	//////////////////
 	cv::Point		m_CurrBotPos;        // current pos. mm.
 	cv::Point		m_PrevBotPos;        // previous pos. mm.
@@ -96,7 +109,7 @@ private:
 	// bot speed
 	//////////////
 	cv::Point2f		m_CurrBotSpeed;      // current speed. dm/ms
-	cv::Point2f		m_AverageBotSpeed;
+	cv::Point2f		m_PrevBotSpeed;
 
     //////////////
 	// status
@@ -108,11 +121,6 @@ private:
 	//////////////
 	int				m_PredictTimeDefence;
 	int				m_PredictTimeAttack;
-
-	/////////////////////////////
-	// Robot
-	/////////////////////////////
-	cv::Point		m_RobotPos;        // robot pos captured by camera. mm
 
 };// Camera
 
