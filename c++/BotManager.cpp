@@ -70,7 +70,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 	if ( _kbhit() )
 	{
 		int key = _getch();
-		if ( key == 104 || key == 72 )
+		if ( key == 104 /*H*/ || key == 72 /*h*/ )
 		{
 			m_Debug = true;
 		}
@@ -166,7 +166,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
         cv::cvtColor( input, hsvImg, CV_BGR2HSV );
 
 		// 1. find puck
-		const bool puckFound = m_DiskFinder.FindDisk2Thresh(
+		const bool puckFound = m_PuckFinder.FindDisk2Thresh(
 			contours, detectedPuckPos, hsvImg, m_RedThresh, m_OrangeThresh, m_Mask );
 
 		cv::Point prevPuckPos;
@@ -279,7 +279,9 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 
 		//2. find robot
 		cv::Point detectedBotPos(-1,-1);
-		const bool botFound = m_DiskFinder.FindDisk1Thresh(
+		contours.clear();
+
+		const bool botFound = m_BotFinder.FindDisk1Thresh(
 		    contours, detectedBotPos, hsvImg, m_BlueThresh, m_Mask );
 
 		m_CorrectMissingSteps = botFound;
@@ -297,13 +299,23 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 			// convert screen coordinate to table coordinate
 			const cv::Point botPos = m_TableFinder.ImgToTableCoordinate( detectedBotPos ); // mm, in table coordinate
 
-			m_Camera.SetCurrBotPos( botPos );
-			if ( m_CurrTime > 0 )
+			// robot should be within its range
+			if ( botPos.x < ROBOT_MIN_X || botPos.x > ROBOT_MAX_X ||
+				 botPos.y < ROBOT_MIN_Y || botPos.y > ROBOT_MAX_Y )
 			{
-				m_CorrectMissingSteps = m_Camera.ToCorrectStep( dt );
+				// detected is noise
+				m_CorrectMissingSteps = false;
 			}
+			else
+			{
+				m_Camera.SetCurrBotPos( botPos );
+				if ( m_CurrTime > 0 )
+				{
+					m_CorrectMissingSteps = m_Camera.ToCorrectStep( dt );
+				}
 
-			m_Camera.SetPrevBotPos( detectedBotPos );
+				m_Camera.SetPrevBotPos( detectedBotPos );
+			}
 		} // if( botFound )
 
 		// 3. send message over serial port to Arduino

@@ -58,20 +58,20 @@ int main()
 // C:/Users/alex_/Documents/Arduino/aidenbot/v2/aidenbot/data/webcam
 
 	//const char inPath[]		= "C:/tmp/data set2/";
-	const char inPath[]		= "C:/tmp/";
+	const char inPath[]		= "C:/tmp/set1/";
 	//const char inPath[]		= "C:/Users/alex_/Documents/Arduino/aidenbot/v2/aidenbot/data/webcam/";
-	const char outPath[]	= "C:/tmp/results/";
+	const char outPath[]	= "C:/tmp/results1/";
 	const char filename[]	= "pic";
 
 	const int webCamId		= 1; // 0: default (laptop's camera), 1: external connected cam
-	const int startFrame	= 0;// frame number we want to start at
-	const int endFrame		= 1340;
+	const int startFrame	= 254;// frame number we want to start at
+	const int endFrame		= 1276;
 
 	//////////////////////
 	// Read from config
 	//////////////////////
 	std::vector<int> tmp;
-	if ( !ReadConfig( tmp, 24 ) ) // read configuration file
+	if ( !ReadConfig( tmp, 32 ) ) // read configuration file
 	{
 		return 0;
 	}
@@ -92,9 +92,14 @@ int main()
 	cv::Vec6i orange;
 	orange[0] = tmp[15];	orange[1] = tmp[16];	orange[2] = tmp[17];	orange[3] = tmp[18];	orange[4] = tmp[19];	orange[5] = tmp[20];
 
-	const bool isLog		= tmp[21] == 1 ? true : false;
-	const double areaLow	= static_cast<double>( tmp[22] );
-	const double areaHigh	= static_cast<double>( tmp[23] );
+	cv::Vec6i blue;
+	blue[0] = tmp[21];	blue[1] = tmp[22];	blue[2] = tmp[23];	blue[3] = tmp[24];	blue[4] = tmp[25];	blue[5] = tmp[26];
+
+	const bool isLog		= tmp[27] == 1 ? true : false;
+	const double puckAreaLow	= static_cast<double>( tmp[28] );
+	const double puckAreaHigh	= static_cast<double>( tmp[29] );
+	const double botAreaLow = static_cast<double>( tmp[30] );
+	const double botAreaHigh = static_cast<double>( tmp[31] );
 
 	switch ( operation )
 	{
@@ -102,6 +107,10 @@ int main()
 		showInputImg = true;
 		showOutputImg = false;
 		outputType = 2;
+		break;
+	case 3: // record webcam images
+		inputType = 2; // web cam
+		outputType = 0; // images
 		break;
 	case 4: // create resulting imgs by Log.txt
 		inputType = 0; // images
@@ -142,9 +151,12 @@ int main()
 	segmentor.SetBandWidth(10);
 	segmentor.SetRedThreshold( red );
 	segmentor.SetOrangeThreshold( orange );
+	segmentor.SetBlueThreshold( blue );
 	segmentor.SetIsLog( isLog );
-	segmentor.SetPuckAreaThreshLow( areaLow );
-	segmentor.SetPuckAreaThreshHigh( areaHigh );
+	segmentor.SetPuckAreaThreshLow( puckAreaLow );
+	segmentor.SetPuckAreaThreshHigh( puckAreaHigh );
+	segmentor.SetBotAreaThreshLow( botAreaLow );
+	segmentor.SetBotAreaThreshHigh( botAreaHigh );
 
 	FrameProcessor * proc = NULL;
 	switch ( operation )

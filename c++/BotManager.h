@@ -71,12 +71,22 @@ public:
 
 	void SetPuckAreaThreshLow( const double low )
 	{
-		m_DiskFinder.SetAreaLow( low );
+		m_PuckFinder.SetAreaLow( low );
 	}
 
 	void SetPuckAreaThreshHigh( const double high )
 	{
-		m_DiskFinder.SetAreaHigh( high );
+		m_PuckFinder.SetAreaHigh( high );
+	}
+
+	void SetBotAreaThreshLow( const double low )
+	{
+		m_BotFinder.SetAreaLow( low );
+	}
+
+	void SetBotAreaThreshHigh( const double high )
+	{
+		m_BotFinder.SetAreaHigh( high );
 	}
 private:
 
@@ -131,7 +141,8 @@ private:
 	cv::Vec6i		m_BlueThresh; // for robot
 	bool			m_IsLog;
 	unsigned int	m_NumConsecutiveNonPuck; // number of consecutive frames that no puck is detected
-	DiskFinder		m_DiskFinder;
+	DiskFinder		m_PuckFinder;
+	DiskFinder		m_BotFinder;
 	FPSCalculator	m_FpsCalculator;
 	Logger			m_Logger;
 	bool			m_CorrectMissingSteps;
