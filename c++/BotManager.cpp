@@ -253,15 +253,16 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 				m_Robot.NewDataStrategy( m_Camera );
 
 				// determine robot position
-				m_Robot.RobotMoveDecision( m_Camera );
+				m_Robot.RobotMoveDecision( m_Camera ); // determins m_DesiredRobotPos
+
+				desiredBotPos = m_Robot.GetDesiredRobotPos();
+				desiredBotPos = m_TableFinder.TableToImgCoordinate( desiredBotPos );
 
 				if ( m_ShowOutPutImg )
 				{
 					// Show desired robot position
 					const int radius = 5;
 					const int thickness = 2;
-					desiredBotPos = m_Robot.GetDesiredRobotPos();
-					desiredBotPos = m_TableFinder.TableToImgCoordinate( desiredBotPos );
 					cv::circle( output, desiredBotPos, radius, BLUE, thickness );
 				}//if ( m_ShowOutPutImg )
 
@@ -279,7 +280,6 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 
 		//2. find robot
 		cv::Point detectedBotPos(-1,-1);
-		contours.clear();
 
 		const bool botFound = m_BotFinder.FindDisk1Thresh(
 		    contours, detectedBotPos, hsvImg, m_BlueThresh, m_Mask );

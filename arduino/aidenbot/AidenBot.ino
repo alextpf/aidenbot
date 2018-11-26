@@ -13,7 +13,7 @@
 
 long curr_time;                 // used in main loop
 long prev_time;
-bool testmode = true;
+bool testmode = false;
 //
 HBot hBot;
 PacketReader reader;
@@ -90,8 +90,8 @@ void loop()
       testMovements();
     }
       
-    //if( reader.ReadPacket() )
-    if(false)
+    if( reader.ReadPacket() )
+    //if(false)
     {
     #ifdef SHOW_LOG      
       //reader.showNewData();
@@ -126,8 +126,7 @@ void loop()
         Serial.print(", Motor2 step = ");
         Serial.println( m2s ); Serial.println("");
         //=============================================
-  #endif
-  
+  #endif 
         hBot.GetM1().SetCurrStep( m1s ); // this sets m_CurrStep for Motor1 & Motor2
         hBot.GetM2().SetCurrStep( m2s );
       }      

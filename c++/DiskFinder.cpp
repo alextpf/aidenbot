@@ -73,6 +73,8 @@ bool DiskFinder::FindDiskInternal(
 	cv::Point& center,
 	const cv::Mat& mask )
 {
+	contours.clear(); // reset contour
+
 	cv::Mat ellipse = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 5, 5 ) );
 
 	// remove noise in background

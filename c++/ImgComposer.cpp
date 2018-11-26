@@ -224,6 +224,7 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 		radius = 5;
 		cv::circle( output, botPos, radius, BLUE, thickness );
 
+		radius = 12;
 		cv::circle( output, detectedBotPos, radius, RED, thickness );
 
 	} // if ( puckFound )
