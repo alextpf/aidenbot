@@ -11,7 +11,7 @@ Robot::Robot()
 	: m_RobotStatus( BOT_STATUS::INIT )
 	, m_AttackTime( 0 )
 	, m_AttackStatus( ATTACK_STATUS::WAIT_FOR_ATTACK )
-    , m_DesiredSpeed( 0 )
+    , m_DesiredYSpeed( 0 )
 {}
 
 //====================================================================================================================
@@ -21,7 +21,7 @@ Robot::~Robot()
 //====================================================================================================================
 int Robot::GetDesiredRobotSpeed()
 {
-	return m_DesiredSpeed;
+	return m_DesiredYSpeed;
 }
 
 //====================================================================================================================
@@ -129,7 +129,7 @@ void Robot::NewDataStrategy( Camera& cam )
 //====================================================================================================================
 void Robot::RobotMoveDecision( Camera& cam )
 {
-    m_DesiredSpeed = MAX_Y_ABS_SPEED;
+    m_DesiredYSpeed = MAX_Y_ABS_SPEED;
 
     cv::Point robotPos;
 
@@ -141,7 +141,7 @@ void Robot::RobotMoveDecision( Camera& cam )
         {
             m_DesiredRobotPos.x = ROBOT_CENTER_X;  //center X axis
             m_DesiredRobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
-            m_DesiredSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
+            m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
         }
 
 		m_AttackTime = 0;
@@ -210,8 +210,6 @@ void Robot::RobotMoveDecision( Camera& cam )
                     m_DesiredRobotPos.x = attackPredictPos.x;
                     m_DesiredRobotPos.y = attackPredictPos.y - PUCK_SIZE * 4;
 
-                    m_DesiredSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.5 );
-
                     m_AttackStatus = ATTACK_STATUS::READY_TO_ATTACK;
                 }
                 else
@@ -222,7 +220,7 @@ void Robot::RobotMoveDecision( Camera& cam )
                     // And go to defense position
                     m_DesiredRobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
                     m_DesiredRobotPos.x = ROBOT_CENTER_X;  //center X axis
-                    m_DesiredSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
+                    m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
                 }
             } // if( !IsOwnGoal( cam ) )
 		} // if ( m_AttackTime == 0 )
@@ -251,7 +249,7 @@ void Robot::RobotMoveDecision( Camera& cam )
                         m_DesiredRobotPos.x = attackPredictPos.x;
                         m_DesiredRobotPos.y = attackPredictPos.y - PUCK_SIZE * 4;
 
-                        m_DesiredSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.5 );
+                        m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.5 );
                     }
                 }//if( !IsOwnGoal( cam ) )
 			} // if (m_AttackStatus == ATTACK_STATUS::READY_TO_ATTACK)

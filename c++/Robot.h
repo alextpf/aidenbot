@@ -63,7 +63,7 @@ public:
 	}
 	void SetDesiredRobotSpeed( int s )
 	{
-		m_DesiredSpeed = s;
+		m_DesiredYSpeed = s;
 	}
 
     BOT_STATUS GetRobotStatus() const
@@ -91,5 +91,5 @@ private:
 	cv::Point			m_DesiredRobotPos;
 
 	// robot speed in steps/seg
-	int					m_DesiredSpeed;
+	int					m_DesiredYSpeed;
 }; // Robot

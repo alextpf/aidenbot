@@ -4,7 +4,7 @@
 //#define DEBUG_SERIAL
 //==========================================================================
 PacketReader::PacketReader()
-    : m_DesiredMotorSpeed( MAX_Y_ABS_SPEED )
+    : m_DesiredYMotorSpeed( MAX_Y_ABS_SPEED )
     , m_IsPacketRead( false )
 {}
 
@@ -72,7 +72,7 @@ bool PacketReader::ReadPacket()
                 m_DesiredBotPos.m_Y = ExtractParamInt( 6 );
                 m_DetectedBotPos.m_X = ExtractParamInt( 4 );
                 m_DetectedBotPos.m_Y = ExtractParamInt( 2 );
-                m_DesiredMotorSpeed = ExtractParamInt( 0 );
+                m_DesiredYMotorSpeed = ExtractParamInt( 0 );
                 
                 inSync = false;
                 m_IsPacketRead = true;
