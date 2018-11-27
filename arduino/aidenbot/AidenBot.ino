@@ -89,7 +89,8 @@ void loop()
     {
       testMovements();
     }
-      
+
+    // there's new data coming
     if( reader.ReadPacket() )
     //if(false)
     {
@@ -108,12 +109,10 @@ void loop()
       Serial.print( reader.GetDesiredMotorSpeed() );
       Serial.println();
     #endif    
-      // there's new data coming
-      hBot.SetXMaxAbsSpeed( reader.GetDesiredMotorSpeed() );
-      hBot.SetYMaxAbsSpeed( reader.GetDesiredMotorSpeed() );
-      hBot.SetPosStraight( reader.GetDesiredBotPos().m_X, reader.GetDesiredBotPos().m_Y ); 
-
+    
       const RobotPos detectedBotPos = reader.GetDetectedBotPos();
+      
+      // if we do missing step correction, don't set new position
       if( detectedBotPos.m_X >= 0 && detectedBotPos.m_Y >= 0 )
       {
         long m1s, m2s;
@@ -129,7 +128,13 @@ void loop()
   #endif 
         hBot.GetM1().SetCurrStep( m1s ); // this sets m_CurrStep for Motor1 & Motor2
         hBot.GetM2().SetCurrStep( m2s );
-      }      
+      }
+      else
+      {      
+        hBot.SetXMaxAbsSpeed( reader.GetDesiredMotorSpeed() );
+        hBot.SetYMaxAbsSpeed( reader.GetDesiredMotorSpeed() );
+        hBot.SetPosStraight( reader.GetDesiredBotPos().m_X, reader.GetDesiredBotPos().m_Y );       
+      }
     }
     
     hBot.Update(); // internally update 

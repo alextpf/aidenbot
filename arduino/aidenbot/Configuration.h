@@ -72,7 +72,7 @@
 #define ROBOT_INITIAL_POSITION_Y              100            // Measured from center of the robot pusher to the table border
 
 // Robot defense and attack lines
-#define ROBOT_DEFENSE_POSITION_DEFAULT        120
+#define ROBOT_DEFENSE_POSITION_DEFAULT        140
 #define ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT 320
 #define ROBOT_DEFENSE_POSITION_MIN            60
 #define ROBOT_DEFENSE_POSITION_MAX            150
