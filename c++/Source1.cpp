@@ -72,7 +72,7 @@ int main()
 	// Read from config
 	//////////////////////
 	std::vector<int> tmp;
-	if ( !ReadConfig( tmp, 32 ) ) // read configuration file
+	if ( !ReadConfig( tmp, 33 ) ) // read configuration file
 	{
 		return 0;
 	}
@@ -101,6 +101,7 @@ int main()
 	const double puckAreaHigh	= static_cast<double>( tmp[29] );
 	const double botAreaLow = static_cast<double>( tmp[30] );
 	const double botAreaHigh = static_cast<double>( tmp[31] );
+	const bool testMotion = tmp[32] == 1 ? true : false;
 
 	switch ( operation )
 	{
@@ -158,6 +159,7 @@ int main()
 	segmentor.SetPuckAreaThreshHigh( puckAreaHigh );
 	segmentor.SetBotAreaThreshLow( botAreaLow );
 	segmentor.SetBotAreaThreshHigh( botAreaHigh );
+	segmentor.m_Debug = testMotion;
 
 	FrameProcessor * proc = NULL;
 	switch ( operation )

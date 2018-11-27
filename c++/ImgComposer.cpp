@@ -73,6 +73,7 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 	stream.seekg( 0 );
 	cv::Point puckPos( 0, 0 );
 	stream >> puckPos.x;
+	stream >> puckPos.y;
 
 	cv::Point bouncePos( 0, 0 );
 	cv::Point predPos( 0, 0 );
@@ -84,97 +85,93 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 	int predictStatus( -1 );
 
 	const bool puckFound = puckPos.x != -1;
-	if (puckFound )
-	{
-		stream >> puckPos.y;
 
-		// bounce position
-		std::getline( log, line ); // get description, skip
-		std::getline( log, line );
-		stream.str( line );
-		stream.seekg( 0 );
+	// bounce position
+	std::getline( log, line ); // get description, skip
+	std::getline( log, line );
+	stream.str( line );
+	stream.seekg( 0 );
 
-		stream >> bouncePos.x;
-		stream >> bouncePos.y;
+	stream >> bouncePos.x;
+	stream >> bouncePos.y;
 
-		hasBounce = bouncePos.x != -1;
+	hasBounce = bouncePos.x != -1;
 
-		// predicted position
-		std::getline( log, line ); // get description, skip
-		std::getline( log, line );
-		stream.str( line );
-		stream.seekg( 0 );
+	// predicted position
+	std::getline( log, line ); // get description, skip
+	std::getline( log, line );
+	stream.str( line );
+	stream.seekg( 0 );
 
-		stream >> predPos.x;
-		stream >> predPos.y;
+	stream >> predPos.x;
+	stream >> predPos.y;
 
-		// previous position
-		std::getline( log, line ); // get description, skip
-		std::getline( log, line );
-		stream.str( line );
-		stream.seekg( 0 );
+	// previous position
+	std::getline( log, line ); // get description, skip
+	std::getline( log, line );
+	stream.str( line );
+	stream.seekg( 0 );
 
-		stream >> prevPos.x;
-		stream >> prevPos.y;
+	stream >> prevPos.x;
+	stream >> prevPos.y;
 
-		// desired bot position
-		std::getline( log, line ); // get description, skip
-		std::getline( log, line );
-		stream.str( line );
-		stream.seekg( 0 );
+	// desired bot position
+	std::getline( log, line ); // get description, skip
+	std::getline( log, line );
+	stream.str( line );
+	stream.seekg( 0 );
 
-		stream >> botPos.x;
-		stream >> botPos.y;
+	stream >> botPos.x;
+	stream >> botPos.y;
 
-		// detected bot position
-		std::getline( log, line ); // get description, skip
-		std::getline( log, line );
-		stream.str( line );
-		stream.seekg( 0 );
+	// detected bot position
+	std::getline( log, line ); // get description, skip
+	std::getline( log, line );
+	stream.str( line );
+	stream.seekg( 0 );
 
-		stream >> detectedBotPos.x;
-		stream >> detectedBotPos.y;
+	stream >> detectedBotPos.x;
+	stream >> detectedBotPos.y;
 
-		// current puck speed
-		std::getline( log, line ); // get description, skip
-		std::getline( log, line );
+	// current puck speed
+	std::getline( log, line ); // get description, skip
+	std::getline( log, line );
 
-		// predictTimeDefence
-		std::getline( log, line ); // get description, skip
-		std::getline( log, line );
+	// predictTimeDefence
+	std::getline( log, line ); // get description, skip
+	std::getline( log, line );
 
-		// predict numBounce
-		std::getline( log, line ); // get description, skip
-		std::getline( log, line );
+	// predict numBounce
+	std::getline( log, line ); // get description, skip
+	std::getline( log, line );
 
-		// desired bot speed
-		std::getline( log, line ); // get description, skip
-		std::getline( log, line );
-		int speed = stoi( line );
+	// desired bot speed
+	std::getline( log, line ); // get description, skip
+	std::getline( log, line );
+	int speed = stoi( line );
 
-		// predict status
-		std::getline( log, line ); // get description, skip
-		std::getline( log, line );
-		predictStatus = stoi( line );
+	// predict status
+	std::getline( log, line ); // get description, skip
+	std::getline( log, line );
+	predictStatus = stoi( line );
 
-		// bot status
-		std::getline( log, line ); // get description, skip
-		std::getline( log, line );
-		int botStatus = stoi( line );
+	// bot status
+	std::getline( log, line ); // get description, skip
+	std::getline( log, line );
+	int botStatus = stoi( line );
 
-		// attack status
-		std::getline( log, line ); // get description, skip
-		std::getline( log, line );
-		int attackStatus = stoi( line );
+	// attack status
+	std::getline( log, line ); // get description, skip
+	std::getline( log, line );
+	int attackStatus = stoi( line );
 
-		// attack time
-		std::getline( log, line ); // get description, skip
-		std::getline( log, line );
+	// attack time
+	std::getline( log, line ); // get description, skip
+	std::getline( log, line );
 
-		// puck average speed
-		std::getline( log, line ); // get description, skip
-		std::getline( log, line );
-	} // if ( puckPos.x == -1 )
+	// puck average speed
+	std::getline( log, line ); // get description, skip
+	std::getline( log, line );
 
 	/////////////////
 	// Draw now
@@ -221,13 +218,15 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 
 		} // if ( predictStatus == 1 || predictStatus == 2 )
 
+		// desired bot pos
 		radius = 5;
 		cv::circle( output, botPos, radius, BLUE, thickness );
 
-		radius = 12;
-		cv::circle( output, detectedBotPos, radius, RED, thickness );
-
 	} // if ( puckFound )
+
+	// detected bot pos
+	int radius = 12;
+	cv::circle( output, detectedBotPos, radius, RED, thickness );
 
 	///////////////////////////////////////////////////////////
 	filePos = static_cast<int>( log.tellg() );

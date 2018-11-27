@@ -326,19 +326,12 @@ void Robot::RobotMoveDecision( Camera& cam )
 //====================================================================================================================
 bool Robot::IsOwnGoal( const Camera& cam )
 {
-	const int rotPosY  = cam.GetCurrBotPos().y;
+	const int botPosY  = cam.GetCurrBotPos().y;
 	const int puckPosX = cam.GetCurrPuckPos().x;
 	const int puckPosY = cam.GetCurrPuckPos().y;
 
-	if ( rotPosY  > ROBOT_DEFENSE_POSITION_DEFAULT + PUCK_SIZE  &&  // robot in front of defence line
-    	 puckPosY < rotPosY && // puck behind robot
-		 puckPosX > ROBOT_CENTER_X - PUCK_SIZE * 5 &&     // puck X within table range
-		 puckPosX < ROBOT_CENTER_X + PUCK_SIZE * 5 )
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	return ( /*botPosY  > ROBOT_DEFENSE_POSITION_DEFAULT + PUCK_SIZE  &&*/  // robot in front of defence line
+		puckPosY < botPosY && // puck behind robot
+		puckPosX > 0 /*ROBOT_CENTER_X - PUCK_SIZE * 5*/ &&     // puck X within table range
+		puckPosX < TABLE_WIDTH/*ROBOT_CENTER_X + PUCK_SIZE * 5*/ );
 } // IsOwnGoal

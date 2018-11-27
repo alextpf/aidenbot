@@ -20,11 +20,6 @@ public:
 	void LogStatus(
 		const long numFrame,
 		const unsigned int dt,
-		const unsigned int fps ) const;
-
-	void LogStatus(
-		const long numFrame,
-		const unsigned int dt,
 		const unsigned int fps,
 		const cv::Point& puckPos,
 		const cv::Point& bouncePos,

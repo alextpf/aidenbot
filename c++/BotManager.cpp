@@ -67,13 +67,10 @@ BotManager::BotManager( char* com )
 void BotManager::Process(cv::Mat & input, cv::Mat & output)
 {
 	// check if keyboard "h/H" is hit
-	if ( _kbhit() )
+	if ( m_Debug )
 	{
-		int key = _getch();
-		if ( key == 104 /*H*/ || key == 72 /*h*/ )
-		{
-			m_Debug = true;
-		}
+		TestMotion();
+		return;
 	}
 
 	//if ( m_ShowOutPutImg )
@@ -144,7 +141,8 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 			cv::line( output, LowerLeft, LowerRight, GREEN, 2 );
 		}
 
-        // get time stamp
+
+		// get time stamp
 		clock_t curr = clock();
 
 		unsigned int dt = static_cast<unsigned int>( ( curr - m_CurrTime ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
@@ -158,168 +156,30 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 		//===========================================
 
 		// find puck and robot position
-        Contours contours;
-        cv::Point detectedPuckPos;
 
-        // convert RBG to HSV first
-        cv::Mat hsvImg;
-        cv::cvtColor( input, hsvImg, CV_BGR2HSV );
+		cv::Point detectedPuckPos;
 
-		// 1. find puck
-		const bool puckFound = m_PuckFinder.FindDisk2Thresh(
-			contours, detectedPuckPos, hsvImg, m_RedThresh, m_OrangeThresh, m_Mask );
+		// convert RBG to HSV first
+		cv::Mat hsvImg;
+		cv::cvtColor( input, hsvImg, CV_BGR2HSV );
+
+		//1. find robot
+		cv::Point detectedBotPos( -1, -1 );
+		const bool botFound = FindRobot( detectedBotPos, hsvImg, output, dt );
+
+		// 2. find puck
+		bool ownGoal = false;
 
 		cv::Point prevPuckPos;
 		cv::Point predPuckPos;
 		cv::Point bouncePos;
 		cv::Point desiredBotPos;
 
-        if( puckFound )
-        {
-            // std::cout << "can't find puck" << std::endl;
-			//draw puck center
-			if ( m_ShowOutPutImg )
-			{
-				const int radius = 15;
-				const int thickness = 2;
-				cv::circle( output, detectedPuckPos, radius, GREEN, thickness );
-			}
-
-			// convert screen coordinate to table coordinate
-			const cv::Point puckPos = m_TableFinder.ImgToTableCoordinate( detectedPuckPos ); // mm, in table coordinate
-
-			m_Camera.SetCurrPuckPos( puckPos );
-
-			// skip processing if 1st frame
-
-			if ( /*dt < 2000 &&*/ m_CurrTime > 0 )
-			{
-				if ( m_NumConsecutiveNonPuck > 1 )
-				{
-					m_Camera.SetPrevPuckPos( cv::Point( 0, 0 ) ); // reset
-				}
-
-				// do prediction work
-				m_Camera.CamProcess( dt );
-
-				prevPuckPos = m_Camera.GetPrevPuckPos(); // mm, table coordinate
-				prevPuckPos = m_TableFinder.TableToImgCoordinate( prevPuckPos );
-
-				predPuckPos = m_Camera.GetCurrPredictPos();
-				predPuckPos = m_TableFinder.TableToImgCoordinate( predPuckPos );
-
-				bouncePos = m_Camera.GetBouncePos();
-				const bool isBounce = bouncePos.x != -1;
-				if ( isBounce )
-				{
-					bouncePos = m_TableFinder.TableToImgCoordinate( bouncePos );
-				}
-
-				if ( m_ShowOutPutImg )
-				{
-					// show FPS on screen
-					const std::string text = "FPS = " + std::to_string( fps );
-					cv::Point origin( 520, 25 ); // upper right
-					int thickness = 1;
-					int lineType = 8;
-
-					cv::putText( output, text, origin, cv::FONT_HERSHEY_SIMPLEX, 0.5, MEDIUM_PURPLE, thickness, lineType );
-
-					// draw previous pos
-
-					cv::line( output, prevPuckPos, detectedPuckPos, cv::Scalar( 130, 221, 238 ), 2 );
-
-					// draw prediction on screen
-                    Camera::PREDICT_STATUS predictStatus = m_Camera.GetPredictStatus();
-					if ( predictStatus == Camera::PREDICT_STATUS::DIRECT_IMPACT ||
-                         predictStatus == Camera::PREDICT_STATUS::ONE_BOUNCE )
-					{
-						// draw bounce pos if there's one
-						if ( !isBounce )
-						{
-							// no bounce
-							cv::line( output, predPuckPos, detectedPuckPos, PURPLE, 2 );
-						}
-						else
-						{
-							// have one bounce
-							cv::line( output, bouncePos, detectedPuckPos, PURPLE, 2 );
-							cv::line( output, predPuckPos, bouncePos, PURPLE, 2 );
-						}
-					}
-				}//if ( m_ShowOutPutImg )
-
-				// determine robot strategy
-				m_Robot.NewDataStrategy( m_Camera );
-
-				// determine robot position
-				m_Robot.RobotMoveDecision( m_Camera ); // determins m_DesiredRobotPos
-
-				desiredBotPos = m_Robot.GetDesiredRobotPos();
-				desiredBotPos = m_TableFinder.TableToImgCoordinate( desiredBotPos );
-
-				if ( m_ShowOutPutImg )
-				{
-					// Show desired robot position
-					const int radius = 5;
-					const int thickness = 2;
-					cv::circle( output, desiredBotPos, radius, BLUE, thickness );
-				}//if ( m_ShowOutPutImg )
-
-			} // if ( /*dt < 2000 &&*/ m_CurrTime > 0 )
-
-			m_Camera.SetPrevPuckPos( puckPos );
-
-			m_NumConsecutiveNonPuck = 0;
-        }
-		else
-		{
-			// puck not found
-			m_NumConsecutiveNonPuck++;
-		} // if( puckFound )
-
-		//2. find robot
-		cv::Point detectedBotPos(-1,-1);
-
-		const bool botFound = m_BotFinder.FindDisk1Thresh(
-		    contours, detectedBotPos, hsvImg, m_BlueThresh, m_Mask );
-
-		m_CorrectMissingSteps = botFound;
-
-		if( botFound )
-		{
-			// Show detected robot position
-			if ( m_ShowOutPutImg )
-			{
-				const int radius = 15;
-				const int thickness = 2;
-				cv::circle( output, detectedBotPos, radius, RED, thickness );
-			}
-
-			// convert screen coordinate to table coordinate
-			const cv::Point botPos = m_TableFinder.ImgToTableCoordinate( detectedBotPos ); // mm, in table coordinate
-
-			// robot should be within its range
-			if ( botPos.x < ROBOT_MIN_X || botPos.x > ROBOT_MAX_X ||
-				 botPos.y < ROBOT_MIN_Y || botPos.y > ROBOT_MAX_Y )
-			{
-				// detected is noise
-				m_CorrectMissingSteps = false;
-			}
-			else
-			{
-				m_Camera.SetCurrBotPos( botPos );
-				if ( m_CurrTime > 0 )
-				{
-					m_CorrectMissingSteps = m_Camera.ToCorrectStep( dt );
-				}
-
-				m_Camera.SetPrevBotPos( detectedBotPos );
-			}
-		} // if( botFound )
+		const bool puckFound = FindPuck( detectedPuckPos, hsvImg, output, dt, fps,
+			ownGoal, prevPuckPos, predPuckPos, bouncePos, desiredBotPos );
 
 		// 3. send message over serial port to Arduino
-		if ( puckFound )
+		if ( puckFound || !ownGoal )
 		{
 			// send the message by com port over to Arduino
 			SendBotMessage();
@@ -330,34 +190,32 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 
 		if ( m_IsLog )
 		{
-			if ( puckFound )
+			if ( !puckFound )
 			{
-				m_Logger.LogStatus(
-					m_NumFrame, dt, fps,
-					detectedPuckPos, // img coordinate
-					bouncePos, // img coordinate
-					predPuckPos, // img coordinate
-					prevPuckPos, // img coordinate
-					desiredBotPos, // img coordinate
-					detectedBotPos, // img coordinate
-					m_Camera.GetCurrPuckSpeed(),
-					m_Camera.GetPredictTimeDefence(), // ms
-					m_Camera.GetCurrNumPredictBounce(),
-					m_Robot.GetDesiredRobotSpeed(),
-					m_Camera.GetPredictStatus(),
-					m_Robot.GetRobotStatus(),
-					m_Robot.GetAttackStatus(),
-					m_Robot.GetAttackTime(),
-					m_Camera.GetPuckAvgSpeed() );
+				detectedPuckPos = cv::Point( -1, -1 );
 			}
-			else
-			{
-				m_Logger.LogStatus( m_NumFrame, dt, fps );
-			}
+
+			m_Logger.LogStatus(
+				m_NumFrame, dt, fps,
+				detectedPuckPos, // img coordinate
+				bouncePos, // img coordinate
+				predPuckPos, // img coordinate
+				prevPuckPos, // img coordinate
+				desiredBotPos, // img coordinate
+				detectedBotPos, // img coordinate
+				m_Camera.GetCurrPuckSpeed(),
+				m_Camera.GetPredictTimeDefence(), // ms
+				m_Camera.GetCurrNumPredictBounce(),
+				m_Robot.GetDesiredRobotSpeed(),
+				m_Camera.GetPredictStatus(),
+				m_Robot.GetRobotStatus(),
+				m_Robot.GetAttackStatus(),
+				m_Robot.GetAttackTime(),
+				m_Camera.GetPuckAvgSpeed() );
 		}
 
-        // update time stamp and puck position
-        m_CurrTime = curr;
+		// update time stamp and puck position
+		m_CurrTime = curr;
 
 	} // if ( m_TableFound )
 
@@ -365,6 +223,236 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 	m_NumFrame++;
 
 }//Process
+
+//=======================================================================
+void BotManager::TestMotion()
+{
+	if ( _kbhit() )
+	{
+		int key = _getch();
+		switch ( key )
+		{
+		case 49://"1"
+			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_MAX_X, ROBOT_MAX_Y ) );
+			m_Robot.SetDesiredRobotSpeed( MAX_Y_ABS_SPEED );
+			SendBotMessage();
+			break;
+		case 50://"2"
+			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_MIN_X, ROBOT_MAX_Y ) );
+			m_Robot.SetDesiredRobotSpeed( MAX_Y_ABS_SPEED );
+			SendBotMessage();
+			break;
+		case 51://"3"
+			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_MIN_X, ROBOT_MIN_Y ) );
+			m_Robot.SetDesiredRobotSpeed( MAX_Y_ABS_SPEED );
+			SendBotMessage();
+			break;
+		case 52://"4"
+			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_MAX_X, ROBOT_MIN_Y ) );
+			m_Robot.SetDesiredRobotSpeed( MAX_Y_ABS_SPEED );
+			SendBotMessage();
+			break;
+		case 53://"5"
+			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_CENTER_X, ROBOT_MAX_Y ) );
+			m_Robot.SetDesiredRobotSpeed( MAX_Y_ABS_SPEED );
+			SendBotMessage();
+			break;
+		case 54://"6"
+			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_CENTER_X, ROBOT_MIN_Y ) );
+			m_Robot.SetDesiredRobotSpeed( MAX_Y_ABS_SPEED );
+			SendBotMessage();
+			break;
+		case 55://"7"
+			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_MAX_X, ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT ) );
+			m_Robot.SetDesiredRobotSpeed( MAX_Y_ABS_SPEED );
+			SendBotMessage();
+			break;
+		case 56://"8"
+			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_MIN_X, ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT ) );
+			m_Robot.SetDesiredRobotSpeed( MAX_Y_ABS_SPEED );
+			SendBotMessage();
+			break;
+		default:
+			break;
+		}
+	}
+}//TestMotion
+
+//=======================================================================
+bool BotManager::FindRobot(
+	cv::Point& detectedBotPos,
+	const cv::Mat& hsvImg,
+	cv::Mat & output,
+	const unsigned int dt)
+{
+	Contours contours;
+
+	const bool botFound = m_BotFinder.FindDisk1Thresh(
+		contours, detectedBotPos, hsvImg, m_BlueThresh, m_Mask );
+
+	m_CorrectMissingSteps = botFound;
+
+	if ( botFound )
+	{
+		// Show detected robot position
+		if ( m_ShowOutPutImg )
+		{
+			const int radius = 15;
+			const int thickness = 2;
+			cv::circle( output, detectedBotPos, radius, RED, thickness );
+		}
+
+		// convert screen coordinate to table coordinate
+		const cv::Point botPos = m_TableFinder.ImgToTableCoordinate( detectedBotPos ); // mm, in table coordinate
+
+		// robot should be within its range
+		if ( botPos.x < ROBOT_MIN_X || botPos.x > ROBOT_MAX_X ||
+		   	 botPos.y < ROBOT_MIN_Y || botPos.y > ROBOT_MAX_Y )
+		{
+			// detected is noise
+			m_CorrectMissingSteps = false;
+		}
+		else
+		{
+			m_Camera.SetCurrBotPos( botPos );
+			if ( m_CurrTime > 0 )
+			{
+				m_CorrectMissingSteps = m_Camera.ToCorrectStep( dt );
+			}
+
+			m_Camera.SetPrevBotPos( detectedBotPos );
+		}
+	} // if( botFound )
+
+	return botFound;
+}// FindRobot
+
+//=======================================================================
+bool BotManager::FindPuck(
+	cv::Point& detectedPuckPos,
+	const cv::Mat& hsvImg,
+	cv::Mat & output,
+	const unsigned int dt,
+	const unsigned int fps,
+	bool& ownGoal,
+	cv::Point& prevPuckPos,
+	cv::Point& predPuckPos,
+	cv::Point& bouncePos,
+	cv::Point& desiredBotPos )
+{
+	Contours contours;
+
+	const bool puckFound = m_PuckFinder.FindDisk2Thresh(
+		contours, detectedPuckPos, hsvImg, m_RedThresh, m_OrangeThresh, m_Mask );
+
+	if ( puckFound )
+	{
+		// std::cout << "can't find puck" << std::endl;
+		//draw puck center
+		if ( m_ShowOutPutImg )
+		{
+			const int radius = 15;
+			const int thickness = 2;
+			cv::circle( output, detectedPuckPos, radius, GREEN, thickness );
+		}
+
+		// convert screen coordinate to table coordinate
+		const cv::Point puckPos = m_TableFinder.ImgToTableCoordinate( detectedPuckPos ); // mm, in table coordinate
+
+		m_Camera.SetCurrPuckPos( puckPos );
+
+		ownGoal = m_Robot.IsOwnGoal( m_Camera );
+
+		// skip processing if 1st frame
+
+		if ( !ownGoal && /*dt < 2000 &&*/ m_CurrTime > 0 )
+		{
+			if ( m_NumConsecutiveNonPuck > 1 )
+			{
+				m_Camera.SetPrevPuckPos( cv::Point( 0, 0 ) ); // reset
+			}
+
+			// do prediction work
+			m_Camera.CamProcess( dt );
+
+			prevPuckPos = m_Camera.GetPrevPuckPos(); // mm, table coordinate
+			prevPuckPos = m_TableFinder.TableToImgCoordinate( prevPuckPos );
+
+			predPuckPos = m_Camera.GetCurrPredictPos();
+			predPuckPos = m_TableFinder.TableToImgCoordinate( predPuckPos );
+
+			bouncePos = m_Camera.GetBouncePos();
+			const bool isBounce = bouncePos.x != -1;
+			if ( isBounce )
+			{
+				bouncePos = m_TableFinder.TableToImgCoordinate( bouncePos );
+			}
+
+			if ( m_ShowOutPutImg )
+			{
+				// show FPS on screen
+				const std::string text = "FPS = " + std::to_string( fps );
+				cv::Point origin( 520, 25 ); // upper right
+				int thickness = 1;
+				int lineType = 8;
+
+				cv::putText( output, text, origin, cv::FONT_HERSHEY_SIMPLEX, 0.5, MEDIUM_PURPLE, thickness, lineType );
+
+				// draw previous pos
+
+				cv::line( output, prevPuckPos, detectedPuckPos, cv::Scalar( 130, 221, 238 ), 2 );
+
+				// draw prediction on screen
+				Camera::PREDICT_STATUS predictStatus = m_Camera.GetPredictStatus();
+				if ( predictStatus == Camera::PREDICT_STATUS::DIRECT_IMPACT ||
+					predictStatus == Camera::PREDICT_STATUS::ONE_BOUNCE )
+				{
+					// draw bounce pos if there's one
+					if ( !isBounce )
+					{
+						// no bounce
+						cv::line( output, predPuckPos, detectedPuckPos, PURPLE, 2 );
+					}
+					else
+					{
+						// have one bounce
+						cv::line( output, bouncePos, detectedPuckPos, PURPLE, 2 );
+						cv::line( output, predPuckPos, bouncePos, PURPLE, 2 );
+					}
+				}
+			}//if ( m_ShowOutPutImg )
+
+			 // determine robot strategy
+			m_Robot.NewDataStrategy( m_Camera );
+
+			// determine robot position
+			m_Robot.RobotMoveDecision( m_Camera ); // determins m_DesiredRobotPos
+
+			desiredBotPos = m_Robot.GetDesiredRobotPos();
+			desiredBotPos = m_TableFinder.TableToImgCoordinate( desiredBotPos );
+
+			if ( m_ShowOutPutImg )
+			{
+				// Show desired robot position
+				const int radius = 5;
+				const int thickness = 2;
+				cv::circle( output, desiredBotPos, radius, BLUE, thickness );
+			}//if ( m_ShowOutPutImg )
+
+		} // if ( /*dt < 2000 &&*/ m_CurrTime > 0 )
+
+		m_Camera.SetPrevPuckPos( puckPos );
+
+		m_NumConsecutiveNonPuck = 0;
+	}
+	else
+	{
+		// puck not found
+		m_NumConsecutiveNonPuck++;
+	} // if( puckFound )
+
+	return puckFound;
+}//FindPuck
 
 //=======================================================================
 void BotManager::FindTable( cv::Mat & input )
@@ -651,16 +739,7 @@ bool BotManager::SendBotMessage()
 	// so we use 2 bytes to store position. Similarly for speed
 
 	// desired robot pos
-	cv::Point desiredBotPos;
-	if ( m_Debug )
-	{
-		m_Debug = false;
-		desiredBotPos = cv::Point( ROBOT_CENTER_X, ROBOT_INITIAL_POSITION_Y );
-	}
-	else
-	{
-		desiredBotPos = m_Robot.GetDesiredRobotPos();
-	}
+	const cv::Point desiredBotPos = m_Robot.GetDesiredRobotPos();
 
 	// Pos X (high byte, low byte)
 	message[2] = ( desiredBotPos.x >> 8 ) & 0xFF;
@@ -671,7 +750,7 @@ bool BotManager::SendBotMessage()
 	message[5] = desiredBotPos.y & 0xFF;
 
 	// detected robot pos
-	cv::Point detectedBotPos = m_CorrectMissingSteps ?
+	const cv::Point detectedBotPos = m_CorrectMissingSteps ?
 		m_Camera.GetCurrBotPos() : cv::Point( -1, -1 );
 
 	// Pos X (high byte, low byte)
@@ -683,7 +762,7 @@ bool BotManager::SendBotMessage()
 	message[9] = detectedBotPos.y & 0xFF;
 
 	// speed
-	int speed = m_Robot.GetDesiredRobotSpeed();
+	const int speed = m_Robot.GetDesiredRobotSpeed();
 	message[10] = ( speed >> 8 ) & 0xFF;
 	message[11] = speed & 0xFF;
 

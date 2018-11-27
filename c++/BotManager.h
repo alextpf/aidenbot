@@ -105,6 +105,28 @@ private:
 	// use the user-picked band to zero out the result of Canny
 	void MaskCanny(cv::Mat & img);
 
+	// find robot pos
+	bool FindRobot(
+		cv::Point& detectedBotPos,
+		const cv::Mat& hsvImg,
+		cv::Mat & output,
+		const unsigned int dt );
+
+	// find puck
+	bool FindPuck(
+		cv::Point& detectedPuckPos,
+		const cv::Mat& hsvImg,
+		cv::Mat & output,
+		const unsigned int dt,
+		const unsigned int fps,
+		bool& ownGoal,
+		cv::Point& prevPuckPos,
+		cv::Point& predPuckPos,
+		cv::Point& bouncePos,
+		cv::Point& desiredBotPos );
+
+	void TestMotion();
+
 	TableFinder m_TableFinder;
     bool m_TableFound;
 

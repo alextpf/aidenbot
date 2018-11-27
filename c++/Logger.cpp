@@ -31,26 +31,6 @@ void Logger::WriteTableCorners(
 void Logger::LogStatus(
 	const long numFrame,
 	const unsigned int dt,
-	const unsigned int fps ) const
-{
-	std::ofstream logFile;
-	logFile.open( "Log.txt", std::ios_base::app ); // append
-	logFile << "frame number: \n";
-	logFile << numFrame << std::endl;
-	logFile << "frame time: \n";
-	logFile << dt << std::endl;
-	logFile << "fps: \n";
-	logFile << fps << std::endl;
-	logFile << "puck pos: \n";
-	logFile << "-1" << std::endl; // indicate that the puck can't be found for this frame
-
-	logFile.close();
-} // LogStatus
-
-//============================================================================
-void Logger::LogStatus(
-	const long numFrame,
-	const unsigned int dt,
 	const unsigned int fps,
 	const cv::Point& puckPos,
 	const cv::Point& bouncePos,

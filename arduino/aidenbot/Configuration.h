@@ -89,8 +89,8 @@
 // RECOMMENDED VALUES FOR 12V POWER SUPPLY
 #define MAX_X_ABS_ACCEL         240//275                        // Maximun motor acceleration in (steps/seg2)/1000. Max recommended value:280
 #define MAX_Y_ABS_ACCEL         100//140
-#define MAX_X_ABS_SPEED         27000//30000//32000                    // Maximun speed in steps/seg. Max absolute value: 32767!!
-#define MAX_Y_ABS_SPEED         18000//25000
+#define MAX_X_ABS_SPEED         25000//27000//30000//32000                    // Maximun speed in steps/seg. Max absolute value: 32767!!
+#define MAX_Y_ABS_SPEED         16000//18000//25000
 
 #define MIN_ACCEL         50						// make sure this is not 0
 #define MIN_SPEED         5000
