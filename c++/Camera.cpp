@@ -94,7 +94,7 @@ void Camera::CamProcess( int dt /*ms*/ )
 		m_CurrPredictPos.x = static_cast<int>( static_cast<float>( m_CurrPredictPos.y - m_CurrPuckPos.y ) / slope ) + m_CurrPuckPos.x;
 
 		// Prediction of the new x position at attack position
-		m_PredictXAttack = m_CurrPredictPos.x;
+		m_PredictXAttack = static_cast<int>( static_cast<float>( ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT + PUCK_SIZE - m_CurrPuckPos.y ) / slope ) + m_CurrPuckPos.x;
 
 		// puck has a bounce with side wall?
 		const bool hasBounce = HasBounce( m_CurrPredictPos.x );
