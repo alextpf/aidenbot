@@ -150,10 +150,9 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 	std::getline( log, line ); // get description, skip
 	std::getline( log, line );
 
-	// desired bot speed
+	// desired bot X/Y speed
 	std::getline( log, line ); // get description, skip
 	std::getline( log, line );
-	int speed = stoi( line );
 
 	// predict status
 	std::getline( log, line ); // get description, skip

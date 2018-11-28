@@ -11,7 +11,7 @@ PacketReader::PacketReader()
 //==========================================================================
 bool PacketReader::ReadPacket()
 {
-    const byte numBytes = 12; // 10 byte data + 2 bytes sync markers
+    const byte numBytes = 14; // 12 byte data + 2 bytes sync markers
     static bool inSync = false; // true: ready; false: not ready
     static byte counter = 0;
     
@@ -68,11 +68,12 @@ bool PacketReader::ReadPacket()
 #endif                
               
                 // Extract parameters
-                m_DesiredBotPos.m_X = ExtractParamInt( 8 );
-                m_DesiredBotPos.m_Y = ExtractParamInt( 6 );
-                m_DetectedBotPos.m_X = ExtractParamInt( 4 );
-                m_DetectedBotPos.m_Y = ExtractParamInt( 2 );
-                m_DesiredYMotorSpeed = ExtractParamInt( 0 );
+                m_DesiredBotPos.m_X = ExtractParamInt( 10 );
+                m_DesiredBotPos.m_Y = ExtractParamInt( 8 );
+                m_DetectedBotPos.m_X = ExtractParamInt( 6 );
+                m_DetectedBotPos.m_Y = ExtractParamInt( 4 );
+                m_DesiredYMotorSpeed = ExtractParamInt( 2 );
+                m_DesiredXMotorSpeed = ExtractParamInt( 0 );
                 
                 inSync = false;
                 m_IsPacketRead = true;

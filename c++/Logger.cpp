@@ -42,7 +42,8 @@ void Logger::LogStatus(
 	const int predictTimeDefence,
 	const int predictTimeAttack,
 	const unsigned int numBounce,
-	const int botSpeed,
+    const int botXSpeed,
+    const int botYSpeed,
 	const int predictStatus,
 	const unsigned int botStatus,
 	const unsigned int attackStatus,
@@ -77,8 +78,8 @@ void Logger::LogStatus(
 	logFile << predictTimeAttack << std::endl;
 	logFile << "predicted number of Bounce: \n";
 	logFile << numBounce << std::endl;
-	logFile << "desired bot speed: \n";
-	logFile << botSpeed << std::endl;
+	logFile << "desired bot X/Y speed: \n";
+	logFile << botXSpeed << " " << botYSpeed << std::endl;
 	logFile << "predict status ( -1 : error, 0 : No risk, 1. direct impact, 2. 1 bounce ): \n";
 	logFile << predictStatus << std::endl;
 	logFile << "bot status ( 0: Init, 1: Defense, 2: Defense+Atack, 3: Atack (only when predict status = no risk) ): \n";

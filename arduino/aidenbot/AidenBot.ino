@@ -130,6 +130,7 @@ void loop()
         hBot.GetM2().SetCurrStep( m2s );
       }
 
+      hBot.SetXMaxAbsSpeed( reader.GetDesiredXMotorSpeed() );
       hBot.SetYMaxAbsSpeed( reader.GetDesiredYMotorSpeed() );
       hBot.SetPosStraight( reader.GetDesiredBotPos().m_X, reader.GetDesiredBotPos().m_Y );
     }

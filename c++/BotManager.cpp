@@ -168,7 +168,8 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 				m_Camera.GetPredictTimeDefence(), // ms
 				m_Camera.GetPredictTimeAttack(), // ms
 				m_Camera.GetCurrNumPredictBounce(),
-				m_Robot.GetDesiredRobotSpeed(),
+                m_Robot.GetDesiredRobotXSpeed(),
+				m_Robot.GetDesiredRobotYSpeed(),
 				m_Camera.GetPredictStatus(),
 				m_Robot.GetRobotStatus(),
 				m_Robot.GetAttackStatus(),
@@ -191,47 +192,42 @@ void BotManager::TestMotion()
 {
 	if ( _kbhit() )
 	{
+        m_Robot.SetDesiredRobotYSpeed( MAX_Y_ABS_SPEED );
+        m_Robot.SetDesiredRobotXSpeed( MAX_X_ABS_SPEED );
+
 		int key = _getch();
 		switch ( key )
 		{
 		case 49://"1"
 			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_MAX_X, ROBOT_MAX_Y ) );
-			m_Robot.SetDesiredRobotSpeed( MAX_Y_ABS_SPEED );
 			SendBotMessage();
 			break;
 		case 50://"2"
 			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_MIN_X, ROBOT_MAX_Y ) );
-			m_Robot.SetDesiredRobotSpeed( MAX_Y_ABS_SPEED );
 			SendBotMessage();
 			break;
 		case 51://"3"
 			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_MIN_X, ROBOT_MIN_Y ) );
-			m_Robot.SetDesiredRobotSpeed( MAX_Y_ABS_SPEED );
 			SendBotMessage();
 			break;
 		case 52://"4"
 			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_MAX_X, ROBOT_MIN_Y ) );
-			m_Robot.SetDesiredRobotSpeed( MAX_Y_ABS_SPEED );
 			SendBotMessage();
 			break;
 		case 53://"5"
 			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_CENTER_X, ROBOT_MAX_Y ) );
-			m_Robot.SetDesiredRobotSpeed( MAX_Y_ABS_SPEED );
 			SendBotMessage();
 			break;
 		case 54://"6"
 			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_CENTER_X, ROBOT_MIN_Y ) );
-			m_Robot.SetDesiredRobotSpeed( MAX_Y_ABS_SPEED );
 			SendBotMessage();
 			break;
 		case 55://"7"
 			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_MAX_X, ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT ) );
-			m_Robot.SetDesiredRobotSpeed( MAX_Y_ABS_SPEED );
 			SendBotMessage();
 			break;
 		case 56://"8"
 			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_MIN_X, ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT ) );
-			m_Robot.SetDesiredRobotSpeed( MAX_Y_ABS_SPEED );
 			SendBotMessage();
 			break;
 		default:
@@ -691,9 +687,9 @@ bool BotManager::SendBotMessage()
 	// 4, 5: desired robot pos Y
 	// 6, 7: detected robot pos X
 	// 8, 9: detected robot pos Y
-	// 10, 11: desired speed
-	// 12, 13: sync "BB"
-	BYTE message[12];
+	// 10, 11: desired X speed
+    // 12, 13: desired Y speed
+	BYTE message[14];
 
 	// Initial sync markers
 	message[0] = 0x7F;
@@ -725,16 +721,17 @@ bool BotManager::SendBotMessage()
 	message[8] = ( detectedBotPos.y >> 8 ) & 0xFF;
 	message[9] = detectedBotPos.y & 0xFF;
 
-	// speed
-	const int speed = m_Robot.GetDesiredRobotSpeed();
-	message[10] = ( speed >> 8 ) & 0xFF;
-	message[11] = speed & 0xFF;
+	// desired X speed
+	const int Xspeed = m_Robot.GetDesiredRobotXSpeed();
+	message[10] = ( Xspeed >> 8 ) & 0xFF;
+	message[11] = Xspeed & 0xFF;
 
-	//// Ending sync "BB"
-	//message[12] = 0x42;
-	//message[13] = 0x42;
+    // desired Y speed
+    const int Yspeed = m_Robot.GetDesiredRobotYSpeed();
+    message[12] = ( Yspeed >> 8 ) & 0xFF;
+    message[13] = Yspeed & 0xFF;
 
-	return m_pSerialPort->WriteSerialPort<BYTE>( message, 12 );
+	return m_pSerialPort->WriteSerialPort<BYTE>( message, 14 );
 } // SendBotMessage
 
 //=======================================================================
