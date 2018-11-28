@@ -112,7 +112,7 @@ void loop()
 
       const RobotPos detectedBotPos = reader.GetDetectedBotPos();
 
-      // missing step correction has to be prior to SetPosStraight
+      // if we do missing step correction, don't SetPosStraight
       if( detectedBotPos.m_X >= 0 && detectedBotPos.m_Y >= 0 )
       {
         long m1s, m2s;
@@ -126,13 +126,16 @@ void loop()
         Serial.println( m2s ); Serial.println("");
         //=============================================
   #endif
+        // hBot.SetRobotPos( detectedBotPos ); // this is not needed becuase Robot pos is later overwrite in Update(), by converting motor steps to robot pos
         hBot.GetM1().SetCurrStep( m1s ); // this sets m_CurrStep for Motor1 & Motor2
         hBot.GetM2().SetCurrStep( m2s );
       }
-
-      hBot.SetXMaxAbsSpeed( reader.GetDesiredXMotorSpeed() );
-      hBot.SetYMaxAbsSpeed( reader.GetDesiredYMotorSpeed() );
-      hBot.SetPosStraight( reader.GetDesiredBotPos().m_X, reader.GetDesiredBotPos().m_Y );
+      else
+      {
+        hBot.SetXMaxAbsSpeed( reader.GetDesiredXMotorSpeed() );
+        hBot.SetYMaxAbsSpeed( reader.GetDesiredYMotorSpeed() );
+        hBot.SetPosStraight( reader.GetDesiredBotPos().m_X, reader.GetDesiredBotPos().m_Y );
+      }
     }
 
     hBot.Update(); // internally update

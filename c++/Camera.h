@@ -39,7 +39,6 @@ public:
 
 	// Main function
 	void CamProcess( int dt /*ms*/ );
-	bool ToCorrectStep( int dt /*ms*/ );
 
 	unsigned int GetCurrNumPredictBounce();
 	unsigned int GetPrevNumPredictBounce();
@@ -63,6 +62,12 @@ public:
 	int GetPredictXAttack();
 
 	cv::Point GetBouncePos() const;
+
+    void SetCurrBotSpeed( const cv::Point2f& s );
+    cv::Point2f GetCurrBotSpeed() const;
+
+    void SetPrevBotSpeed( const cv::Point2f& s );
+    cv::Point2f GetPrevBotSpeed() const;
 
 private:
 

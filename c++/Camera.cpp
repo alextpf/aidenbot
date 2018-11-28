@@ -17,27 +17,6 @@ Camera::~Camera()
 {}
 
 //=========================================================
-bool Camera::ToCorrectStep( int dt /*ms*/ )
-{
-	cv::Point posDif = m_CurrBotPos - m_PrevBotPos;
-
-	m_PrevBotSpeed = m_CurrBotSpeed; // update old speed
-
-	const cv::Point2f tmp = static_cast<cv::Point2f>( posDif * 100 );
-	m_CurrBotSpeed = tmp / dt; // speed in dm/ms (we use this units to not overflow the variable)
-
-	// if the bot is not moving fast (i.e. the detection is more accurate )
-	// we feed the position back to arduino
-	int speedThresh = 30;
-
-	return (
-		std::abs( m_CurrBotSpeed.x ) < speedThresh &&
-		std::abs( m_CurrBotSpeed.y ) < speedThresh &&
-		std::abs( m_PrevBotSpeed.x ) < speedThresh &&
-		std::abs( m_PrevBotSpeed.y ) < speedThresh );
-}
-
-//=========================================================
 void Camera::CamProcess( int dt /*ms*/ )
 {
 	// Speed calculation on each axis
@@ -312,4 +291,28 @@ void Camera::SetCurrPredictPos( const cv::Point& pos )
 cv::Point Camera::GetBouncePos() const
 {
 	return m_BouncePos;
+}
+
+//=========================================================
+void Camera::SetCurrBotSpeed( const cv::Point2f& s )
+{
+    m_CurrBotSpeed = s;
+}
+
+//=========================================================
+cv::Point2f Camera::GetCurrBotSpeed() const
+{
+    return m_CurrBotSpeed;
+}
+
+//=========================================================
+void Camera::SetPrevBotSpeed( const cv::Point2f& s )
+{
+    m_PrevBotSpeed = s;
+}
+
+//=========================================================
+cv::Point2f Camera::GetPrevBotSpeed() const
+{
+    return m_PrevBotSpeed;
 }

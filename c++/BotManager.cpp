@@ -139,6 +139,9 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 		const bool puckFound = FindPuck( detectedPuckPos, hsvImg, output, dt, fps,
 			ownGoal, prevPuckPos, predPuckPos, bouncePos, desiredBotPos );
 
+        // 3. decide whether to correct missing steps
+        CorrectMissingSteps( botFound );
+
 		// 3. send message over serial port to Arduino
 		if ( puckFound && !ownGoal )
 		{
@@ -186,6 +189,34 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 	m_NumFrame++;
 
 }//Process
+
+//=======================================================================
+void BotManager::CorrectMissingSteps( const bool botFound )
+{
+    bool tmp = false;
+
+    if( m_CurrTime > 0 && botFound )
+    {
+        int speedThresh = 30;
+        int posThresh = 10;
+
+        cv::Point2f& currSpeed = m_Camera.GetCurrBotSpeed();
+        cv::Point2f& prevSpeed = m_Camera.GetPrevBotSpeed();
+
+        cv::Point& currPos = m_Camera.GetCurrPuckPos();
+        cv::Point& predictPos = m_Robot.GetDesiredRobotPos();
+        cv::Point posDif = predictPos - currPos;
+
+        tmp =   std::abs( currSpeed.x ) < speedThresh &&
+                std::abs( currSpeed.y ) < speedThresh &&
+                std::abs( prevSpeed.x ) < speedThresh &&
+                std::abs( prevSpeed.y ) < speedThresh &&
+                std::abs( posDif.x ) < posThresh      &&
+                std::abs( posDif.y ) < posThresh;
+    } //if( m_CurrTime > 0 )
+
+    m_CorrectMissingSteps = m_CorrectMissingSteps && tmp;
+}
 
 //=======================================================================
 void BotManager::TestMotion()
@@ -245,10 +276,8 @@ bool BotManager::FindRobot(
 {
 	Contours contours;
 
-	const bool botFound = m_BotFinder.FindDisk1Thresh(
-		contours, detectedBotPos, hsvImg, m_BlueThresh, m_Mask );
-
-	bool tmp = botFound;
+    bool botFound = m_BotFinder.FindDisk1Thresh(
+        contours, detectedBotPos, hsvImg, m_BlueThresh, m_Mask );
 
 	if ( botFound )
 	{
@@ -264,25 +293,28 @@ bool BotManager::FindRobot(
 		const cv::Point botPos = m_TableFinder.ImgToTableCoordinate( detectedBotPos ); // mm, in table coordinate
 
 		// robot should be within its range
-		if ( botPos.x < ROBOT_MIN_X || botPos.x > ROBOT_MAX_X ||
-		   	 botPos.y < ROBOT_MIN_Y || botPos.y > ROBOT_MAX_Y )
+        const int tolerance = 10; // 10 mm tolerance
+
+		if ( botPos.x < ROBOT_MIN_X - tolerance || botPos.x > ROBOT_MAX_X + tolerance ||
+		   	 botPos.y < ROBOT_MIN_Y - tolerance || botPos.y > ROBOT_MAX_Y + tolerance )
 		{
 			// detected is noise
-			tmp = false;
+            botFound = false;
 		}
 		else
 		{
 			m_Camera.SetCurrBotPos( botPos );
-			if ( m_CurrTime > 0 )
-			{
-				tmp = m_Camera.ToCorrectStep( dt );
-			}
 
-			m_Camera.SetPrevBotPos( detectedBotPos );
+            // calculate and set speed
+            m_Camera.SetPrevBotSpeed( m_Camera.GetCurrBotSpeed() );
+
+            cv::Point posDif = m_Camera.GetCurrBotPos() - m_Camera.GetPrevBotPos();
+            const cv::Point2f tmp = static_cast<cv::Point2f>( posDif * 100 );
+            m_Camera.SetCurrBotSpeed( tmp / static_cast<int>( dt ) ); // speed in dm/ms (we use this units to not overflow the variable)
+
+            m_Camera.SetPrevBotPos( botPos );
 		}
 	} // if( botFound )
-
-	m_CorrectMissingSteps = m_CorrectMissingSteps && tmp;
 
 	return botFound;
 }// FindRobot

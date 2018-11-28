@@ -94,6 +94,8 @@ public:
 		m_CorrectMissingSteps = ok;
 	}
 
+    void CorrectMissingSteps( const bool botFound );
+
 private:
 
 	// wrapper function to find table corners

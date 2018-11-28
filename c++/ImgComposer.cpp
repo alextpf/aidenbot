@@ -28,6 +28,8 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 	output = input.clone();
 
 	std::string line;
+    std::string puckSpeed;
+    std::string puckAvgSpeed;
 	std::stringstream stream;
 	static int filePos = 0;
 	log.seekg( filePos );
@@ -135,8 +137,8 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 	stream >> detectedBotPos.y;
 
 	// current puck speed
-	std::getline( log, line ); // get description, skip
-	std::getline( log, line );
+	std::getline( log, puckSpeed ); // get description, skip
+	std::getline( log, puckSpeed );
 
 	// predictTimeDefence
 	std::getline( log, line ); // get description, skip
@@ -174,8 +176,8 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 	std::getline( log, line );
 
 	// puck average speed
-	std::getline( log, line ); // get description, skip
-	std::getline( log, line );
+	std::getline( log, puckAvgSpeed ); // get description, skip
+	std::getline( log, puckAvgSpeed );
 
 	/////////////////
 	// Draw now
@@ -188,12 +190,21 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 	cv::line( output, m_Corners[2], m_Corners[3], GREEN, 2 );
 
 	// show frame number on screen
-	std::string text = "# " + std::to_string( frameNum );
+	std::string text = "#" + std::to_string( frameNum );
 	cv::Point origin( 30, 25 ); // upper left
 	int thickness = 1;
 	int lineType = 8;
 
+    // show puck speed/avg speed on screen
+    text = "Puck Speed: " + puckSpeed;
+    origin = cv::Point( 30, 30 );
+
 	cv::putText( output, text, origin, cv::FONT_HERSHEY_SIMPLEX, 0.5, ORANGE, thickness, lineType );
+
+    text = "Puck Avg Speed: " + puckAvgSpeed;
+    origin = cv::Point( 30, 35 );
+
+    cv::putText( output, text, origin, cv::FONT_HERSHEY_SIMPLEX, 0.5, ORANGE, thickness, lineType );
 
 	// show FPS on screen
 	text = "FPS = " + std::to_string( fps );
