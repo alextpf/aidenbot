@@ -48,7 +48,8 @@ void Logger::LogStatus(
 	const unsigned int botStatus,
 	const unsigned int attackStatus,
 	const clock_t attackTime,
-	const cv::Point2f& avgPuckSpeed) const
+	const cv::Point2f& avgPuckSpeed,
+    const bool correctMissingSteps ) const
 {
 	std::ofstream logFile;
 	logFile.open( "Log.txt", std::ios_base::app ); // append
@@ -90,6 +91,15 @@ void Logger::LogStatus(
 	logFile << attackTime << std::endl;
 	logFile << "puck avg speed: \n";
 	logFile << avgPuckSpeed.x << " " << avgPuckSpeed.y << std::endl;
+    logFile << "correct missing steps? \n";
+    if( correctMissingSteps )
+    {
+        logFile << "yes" << std::endl;
+    }
+    else
+    {
+        logFile << "no" << std::endl;
+    }
 
 	logFile.close();
 } // LogStatus

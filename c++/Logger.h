@@ -37,7 +37,8 @@ public:
 		const unsigned int botStatus,
 		const unsigned int attackStatus,
 		const clock_t attackTime,
-		const cv::Point2f& avgPuckSpeed ) const;
+		const cv::Point2f& avgPuckSpeed,
+        const bool correctMissingSteps ) const;
 
 private:
 

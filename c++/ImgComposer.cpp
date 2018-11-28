@@ -179,6 +179,10 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 	std::getline( log, puckAvgSpeed ); // get description, skip
 	std::getline( log, puckAvgSpeed );
 
+    // correct missing steps
+    std::getline( log, line ); // get description, skip
+    std::getline( log, line );
+
 	/////////////////
 	// Draw now
 	/////////////////

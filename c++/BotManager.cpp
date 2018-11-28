@@ -177,7 +177,8 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 				m_Robot.GetRobotStatus(),
 				m_Robot.GetAttackStatus(),
 				m_Robot.GetAttackTime(),
-				m_Camera.GetPuckAvgSpeed() );
+				m_Camera.GetPuckAvgSpeed(),
+                m_CorrectMissingSteps );
 		}
 
 		// update time stamp and puck position
@@ -198,12 +199,12 @@ void BotManager::CorrectMissingSteps( const bool botFound )
     if( m_CurrTime > 0 && botFound )
     {
         int speedThresh = 30;
-        int posThresh = 10;
+        int posErr = 10;
 
         cv::Point2f& currSpeed = m_Camera.GetCurrBotSpeed();
         cv::Point2f& prevSpeed = m_Camera.GetPrevBotSpeed();
 
-        cv::Point& currPos = m_Camera.GetCurrPuckPos();
+        cv::Point& currPos = m_Camera.GetCurrBotPos();
         cv::Point& predictPos = m_Robot.GetDesiredRobotPos();
         cv::Point posDif = predictPos - currPos;
 
@@ -211,8 +212,8 @@ void BotManager::CorrectMissingSteps( const bool botFound )
                 std::abs( currSpeed.y ) < speedThresh &&
                 std::abs( prevSpeed.x ) < speedThresh &&
                 std::abs( prevSpeed.y ) < speedThresh &&
-                std::abs( posDif.x ) < posThresh      &&
-                std::abs( posDif.y ) < posThresh;
+                std::abs( posDif.x ) < posErr         &&
+                std::abs( posDif.y ) < posErr;
     } //if( m_CurrTime > 0 )
 
     m_CorrectMissingSteps = m_CorrectMissingSteps && tmp;
