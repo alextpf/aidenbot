@@ -29,9 +29,9 @@ public:
       return m_DetectedBotPos;
     }
     
-    int       GetDesiredMotorSpeed()
+    int       GetDesiredYMotorSpeed()
     {
-      return m_DesiredMotorSpeed;
+      return m_DesiredYMotorSpeed;
     }
     
     void showNewData();
@@ -42,6 +42,6 @@ private:
     bool      m_IsPacketRead;
     RobotPos  m_DesiredBotPos;
     RobotPos  m_DetectedBotPos;
-    int       m_DesiredMotorSpeed;
+    int       m_DesiredYMotorSpeed;
 }; // PacketReader
 #endif
