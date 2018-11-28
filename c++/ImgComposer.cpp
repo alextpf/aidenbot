@@ -11,6 +11,7 @@
 #define BLACK  cv::Scalar(   0,   0,   0 )
 #define PURPLE cv::Scalar( 255, 112, 132 )
 #define MEDIUM_PURPLE cv::Scalar( 219, 112, 147 )
+#define ORANGE cv::Scalar( 0, 128, 255 )
 
 //===============================================================
 void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
@@ -141,6 +142,10 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 	std::getline( log, line ); // get description, skip
 	std::getline( log, line );
 
+	// predictTimeAttack
+	std::getline( log, line ); // get description, skip
+	std::getline( log, line );
+
 	// predict numBounce
 	std::getline( log, line ); // get description, skip
 	std::getline( log, line );
@@ -183,11 +188,17 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 	cv::line( output, m_Corners[1], m_Corners[3], GREEN, 2 );
 	cv::line( output, m_Corners[2], m_Corners[3], GREEN, 2 );
 
-	// show FPS on screen
-	const std::string text = "FPS = " + std::to_string( fps );
-	cv::Point origin( 520, 25 ); // upper right
+	// show frame number on screen
+	std::string text = "# " + std::to_string( frameNum );
+	cv::Point origin( 30, 25 ); // upper left
 	int thickness = 1;
 	int lineType = 8;
+
+	cv::putText( output, text, origin, cv::FONT_HERSHEY_SIMPLEX, 0.5, ORANGE, thickness, lineType );
+
+	// show FPS on screen
+	text = "FPS = " + std::to_string( fps );
+	origin = cv::Point( 520, 25 ); // upper right
 
 	cv::putText( output, text, origin, cv::FONT_HERSHEY_SIMPLEX, 0.5, MEDIUM_PURPLE, thickness, lineType );
 

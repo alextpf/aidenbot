@@ -40,6 +40,7 @@ void Logger::LogStatus(
 	const cv::Point& detectedBotPos,
 	const cv::Point& puckSpeed,
 	const int predictTimeDefence,
+	const int predictTimeAttack,
 	const unsigned int numBounce,
 	const int botSpeed,
 	const int predictStatus,
@@ -72,13 +73,15 @@ void Logger::LogStatus(
 	logFile << puckSpeed.x << " " << puckSpeed.y << std::endl;
 	logFile << "predict time defence: \n";
 	logFile << predictTimeDefence << std::endl;
+	logFile << "predict time attack (only applicable in direct impact): \n";
+	logFile << predictTimeAttack << std::endl;
 	logFile << "predicted number of Bounce: \n";
 	logFile << numBounce << std::endl;
 	logFile << "desired bot speed: \n";
 	logFile << botSpeed << std::endl;
 	logFile << "predict status ( -1 : error, 0 : No risk, 1. direct impact, 2. 1 bounce ): \n";
 	logFile << predictStatus << std::endl;
-	logFile << "bot status ( 0: Init, 1: Defense, 2: Defense+Atack, 3: Atack ): \n";
+	logFile << "bot status ( 0: Init, 1: Defense, 2: Defense+Atack, 3: Atack (only when predict status = no risk) ): \n";
 	logFile << botStatus << std::endl;
 	logFile << "attack status (0: wait for attack, 1: ready to attack, 2: after firing attack ) only useful in BOT_STATUS::ATTACK mode: \n";
 	logFile << attackStatus << std::endl;

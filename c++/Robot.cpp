@@ -101,7 +101,6 @@ void Robot::NewDataStrategy( Camera& cam )
 						// puck is moving fast
 						m_RobotStatus = BOT_STATUS::DEFENCE;
 					}
-
 				}
             }
             break;

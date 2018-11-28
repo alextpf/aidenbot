@@ -205,6 +205,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 				detectedBotPos, // img coordinate
 				m_Camera.GetCurrPuckSpeed(),
 				m_Camera.GetPredictTimeDefence(), // ms
+				m_Camera.GetPredictTimeAttack(), // ms
 				m_Camera.GetCurrNumPredictBounce(),
 				m_Robot.GetDesiredRobotSpeed(),
 				m_Camera.GetPredictStatus(),

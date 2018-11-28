@@ -1,5 +1,8 @@
 #include "VideoProcessor.h"
 
+#include <conio.h> // for getch
+#include <windows.h> // for kbhit
+
 #define FRAME_WIDTH 640
 #define FRAME_HEIGHT 360
 
@@ -405,6 +408,16 @@ void VideoProcessor::Run()
 
     while( !IsStopped() )
     {
+		// if there's no window created, hit Esc on the command window should also exit
+		if ( _kbhit() )
+		{
+			int key = _getch();
+			if ( key == 27/*Esc*/ )
+			{
+				StopIt();
+			}
+		}
+
         // read next frame if any
         if( !ReadNextFrame( frame ) )
         {

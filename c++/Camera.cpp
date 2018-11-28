@@ -173,7 +173,7 @@ void Camera::CamProcess( int dt /*ms*/ )
 
 				m_PredictTimeDefence = static_cast<int>( ( ROBOT_DEFENSE_POSITION_DEFAULT + PUCK_SIZE - m_CurrPuckPos.y ) * 100.0f / m_CurrPuckSpeed.y ) - VISION_SYSTEM_LAG; // in ms
 				m_PredictTimeAttack = static_cast<int>( ( ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT + PUCK_SIZE - m_CurrPuckPos.y ) * 100.0f / m_CurrPuckSpeed.y ) - VISION_SYSTEM_LAG; // in ms
-			}
+			}//if ( m_PrevNumPredictBounce == 0 )
 		} // // No bounce, direct impact
 	}// coming fast into our field
 	else
