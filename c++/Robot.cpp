@@ -208,6 +208,7 @@ void Robot::RobotMoveDecision( Camera& cam )
                     // Go to pre-attack position
                     m_DesiredRobotPos.x = attackPredictPos.x;
                     m_DesiredRobotPos.y = attackPredictPos.y - PUCK_SIZE * 4;
+					m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.5 );
 
                     m_AttackStatus = ATTACK_STATUS::READY_TO_ATTACK;
                 }

@@ -88,6 +88,12 @@ public:
 	{
 		m_BotFinder.SetAreaHigh( high );
 	}
+
+	void SetCorrectMissingSteps( const bool ok )
+	{
+		m_CorrectMissingSteps = ok;
+	}
+
 private:
 
 	// wrapper function to find table corners

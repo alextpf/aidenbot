@@ -78,45 +78,6 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 		output = input.clone();
 	}
 
-	/*
-	//=====================================
-	//debug
-	if ( m_Debug )
-	{
-		m_Debug = false;
-
-		m_Robot.SetDesiredRobotPos( cv::Point( 56, 43 ) );
-		m_Camera.SetRobotPos( cv::Point( 89, 23 ) );
-		m_Robot.SetDesiredRobotSpeed( 84 );
-		if ( !SendBotMessage() )
-		{
-			return;
-		}
-	}
-
-	char msg[40];
-
-	int res = m_pSerialPort->ReadSerialPort<char>( msg, 40 );
-	bool toPrint = false;
-
-	for ( int i = 0; i < 40; i++ )
-	{
-		if ( msg[i] == '\n' )
-		{
-			toPrint = true;
-			break;
-		}
-	}
-
-	if ( toPrint )
-	{
-		std::cout << msg << std::endl;
-	}
-
-	return;
-	//=====================================
-	*/
-
 	// find table range
 	if ( !m_TableFound )
 	{
@@ -179,7 +140,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 			ownGoal, prevPuckPos, predPuckPos, bouncePos, desiredBotPos );
 
 		// 3. send message over serial port to Arduino
-		if ( puckFound || !ownGoal )
+		if ( puckFound && !ownGoal )
 		{
 			// send the message by com port over to Arduino
 			SendBotMessage();
@@ -291,7 +252,7 @@ bool BotManager::FindRobot(
 	const bool botFound = m_BotFinder.FindDisk1Thresh(
 		contours, detectedBotPos, hsvImg, m_BlueThresh, m_Mask );
 
-	m_CorrectMissingSteps = botFound;
+	bool tmp = botFound;
 
 	if ( botFound )
 	{
@@ -311,19 +272,21 @@ bool BotManager::FindRobot(
 		   	 botPos.y < ROBOT_MIN_Y || botPos.y > ROBOT_MAX_Y )
 		{
 			// detected is noise
-			m_CorrectMissingSteps = false;
+			tmp = false;
 		}
 		else
 		{
 			m_Camera.SetCurrBotPos( botPos );
 			if ( m_CurrTime > 0 )
 			{
-				m_CorrectMissingSteps = m_Camera.ToCorrectStep( dt );
+				tmp = m_Camera.ToCorrectStep( dt );
 			}
 
 			m_Camera.SetPrevBotPos( detectedBotPos );
 		}
 	} // if( botFound )
+
+	m_CorrectMissingSteps = m_CorrectMissingSteps && tmp;
 
 	return botFound;
 }// FindRobot

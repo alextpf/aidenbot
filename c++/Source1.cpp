@@ -57,22 +57,22 @@ int main()
 	//char inPath[] = "E:/alex/aidenbot2/data/";
 // C:/Users/alex_/Documents/Arduino/aidenbot/v2/aidenbot/data/webcam
 
-	//const char inPath[]		= "C:/tmp/results1/";
-	const char inPath[]		= "C:/tmp/direct_impact_results/";
+	//const char inPath[]		= "C:/tmp/data3/";
+	const char inPath[]		= "C:/tmp/results3/";
 	//const char inPath[]		= "C:/Users/alex_/Documents/Arduino/aidenbot/v2/aidenbot/data/webcam/";
-	//const char outPath[]	= "C:/tmp/results1/";
-	const char outPath[] = "C:/tmp/direct_impact_results/";
+	//const char outPath[]	= "C:/tmp/data3/";
+	const char outPath[] = "C:/tmp/results3/";
 	const char filename[]	= "pic";
 
 	const int webCamId		= 1; // 0: default (laptop's camera), 1: external connected cam
 	const int startFrame    = 0;// frame number we want to start at
-	const int endFrame		= 791;
+	const int endFrame		= 700;
 
 	//////////////////////
 	// Read from config
 	//////////////////////
 	std::vector<int> tmp;
-	if ( !ReadConfig( tmp, 33 ) ) // read configuration file
+	if ( !ReadConfig( tmp, 34 ) ) // read configuration file
 	{
 		return 0;
 	}
@@ -102,6 +102,7 @@ int main()
 	const double botAreaLow = static_cast<double>( tmp[30] );
 	const double botAreaHigh = static_cast<double>( tmp[31] );
 	const bool testMotion = tmp[32] == 1 ? true : false;
+	const bool correctMissingSteps = tmp[33] == 1 ? true : false;
 
 	switch ( operation )
 	{
@@ -160,6 +161,7 @@ int main()
 	segmentor.SetBotAreaThreshLow( botAreaLow );
 	segmentor.SetBotAreaThreshHigh( botAreaHigh );
 	segmentor.m_Debug = testMotion;
+	segmentor.SetCorrectMissingSteps( correctMissingSteps );
 
 	FrameProcessor * proc = NULL;
 	switch ( operation )
