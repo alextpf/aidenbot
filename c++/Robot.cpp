@@ -165,19 +165,23 @@ void Robot::RobotMoveDecision( Camera& cam )
     {
         // move only if the speed of puck is small
         const cv::Point2f& puckSpeed = cam.GetCurrPuckSpeed();
-        const float speedThresh = 50;
+        const float speedThresh = 50.0f;
 
-        if( abs( puckSpeed.x ) < speedThresh && abs( puckSpeed.y ) < speedThresh )
+        if( abs( puckSpeed.x ) < speedThresh )
         {
-            const int thresh = 3 * PUCK_SIZE;
+            const int thresh = 6 * PUCK_SIZE;
             const cv::Point& currBotPos = cam.GetCurrBotPos();
             const cv::Point& currPuckPos = cam.GetCurrPuckPos();
 
             // if puck and bot don't overlap vertically, back up straight
-            if( std::abs( currPuckPos.x - currBotPos.x ) < thresh )
+            if( std::abs( currPuckPos.x - currBotPos.x ) > thresh )
             {
-                m_DesiredRobotPos.x = currBotPos.x;
-                m_DesiredRobotPos.y = currPuckPos.y - thresh;
+                // only if the puck is not at too low position we back up
+                if( currPuckPos.y - thresh >= ROBOT_MIN_Y )
+                {
+                    m_DesiredRobotPos.x = currBotPos.x;
+                    m_DesiredRobotPos.y = currPuckPos.y - thresh;
+                }
             }
             else
             {
