@@ -46,7 +46,11 @@ void Robot::NewDataStrategy( Camera& cam )
     {
         case Camera::PREDICT_STATUS::OWN_GOAL:
             {
-                m_RobotStatus = BOT_STATUS::TURN_AROUND;
+                const float speedThresh = 150.0f;
+                const cv::Point2f& puckSpeed = cam.GetCurrPuckSpeed();
+
+                m_RobotStatus = abs( puckSpeed.x ) < speedThresh ?
+                    BOT_STATUS::TURN_AROUND : BOT_STATUS::BAIL_OUT;
             }
             break;
 
@@ -141,8 +145,10 @@ void Robot::NewDataStrategy( Camera& cam )
 } // Robot::NewDataStrategy
 
 //====================================================================================================================
-void Robot::RobotMoveDecision( Camera& cam )
+bool Robot::RobotMoveDecision( Camera& cam )
 {
+    bool bailOut = false;
+
     m_DesiredYSpeed = MAX_Y_ABS_SPEED;
     m_DesiredXSpeed = MAX_X_ABS_SPEED;
 
@@ -163,45 +169,43 @@ void Robot::RobotMoveDecision( Camera& cam )
 
     case BOT_STATUS::TURN_AROUND: // try to go around to the back of the puck ( since it's current at the back of the bot )
     {
-        // move only if the speed of puck is small
-        const cv::Point2f& puckSpeed = cam.GetCurrPuckSpeed();
-        const float speedThresh = 50.0f;
+        const int thresh = 6 * PUCK_SIZE;
+        const cv::Point& currBotPos = cam.GetCurrBotPos();
+        cv::Point backupPredictPos = cam.PredictPuckPos( 300 );
 
-        if( abs( puckSpeed.x ) < speedThresh )
+        // if puck and bot don't overlap vertically, back up straight
+        if( std::abs( backupPredictPos.x - m_DesiredRobotPos.x ) > thresh )
         {
-            const int thresh = 6 * PUCK_SIZE;
-            const cv::Point& currBotPos = cam.GetCurrBotPos();
-            const cv::Point& currPuckPos = cam.GetCurrPuckPos();
-
-            // if puck and bot don't overlap vertically, back up straight
-            if( std::abs( currPuckPos.x - currBotPos.x ) > thresh )
+            // only if the puck is not at too low position we back up
+            if( backupPredictPos.y - thresh >= ROBOT_MIN_Y )
             {
-                // only if the puck is not at too low position we back up
-                if( currPuckPos.y - thresh >= ROBOT_MIN_Y )
-                {
-                    m_DesiredRobotPos.x = currBotPos.x;
-                    m_DesiredRobotPos.y = currPuckPos.y - thresh;
-                }
+                // x doesn't change
+                m_DesiredRobotPos.y = backupPredictPos.y - thresh;
             }
             else
             {
-                //else, move the bot away from puck horizontally
-                // depending on which side the puck is at currently, move the bot
-                if( currPuckPos.x > ROBOT_CENTER_X )
-                {
-                    m_DesiredRobotPos.x = currPuckPos.x - thresh;
-                    m_DesiredRobotPos.y = currBotPos.y;
-                }
-                else
-                {
-                    m_DesiredRobotPos.x = currPuckPos.x + thresh;
-                    m_DesiredRobotPos.y = currBotPos.y;
-                }
+                // don't move and bail out
+                bailOut = true;
             }
+        }
+        else
+        {
+            //else, move the bot away from puck horizontally
+            // depending on which side the puck is at currently, move the bot
+            if( backupPredictPos.x > ROBOT_CENTER_X )
+            {
+                // y doesn't change
+                m_DesiredRobotPos.x = backupPredictPos.x - thresh;
+            }
+            else
+            {
+                // y doesn't change
+                m_DesiredRobotPos.x = backupPredictPos.x + thresh;
+            }
+        }
 
-            m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.7 );
-            m_DesiredXSpeed = static_cast<int>( MAX_X_ABS_SPEED * 0.7 );
-        } // if( abs( puckSpeed.x ) < speedThresh && abs( puckSpeed.y ) < speedThresh )
+        m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.7 );
+        m_DesiredXSpeed = static_cast<int>( MAX_X_ABS_SPEED * 0.7 );
     }//TURN_AROUND
     break;
 
@@ -300,7 +304,7 @@ void Robot::RobotMoveDecision( Camera& cam )
                     attackPredictPos = cam.PredictPuckPos( ATTACK_TIME_THRESHOLD );
 
                     m_DesiredRobotPos.x = attackPredictPos.x;
-                    m_DesiredRobotPos.y = attackPredictPos.y - PUCK_SIZE * 4;
+                    m_DesiredRobotPos.y = attackPredictPos.y - PRE_ATTACK_DIST;
 
                     m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.5 );
                     m_DesiredXSpeed = static_cast<int>( MAX_X_ABS_SPEED * 0.5 );
@@ -327,34 +331,40 @@ void Robot::RobotMoveDecision( Camera& cam )
 	case BOT_STATUS::ATTACK_AT_BOUNCE: // The puck will come from a bounce
 	{
         cv::Point bouncePos = cam.GetBouncePos();
-
-        if( bouncePos.x < ROBOT_MIN_X )
+        if( bouncePos.y < ROBOT_MIN_Y + PRE_ATTACK_DIST )
         {
-            bouncePos.x = ROBOT_MIN_X;
+            // this section can be improved, by doing attack before bounce
+            bailOut = true;
         }
-        else if( bouncePos.x > ROBOT_MAX_X )
+        else
         {
-            bouncePos.x = ROBOT_MAX_X;
-        }
+            if( bouncePos.x < ROBOT_MIN_X )
+            {
+                bouncePos.x = ROBOT_MIN_X;
+            }
+            else if( bouncePos.x > ROBOT_MAX_X )
+            {
+                bouncePos.x = ROBOT_MAX_X;
+            }
 
-        //wait for the perfect timing to attack
-        const int impactTime = cam.GetPredictTimeAtBounce();
+            //wait for the perfect timing to attack
+            const int impactTime = cam.GetPredictTimeAtBounce();
 
-        if( impactTime < IMPACT_TIME_THRESHOLD )
-        {
-            // Attack movement
-            // attack at the bounce point
+            if( impactTime < IMPACT_TIME_THRESHOLD )
+            {
+                // Attack movement
+                // attack at the bounce point
+                m_DesiredRobotPos = bouncePos;
+            }
+            else  //it's not the time to attack yet
+            {
+                // go to pre-attack position
+                m_DesiredRobotPos.x = bouncePos.x;
+                m_DesiredRobotPos.y = bouncePos.y - PRE_ATTACK_DIST;
 
-            m_DesiredRobotPos = bouncePos;
-        }
-        else  //it's not the time to attack yet
-        {
-            // go to pre-attack position
-            m_DesiredRobotPos.x = bouncePos.x;
-            m_DesiredRobotPos.y = bouncePos.y - PUCK_SIZE * 4;
-
-            m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.5 );
-            m_DesiredXSpeed = static_cast<int>( MAX_X_ABS_SPEED * 0.5 );
+                m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.5 );
+                m_DesiredXSpeed = static_cast<int>( MAX_X_ABS_SPEED * 0.5 );
+            }
         }
 	} // ATTACK_AT_BOUNCE
 	break;
@@ -365,7 +375,10 @@ void Robot::RobotMoveDecision( Camera& cam )
         m_DesiredRobotPos.x = ROBOT_CENTER_X;  //center X axis
 
 		m_AttackTime = 0;
+        break;
 	}// switch
+
+    return bailOut;
 } // Robot::RobotMoveDecision
 
 //====================================================================================================================

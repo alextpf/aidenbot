@@ -127,7 +127,7 @@ private:
 		cv::Mat & output,
 		const unsigned int dt,
 		const unsigned int fps,
-		bool& ownGoal,
+		bool& bailOut,
 		cv::Point& prevPuckPos,
 		cv::Point& predPuckPos,
 		cv::Point& bouncePos,

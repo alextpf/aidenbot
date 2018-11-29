@@ -79,7 +79,9 @@
 #define ROBOT_DEFENSE_ATTACK_POSITION_MIN     140
 #define ROBOT_DEFENSE_ATTACK_POSITION_MAX     400
 
-#define PUCK_SIZE       22                        // PuckSize (puck radius in mm)
+#define PUCK_SIZE               22                        // PuckSize (puck radius in mm)
+#define PRE_ATTACK_DIST         4 * PUCK_SIZE
+
 //========================================================================================================================================
 //////////////////////////////////
 // Max Robot Speed & Acceleration

@@ -19,7 +19,7 @@ public:
     // 1: Defense
     // 2: Defense+Atack
     // 3: Atack
-    enum BOT_STATUS { INIT = 0, DEFENCE, DEFENCE_AND_ATTACK, ATTACK, ATTACK_AT_BOUNCE, TURN_AROUND };
+    enum BOT_STATUS { INIT = 0, DEFENCE, DEFENCE_AND_ATTACK, ATTACK, ATTACK_AT_BOUNCE, TURN_AROUND, BAIL_OUT };
 
 	// 0: wait for attack
 	// 1: ready to attack
@@ -45,7 +45,7 @@ public:
 	//   3: Attack mode
 	//   4: ?? REMOVE ??
 	//   5: Manual mode => User send direct commands to robot
-	void RobotMoveDecision( Camera& cam );
+	bool RobotMoveDecision( Camera& cam );
 
 	//====================================================================================================================
 	// This function returns true if the puck is behind the robot and

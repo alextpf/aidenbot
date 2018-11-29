@@ -129,7 +129,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 		const bool botFound = FindRobot( detectedBotPos, hsvImg, output, dt );
 
 		// 2. find puck
-		bool ownGoal = false;
+		bool bailOut = false;
 
 		cv::Point prevPuckPos;
 		cv::Point predPuckPos;
@@ -137,13 +137,13 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 		cv::Point desiredBotPos;
 
 		const bool puckFound = FindPuck( detectedPuckPos, hsvImg, output, dt, fps,
-			ownGoal, prevPuckPos, predPuckPos, bouncePos, desiredBotPos );
+            bailOut, prevPuckPos, predPuckPos, bouncePos, desiredBotPos );
 
         // 3. decide whether to correct missing steps
         const bool correctSteps = CorrectMissingSteps( botFound );
 
 		// 3. send message over serial port to Arduino
-		if ( puckFound && !ownGoal )
+		if ( puckFound && !bailOut )
 		{
 			// send the message by com port over to Arduino
 			SendBotMessage( correctSteps );
@@ -328,7 +328,7 @@ bool BotManager::FindPuck(
 	cv::Mat & output,
 	const unsigned int dt,
 	const unsigned int fps,
-	bool& ownGoal,
+	bool& bailOut,
 	cv::Point& prevPuckPos,
 	cv::Point& predPuckPos,
 	cv::Point& bouncePos,
@@ -420,19 +420,21 @@ bool BotManager::FindPuck(
 			m_Robot.NewDataStrategy( m_Camera );
 
 			// determine robot position
-			m_Robot.RobotMoveDecision( m_Camera ); // determins m_DesiredRobotPos
+            bailOut = m_Robot.RobotMoveDecision( m_Camera ); // determins m_DesiredRobotPos
 
-			desiredBotPos = m_Robot.GetDesiredRobotPos();
-			desiredBotPos = m_TableFinder.TableToImgCoordinate( desiredBotPos );
+            if( !bailOut )
+            {
+                desiredBotPos = m_Robot.GetDesiredRobotPos();
+                desiredBotPos = m_TableFinder.TableToImgCoordinate( desiredBotPos );
 
-			if ( m_ShowOutPutImg )
-			{
-				// Show desired robot position
-				const int radius = 5;
-				const int thickness = 2;
-				cv::circle( output, desiredBotPos, radius, BLUE, thickness );
-			}//if ( m_ShowOutPutImg )
-
+                if( m_ShowOutPutImg )
+                {
+                    // Show desired robot position
+                    const int radius = 5;
+                    const int thickness = 2;
+                    cv::circle( output, desiredBotPos, radius, BLUE, thickness );
+                }//if ( m_ShowOutPutImg )
+            }
 		} // if ( /*dt < 2000 &&*/ m_CurrTime > 0 )
 
 		m_Camera.SetPrevPuckPos( puckPos );
