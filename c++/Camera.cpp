@@ -18,7 +18,7 @@ Camera::~Camera()
 {}
 
 //=========================================================
-void Camera::CamProcess( int dt /*ms*/ )
+void Camera::CamProcess( int dt /*ms*/, const cv::Point& botPos )
 {
 	// Speed calculation on each axis
 	cv::Point posDif = m_CurrPuckPos - m_PrevPuckPos;
@@ -55,6 +55,12 @@ void Camera::CamProcess( int dt /*ms*/ )
 	{
 		m_AverageSpeed = m_CurrPuckSpeed;
 	}
+
+    if( IsOwnGoal( botPos ) )
+    {
+        m_PredictStatus = OWN_GOAL;
+        return;
+    }
 
 	m_PredictXAttack = -1;
 
@@ -166,6 +172,12 @@ void Camera::CamProcess( int dt /*ms*/ )
 
 	m_PrevNumPredictBounce = m_CurrNumPredictBounce;
 } // CamProcess
+
+//====================================================================================================================
+bool Camera::IsOwnGoal(const cv::Point& botPos ) const
+{
+    return  m_CurrPuckPos.y < botPos.y;
+} // IsOwnGoal
 
 //=========================================================
 bool Camera::HasBounce( const int x ) const

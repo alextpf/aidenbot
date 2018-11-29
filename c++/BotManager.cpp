@@ -355,11 +355,11 @@ bool BotManager::FindPuck(
 
 		m_Camera.SetCurrPuckPos( puckPos );
 
-		ownGoal = m_Robot.IsOwnGoal( m_Camera );
+		//ownGoal = m_Robot.IsOwnGoal( m_Camera );
 
 		// skip processing if 1st frame
 
-		if ( !ownGoal && /*dt < 2000 &&*/ m_CurrTime > 0 )
+		if ( /*!ownGoal &&*/ /*dt < 2000 &&*/ m_CurrTime > 0 )
 		{
 			if ( m_NumConsecutiveNonPuck > 1 )
 			{
@@ -367,7 +367,7 @@ bool BotManager::FindPuck(
 			}
 
 			// do prediction work
-			m_Camera.CamProcess( dt );
+            m_Camera.CamProcess( dt, puckPos );
 
 			prevPuckPos = m_Camera.GetPrevPuckPos(); // mm, table coordinate
 			prevPuckPos = m_TableFinder.TableToImgCoordinate( prevPuckPos );

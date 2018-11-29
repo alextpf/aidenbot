@@ -84,9 +84,9 @@ void Logger::LogStatus(
 	logFile << numBounce << std::endl;
 	logFile << "desired bot X/Y speed: \n";
 	logFile << botXSpeed << " " << botYSpeed << std::endl;
-	logFile << "predict status ( -1 : error, 0 : No risk, 1. direct impact, 2. 1 bounce ): \n";
+	logFile << "predict status ( -1 : error, 0 : No risk, 1. direct impact, 2. 1 bounce, 3: own goal ): \n";
 	logFile << predictStatus << std::endl;
-	logFile << "bot status ( 0: Init, 1: Defense, 2: Defense+Atack, 3: Atack (only when predict status = no risk), 4: attack at bounce point ): \n";
+	logFile << "bot status ( 0: Init, 1: Defense, 2: Defense+Atack, 3: Atack (only when predict status = no risk), 4: attack at bounce point, 5: turn around ): \n";
 	logFile << botStatus << std::endl;
 	logFile << "attack status (0: wait for attack, 1: ready to attack, 2: after firing attack ) only useful in BOT_STATUS::ATTACK mode: \n";
 	logFile << attackStatus << std::endl;

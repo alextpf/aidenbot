@@ -19,7 +19,7 @@ public:
     // 1: Defense
     // 2: Defense+Atack
     // 3: Atack
-    enum BOT_STATUS { INIT = 0, DEFENCE, DEFENCE_AND_ATTACK, ATTACK, ATTACK_AT_BOUNCE };
+    enum BOT_STATUS { INIT = 0, DEFENCE, DEFENCE_AND_ATTACK, ATTACK, ATTACK_AT_BOUNCE, TURN_AROUND };
 
 	// 0: wait for attack
 	// 1: ready to attack

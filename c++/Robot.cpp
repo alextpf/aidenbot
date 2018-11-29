@@ -44,6 +44,12 @@ void Robot::NewDataStrategy( Camera& cam )
 
     switch( cam.GetPredictStatus() )
     {
+        case Camera::PREDICT_STATUS::OWN_GOAL:
+            {
+                m_RobotStatus = BOT_STATUS::TURN_AROUND;
+            }
+            break;
+
         case Camera::PREDICT_STATUS::NO_RISK:
             {
                 // If the puck is moving slowly in the robot field we could start an attack
@@ -146,17 +152,54 @@ void Robot::RobotMoveDecision( Camera& cam )
 	{
 	case BOT_STATUS::INIT: // Go to init position
 	{
-		if ( !IsOwnGoal( cam ) )
-        {
-            m_DesiredRobotPos.x = ROBOT_CENTER_X;  //center X axis
-            m_DesiredRobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
-            m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
-            m_DesiredXSpeed = static_cast<int>( MAX_X_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
-        }
+        m_DesiredRobotPos.x = ROBOT_CENTER_X;  //center X axis
+        m_DesiredRobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
+        m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
+        m_DesiredXSpeed = static_cast<int>( MAX_X_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
 
 		m_AttackTime = 0;
 	}
 	break;
+
+    case BOT_STATUS::TURN_AROUND: // try to go around to the back of the puck ( since it's current at the back of the bot )
+    {
+        // move only if the speed of puck is small
+        const cv::Point2f& puckSpeed = cam.GetCurrPuckSpeed();
+        const float speedThresh = 50;
+
+        if( abs( puckSpeed.x ) < speedThresh && abs( puckSpeed.y ) < speedThresh )
+        {
+            const int thresh = 3 * PUCK_SIZE;
+            const cv::Point& currBotPos = cam.GetCurrBotPos();
+            const cv::Point& currPuckPos = cam.GetCurrPuckPos();
+
+            // if puck and bot don't overlap vertically, back up straight
+            if( std::abs( currPuckPos.x - currBotPos.x ) < thresh )
+            {
+                m_DesiredRobotPos.x = currBotPos.x;
+                m_DesiredRobotPos.y = currPuckPos.y - thresh;
+            }
+            else
+            {
+                //else, move the bot away from puck horizontally
+                // depending on which side the puck is at currently, move the bot
+                if( currPuckPos.x > ROBOT_CENTER_X )
+                {
+                    m_DesiredRobotPos.x = currPuckPos.x - thresh;
+                    m_DesiredRobotPos.y = currBotPos.y;
+                }
+                else
+                {
+                    m_DesiredRobotPos.x = currPuckPos.x + thresh;
+                    m_DesiredRobotPos.y = currBotPos.y;
+                }
+            }
+
+            m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.5 );
+            m_DesiredXSpeed = static_cast<int>( MAX_X_ABS_SPEED * 0.5 );
+        } // if( abs( puckSpeed.x ) < speedThresh && abs( puckSpeed.y ) < speedThresh )
+    }//TURN_AROUND
+    break;
 
 	case BOT_STATUS::DEFENCE: // Defense mode (only move on X axis on the defense line)
 	{
@@ -203,67 +246,61 @@ void Robot::RobotMoveDecision( Camera& cam )
 
 		if ( m_AttackTime == 0 )
 		{
-            if( !IsOwnGoal( cam ) )
+            attackPredictPos = cam.PredictPuckPos( ATTACK_TIME_THRESHOLD );
+
+            if( ( attackPredictPos.x > PUCK_SIZE ) &&
+                ( attackPredictPos.x < TABLE_WIDTH - PUCK_SIZE ) &&
+                ( attackPredictPos.y > PUCK_SIZE * 2 ) &&
+                ( attackPredictPos.y < ROBOT_CENTER_Y - PUCK_SIZE * 4 ) )
             {
-                attackPredictPos = cam.PredictPuckPos( ATTACK_TIME_THRESHOLD );
+                m_AttackTime = clock() + static_cast<clock_t>( ATTACK_TIME_THRESHOLD * CLOCKS_PER_SEC / 1000.0f );  // Prepare an attack in 500ms
 
-                if( ( attackPredictPos.x > PUCK_SIZE ) &&
-                    ( attackPredictPos.x < TABLE_WIDTH - PUCK_SIZE ) &&
-                    ( attackPredictPos.y > PUCK_SIZE * 2 ) &&
-                    ( attackPredictPos.y < ROBOT_CENTER_Y - PUCK_SIZE * 4 ) )
-                {
-                    m_AttackTime = clock() + static_cast<clock_t>( ATTACK_TIME_THRESHOLD * CLOCKS_PER_SEC / 1000.0f );  // Prepare an attack in 500ms
+                                                                                                                    // Go to pre-attack position
+                m_DesiredRobotPos.x = attackPredictPos.x;
+                m_DesiredRobotPos.y = attackPredictPos.y - PUCK_SIZE * 4;
+                m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.5 );
+                m_DesiredXSpeed = static_cast<int>( MAX_X_ABS_SPEED * 0.5 );
 
-                    // Go to pre-attack position
-                    m_DesiredRobotPos.x = attackPredictPos.x;
-                    m_DesiredRobotPos.y = attackPredictPos.y - PUCK_SIZE * 4;
-					m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.5 );
-                    m_DesiredXSpeed = static_cast<int>( MAX_X_ABS_SPEED * 0.5 );
+                m_AttackStatus = ATTACK_STATUS::READY_TO_ATTACK;
+            }
+            else
+            {
+                m_AttackTime = 0;  // Continue waiting for the right attack moment...
+                m_AttackStatus = ATTACK_STATUS::WAIT_FOR_ATTACK;
 
-                    m_AttackStatus = ATTACK_STATUS::READY_TO_ATTACK;
-                }
-                else
-                {
-                    m_AttackTime = 0;  // Continue waiting for the right attack moment...
-					m_AttackStatus = ATTACK_STATUS::WAIT_FOR_ATTACK;
-
-                    // And go to defense position
-                    m_DesiredRobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
-                    m_DesiredRobotPos.x = ROBOT_CENTER_X;  //center X axis
-                    m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
-                    m_DesiredXSpeed = static_cast<int>( MAX_X_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
-                }
-            } // if( !IsOwnGoal( cam ) )
+                // And go to defense position
+                m_DesiredRobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
+                m_DesiredRobotPos.x = ROBOT_CENTER_X;  //center X axis
+                m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
+                m_DesiredXSpeed = static_cast<int>( MAX_X_ABS_SPEED * 0.6667 ); // Return a bit more slowly...
+            }
 		} // if ( m_AttackTime == 0 )
 		else
 		{
 			if ( m_AttackStatus == ATTACK_STATUS::READY_TO_ATTACK )
 			{
 				// ready to attack
-                if( !IsOwnGoal( cam ) )
+                const int impactTime = static_cast<int>( ( m_AttackTime - clock() ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
+                if( impactTime < IMPACT_TIME_THRESHOLD )
                 {
-                    const int impactTime = static_cast<int>( ( m_AttackTime - clock() ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
-                    if( impactTime < IMPACT_TIME_THRESHOLD )
-                    {
-                        // Attack movement
-                        attackPredictPos = cam.PredictPuckPos( impactTime );
-                        m_DesiredRobotPos.x = attackPredictPos.x;
-                        m_DesiredRobotPos.y = attackPredictPos.y + PUCK_SIZE * 2;
+                    // Attack movement
+                    attackPredictPos = cam.PredictPuckPos( impactTime );
+                    m_DesiredRobotPos.x = attackPredictPos.x;
+                    m_DesiredRobotPos.y = attackPredictPos.y + PUCK_SIZE * 2;
 
-                        m_AttackStatus = ATTACK_STATUS::AFTER_ATTACK;
-                    }
-                    else  // m_AttackStatus = ATTACK_STATUS::READY_TO_ATTACK but it's not the time to attack yet
-                    {
-                        // Go to pre-attack position
-                        attackPredictPos = cam.PredictPuckPos( ATTACK_TIME_THRESHOLD );
+                    m_AttackStatus = ATTACK_STATUS::AFTER_ATTACK;
+                }
+                else  // m_AttackStatus = ATTACK_STATUS::READY_TO_ATTACK but it's not the time to attack yet
+                {
+                    // Go to pre-attack position
+                    attackPredictPos = cam.PredictPuckPos( ATTACK_TIME_THRESHOLD );
 
-                        m_DesiredRobotPos.x = attackPredictPos.x;
-                        m_DesiredRobotPos.y = attackPredictPos.y - PUCK_SIZE * 4;
+                    m_DesiredRobotPos.x = attackPredictPos.x;
+                    m_DesiredRobotPos.y = attackPredictPos.y - PUCK_SIZE * 4;
 
-                        m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.5 );
-                        m_DesiredXSpeed = static_cast<int>( MAX_X_ABS_SPEED * 0.5 );
-                    }
-                }//if( !IsOwnGoal( cam ) )
+                    m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.5 );
+                    m_DesiredXSpeed = static_cast<int>( MAX_X_ABS_SPEED * 0.5 );
+                }
 			} // if (m_AttackStatus == ATTACK_STATUS::READY_TO_ATTACK)
 
 			if ( m_AttackStatus == ATTACK_STATUS::AFTER_ATTACK )
@@ -315,27 +352,13 @@ void Robot::RobotMoveDecision( Camera& cam )
             m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.5 );
             m_DesiredXSpeed = static_cast<int>( MAX_X_ABS_SPEED * 0.5 );
         }
-	}
-	break;
-
-	case 5:
-	{
-		// User manual control
-		//hBot.SetMaxAbsSpeed( m_UserSpeed );
-		// Control acceleration
-		//hBot.SetMaxAbsAccel( m_UserAccel );
-		//hBot.SetPosStraight( m_UserPuckPos.x, m_UserPuckPos.y );
-		//Serial.println(max_acceleration);
-	}// case 5
+	} // ATTACK_AT_BOUNCE
 	break;
 
 	default:
 		// Default : go to defense position
-		if ( !IsOwnGoal( cam ) )
-		{
-            m_DesiredRobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
-            m_DesiredRobotPos.x = ROBOT_CENTER_X;  //center X axis
-		}
+        m_DesiredRobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
+        m_DesiredRobotPos.x = ROBOT_CENTER_X;  //center X axis
 
 		m_AttackTime = 0;
 	}// switch

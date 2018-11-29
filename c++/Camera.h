@@ -12,7 +12,7 @@ public:
     // 0 : No risk,
     // 1 : Puck is moving to our field directly fast, with no bounce
     // 2 : Puck is moving to our field fast, with a bounce
-    enum PREDICT_STATUS { ERROR = -1, NO_RISK, DIRECT_IMPACT, ONE_BOUNCE };
+    enum PREDICT_STATUS { ERROR = -1, NO_RISK, DIRECT_IMPACT, ONE_BOUNCE, OWN_GOAL };
 
 	Camera();
 	~Camera();
@@ -38,7 +38,9 @@ public:
 	cv::Point GetPrevBotPos() const;
 
 	// Main function
-	void CamProcess( int dt /*ms*/ );
+	void CamProcess( int dt /*ms*/, const cv::Point& botPos /*table coord*/ );
+
+    bool IsOwnGoal( const cv::Point& botPos ) const;
 
 	unsigned int GetCurrNumPredictBounce();
 	unsigned int GetPrevNumPredictBounce();
