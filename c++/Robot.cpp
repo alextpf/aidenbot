@@ -195,8 +195,8 @@ void Robot::RobotMoveDecision( Camera& cam )
                 }
             }
 
-            m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.5 );
-            m_DesiredXSpeed = static_cast<int>( MAX_X_ABS_SPEED * 0.5 );
+            m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.7 );
+            m_DesiredXSpeed = static_cast<int>( MAX_X_ABS_SPEED * 0.7 );
         } // if( abs( puckSpeed.x ) < speedThresh && abs( puckSpeed.y ) < speedThresh )
     }//TURN_AROUND
     break;
