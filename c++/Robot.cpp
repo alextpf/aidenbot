@@ -170,8 +170,7 @@ bool Robot::RobotMoveDecision( Camera& cam )
     case BOT_STATUS::TURN_AROUND: // try to go around to the back of the puck ( since it's current at the back of the bot )
     {
         const int thresh = 6 * PUCK_SIZE;
-        const cv::Point& currBotPos = cam.GetCurrBotPos();
-        cv::Point backupPredictPos = cam.PredictPuckPos( 300 );
+        cv::Point backupPredictPos = cam.PredictPuckPos( 300 ); // predict puck's position after 300 ms
 
         // if puck and bot don't overlap vertically, back up straight
         if( std::abs( backupPredictPos.x - m_DesiredRobotPos.x ) > thresh )
@@ -194,13 +193,31 @@ bool Robot::RobotMoveDecision( Camera& cam )
             // depending on which side the puck is at currently, move the bot
             if( backupPredictPos.x > ROBOT_CENTER_X )
             {
-                // y doesn't change
-                m_DesiredRobotPos.x = backupPredictPos.x - thresh;
+                if( std::abs( backupPredictPos.y - m_DesiredRobotPos.y ) < PRE_ATTACK_DIST
+                    && backupPredictPos.x < m_DesiredRobotPos.x )
+                {
+                    // if y overlap and bot is on the right of the puck
+                    bailOut = true;
+                }
+                else
+                {
+                    // y doesn't change
+                    m_DesiredRobotPos.x = backupPredictPos.x - thresh;
+                }
             }
             else
             {
-                // y doesn't change
-                m_DesiredRobotPos.x = backupPredictPos.x + thresh;
+                if( std::abs( backupPredictPos.y - m_DesiredRobotPos.y ) < PRE_ATTACK_DIST
+                    && backupPredictPos.x > m_DesiredRobotPos.x )
+                {
+                    // if y overlap and bot is on the left of the puck
+                    bailOut = true;
+                }
+                else
+                {
+                    // y doesn't change
+                    m_DesiredRobotPos.x = backupPredictPos.x + thresh;
+                }
             }
         }
 
