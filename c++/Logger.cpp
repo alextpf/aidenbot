@@ -41,6 +41,7 @@ void Logger::LogStatus(
 	const cv::Point& puckSpeed,
 	const int predictTimeDefence,
 	const int predictTimeAttack,
+    const int predictTimeBounce,
 	const unsigned int numBounce,
     const int botXSpeed,
     const int botYSpeed,
@@ -77,19 +78,21 @@ void Logger::LogStatus(
 	logFile << predictTimeDefence << std::endl;
 	logFile << "predict time attack (only applicable in direct impact): \n";
 	logFile << predictTimeAttack << std::endl;
-	logFile << "predicted number of Bounce: \n";
+    logFile << "predict time to bounce point: \n";
+    logFile << predictTimeBounce << std::endl;
+    logFile << "predicted number of Bounce: \n";
 	logFile << numBounce << std::endl;
 	logFile << "desired bot X/Y speed: \n";
 	logFile << botXSpeed << " " << botYSpeed << std::endl;
 	logFile << "predict status ( -1 : error, 0 : No risk, 1. direct impact, 2. 1 bounce ): \n";
 	logFile << predictStatus << std::endl;
-	logFile << "bot status ( 0: Init, 1: Defense, 2: Defense+Atack, 3: Atack (only when predict status = no risk) ): \n";
+	logFile << "bot status ( 0: Init, 1: Defense, 2: Defense+Atack, 3: Atack (only when predict status = no risk), 4: attack at bounce point ): \n";
 	logFile << botStatus << std::endl;
 	logFile << "attack status (0: wait for attack, 1: ready to attack, 2: after firing attack ) only useful in BOT_STATUS::ATTACK mode: \n";
 	logFile << attackStatus << std::endl;
-	logFile << "attack time: \n";
+	logFile << "attack time (time stamp): \n";
 	logFile << attackTime << std::endl;
-	logFile << "puck avg speed (table coord): \n";
+    logFile << "puck avg speed (table coord): \n";
 	logFile << avgPuckSpeed.x << " " << avgPuckSpeed.y << std::endl;
     logFile << "correct missing steps? \n";
     if( correctMissingSteps )

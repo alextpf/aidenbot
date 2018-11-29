@@ -83,15 +83,16 @@ void Robot::NewDataStrategy( Camera& cam )
 					else
 					{
 						// Predicted position X is out of table range
-						if ( cam.GetPredictTimeDefence() < BOT_MOVE_TIME_THRESHOLD )
+						if ( cam.GetPredictTimeDefence() < BOUNCE_TIME_THRESHOLD ||
+                             cam.GetPredictTimeAtBounce() < BOUNCE_TIME_THRESHOLD )
 						{
 							// predicted hit time is small, i.e. puck approcahing soon
 							m_RobotStatus = BOT_STATUS::DEFENCE;
 						}
 						else
 						{
-							// predicted hit time is large, i.e. no risk
-							m_RobotStatus = BOT_STATUS::INIT;
+							// predicted hit time is large, attack at the bounce point
+							m_RobotStatus = BOT_STATUS::ATTACK_AT_BOUNCE;
 						}
 					}
 				}
@@ -115,14 +116,15 @@ void Robot::NewDataStrategy( Camera& cam )
         case Camera::PREDICT_STATUS::ONE_BOUNCE:
             {
                 // Prediction with side bounce
-                if( cam.GetPredictTimeDefence() < BOT_MOVE_TIME_THRESHOLD )
+                if( cam.GetPredictTimeDefence() < BOUNCE_TIME_THRESHOLD ||
+                    cam.GetPredictTimeAtBounce() < BOUNCE_TIME_THRESHOLD )
                 {
                     // Limit movement
                     m_RobotStatus = BOT_STATUS::DEFENCE;
                 }
                 else
                 {
-                    m_RobotStatus = BOT_STATUS::INIT;
+                    m_RobotStatus = BOT_STATUS::ATTACK_AT_BOUNCE;
                 }
             }
             break;
@@ -159,16 +161,14 @@ void Robot::RobotMoveDecision( Camera& cam )
 	case BOT_STATUS::DEFENCE: // Defense mode (only move on X axis on the defense line)
 	{
 		cv::Point pos = cam.GetCurrPredictPos();
-		const int maxX = TABLE_WIDTH - PUCK_SIZE * 3;
-		const int minX = PUCK_SIZE * 3;
 
-		if ( pos.x < minX )
+		if ( pos.x < ROBOT_MIN_X )
 		{
-			pos.x = minX;
+			pos.x = ROBOT_MIN_X;
 		}
-		else if ( pos.x > maxX )
+		else if ( pos.x > ROBOT_MAX_X )
 		{
-			pos.x = maxX;
+			pos.x = ROBOT_MAX_X;
 		}
 
 		cam.SetCurrPredictPos( pos );
@@ -177,7 +177,7 @@ void Robot::RobotMoveDecision( Camera& cam )
         m_DesiredRobotPos.x = pos.x;
 
 		m_AttackTime = 0;
-	} // case 1
+	}
 	break;
 
 	case BOT_STATUS::DEFENCE_AND_ATTACK:
@@ -194,7 +194,7 @@ void Robot::RobotMoveDecision( Camera& cam )
 
 			m_AttackTime = 0;
 		}
-	} // case 2
+	}
 	break;
 
 	case BOT_STATUS::ATTACK:
@@ -243,7 +243,7 @@ void Robot::RobotMoveDecision( Camera& cam )
                 if( !IsOwnGoal( cam ) )
                 {
                     const int impactTime = static_cast<int>( ( m_AttackTime - clock() ) * 1000.0f / CLOCKS_PER_SEC ); // in ms
-                    if( impactTime < IMPACT_TIME_THRESHOLD )  // less than 150ms to start the attack
+                    if( impactTime < IMPACT_TIME_THRESHOLD )
                     {
                         // Attack movement
                         attackPredictPos = cam.PredictPuckPos( impactTime );
@@ -282,31 +282,39 @@ void Robot::RobotMoveDecision( Camera& cam )
 		} // if (m_AttackTime == 0)
 	} // case BOT_STATUS::ATTACK:
 	break;
-	case 4: // The puck came from a bounce
+
+	case BOT_STATUS::ATTACK_AT_BOUNCE: // The puck will come from a bounce
 	{
-		// Only defense now (we could improve this in future)
-		// Defense mode (only move on X axis on the defense line)
-		cv::Point pos = cam.GetCurrPredictPos();
+        cv::Point bouncePos = cam.GetBouncePos();
 
-		const int minX = PUCK_SIZE * 3;
-		const int maxX = TABLE_WIDTH - PUCK_SIZE * 3;
+        if( bouncePos.x < ROBOT_MIN_X )
+        {
+            bouncePos.x = ROBOT_MIN_X;
+        }
+        else if( bouncePos.x > ROBOT_MAX_X )
+        {
+            bouncePos.x = ROBOT_MAX_X;
+        }
 
-		// we leave some space near the borders...
-		if ( pos.x < minX )
-		{
-			pos.x = minX;
-		}
-		else if ( pos.x > maxX )
-		{
-			pos.x = maxX;
-		}
+        //wait for the perfect timing to attack
+        const int impactTime = cam.GetPredictTimeAtBounce();
 
-		cam.SetCurrPredictPos( pos );
+        if( impactTime < IMPACT_TIME_THRESHOLD )
+        {
+            // Attack movement
+            // attack at the bounce point
 
-        m_DesiredRobotPos.y = ROBOT_DEFENSE_POSITION_DEFAULT;
-        m_DesiredRobotPos.x = pos.x;
+            m_DesiredRobotPos = bouncePos;
+        }
+        else  //it's not the time to attack yet
+        {
+            // go to pre-attack position
+            m_DesiredRobotPos.x = bouncePos.x;
+            m_DesiredRobotPos.y = bouncePos.y - PUCK_SIZE * 4;
 
-		m_AttackTime = 0;
+            m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.5 );
+            m_DesiredXSpeed = static_cast<int>( MAX_X_ABS_SPEED * 0.5 );
+        }
 	}
 	break;
 

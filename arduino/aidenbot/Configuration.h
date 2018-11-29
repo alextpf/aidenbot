@@ -102,13 +102,13 @@
 #define MIN_PUCK_Y_SPEED1        -280                    // used in Robot::newDataStrategy()
 #define MIN_PUCK_Y_SPEED2        -160                    // used in Robot::newDataStrategy()
 #define FAST_IN_Y_SPEED          -25
-#define BOT_MOVE_TIME_THRESHOLD   500
+#define BOUNCE_TIME_THRESHOLD     200
 #define ATTACK_TIME_THRESHOLD     500
-#define IMPACT_TIME_THRESHOLD     200
+#define IMPACT_TIME_THRESHOLD     300 // if robot is slow (low speed limist), make this value larger
 #define PREDICT_TIME_THRESHOLD    500
 #define MIN_ABS_Y_SPEED           60
 #define MIN_ABS_X_SPEED           100
-#define MIN_PREDICT_TIME          300                   // used in Robot::robotStrategy()
+#define MIN_PREDICT_TIME          300                   // used in Robot::robotStrategy(). If the robot is slow (low speed limit), increase this value.
 #define STOP_COEF         1800//1800
 //========================================================================================================================================
 //////////////////////////////////

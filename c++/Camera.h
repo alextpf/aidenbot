@@ -45,6 +45,8 @@ public:
 
 	int GetPredictTimeDefence() const;
 
+    int GetPredictTimeAtBounce() const;
+
 	int GetPredictTimeAttack() const;
 
 	cv::Point PredictPuckPos( int predictTime );
@@ -125,6 +127,7 @@ private:
 	// Time
 	//////////////
 	int				m_PredictTimeDefence;
+    int				m_PredictTimeAtBounce;
 	int				m_PredictTimeAttack;
 
 };// Camera

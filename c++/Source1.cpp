@@ -6,14 +6,14 @@
 #include <opencv2/video.hpp>
 #include <opencv2/imgproc.hpp>
 
-//#include "D:\alex\aidenbot2\c++\VideoProcessor.h"
-//#include "D:\alex\aidenbot2\c++\BotManager.h"
-//#include "D:\alex\aidenbot2\c++\CheckHSV.h"
-//#include "D:\alex\aidenbot2\c++\ImgComposer.h"
-#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\VideoProcessor.h"
-#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\BotManager.h"
-#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\CheckHSV.h"
-#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\ImgComposer.h"
+#include "D:\alex\aidenbot2\c++\VideoProcessor.h"
+#include "D:\alex\aidenbot2\c++\BotManager.h"
+#include "D:\alex\aidenbot2\c++\CheckHSV.h"
+#include "D:\alex\aidenbot2\c++\ImgComposer.h"
+//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\VideoProcessor.h"
+//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\BotManager.h"
+//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\CheckHSV.h"
+//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\ImgComposer.h"
 
 using namespace cv;
 using namespace std;

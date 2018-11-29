@@ -9,6 +9,7 @@ Camera::Camera()
     , m_CurrNumPredictBounce( 0 )
 	, m_PrevNumPredictBounce( 0 )
     , m_PredictTimeDefence( 0 )
+    , m_PredictTimeAtBounce( 0 )
     , m_PredictTimeAttack( 0 )
 {}
 
@@ -89,8 +90,9 @@ void Camera::CamProcess( int dt /*ms*/ )
 
 			m_BouncePos.y = static_cast<int>( static_cast<float>( m_BouncePos.x - m_CurrPuckPos.x ) * slope ) + m_CurrPuckPos.y;
 
-			m_PredictTimeDefence = static_cast<int>( static_cast<float>( m_BouncePos.y - m_CurrPuckPos.y ) * 100.0f / m_CurrPuckSpeed.y ); // time until bouce
-																																					   // bounce prediction => slope change  with the bounce, we only need to change the sign, easy!!
+            m_PredictTimeAtBounce = static_cast<int>( static_cast<float>( m_BouncePos.y - m_CurrPuckPos.y ) * 100.0f / m_CurrPuckSpeed.y ); // time until bouce
+
+            // bounce prediction => slope change  with the bounce, we only need to change the sign, easy!!
 			slope = -slope;
 
 			m_CurrPredictPos.y = ROBOT_DEFENSE_POSITION_DEFAULT + PUCK_SIZE;
@@ -126,7 +128,7 @@ void Camera::CamProcess( int dt /*ms*/ )
 					m_PrevPredictPos.x = m_CurrPredictPos.x;
 
 					// We introduce a factor (120 instead of 100) to model the bounce (20% loss in speed)(to improcve...)
-					m_PredictTimeDefence += static_cast<int>( ( m_CurrPredictPos.y - m_BouncePos.y ) * 120.0f / m_CurrPuckSpeed.y ); // in ms
+					m_PredictTimeDefence = m_PredictTimeAtBounce + static_cast<int>( ( m_CurrPredictPos.y - m_BouncePos.y ) * 120.0f / m_CurrPuckSpeed.y ); // in ms
 					m_PredictTimeDefence -= VISION_SYSTEM_LAG;
 				}
 			}
@@ -243,6 +245,12 @@ unsigned int Camera::GetPrevNumPredictBounce()
 int Camera::GetPredictTimeDefence() const
 {
     return m_PredictTimeDefence;
+}
+
+//=========================================================
+int Camera::GetPredictTimeAtBounce() const
+{
+    return m_PredictTimeAtBounce;
 }
 
 //=========================================================

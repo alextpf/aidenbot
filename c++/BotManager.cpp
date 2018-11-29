@@ -170,6 +170,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 				m_Camera.GetCurrPuckSpeed(),
 				m_Camera.GetPredictTimeDefence(), // ms
 				m_Camera.GetPredictTimeAttack(), // ms
+                m_Camera.GetPredictTimeAtBounce(), // ms
 				m_Camera.GetCurrNumPredictBounce(),
                 m_Robot.GetDesiredRobotXSpeed(),
 				m_Robot.GetDesiredRobotYSpeed(),
@@ -224,8 +225,8 @@ void BotManager::TestMotion()
 {
 	if ( _kbhit() )
 	{
-        m_Robot.SetDesiredRobotYSpeed( MAX_Y_ABS_SPEED );
-        m_Robot.SetDesiredRobotXSpeed( MAX_X_ABS_SPEED );
+        m_Robot.SetDesiredRobotYSpeed( static_cast<int>( MAX_Y_ABS_SPEED * 0.7f ) );
+        m_Robot.SetDesiredRobotXSpeed( static_cast<int>( MAX_X_ABS_SPEED * 0.7f ) );
 
 		int key = _getch();
 		switch ( key )
