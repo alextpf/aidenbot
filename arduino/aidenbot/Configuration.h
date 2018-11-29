@@ -87,9 +87,9 @@
 
 // THIS VALUES DEPENDS ON YOUR ROBOT CONSTRUCTION (MOTORS, MECHANICS...)
 // RECOMMENDED VALUES FOR 12V POWER SUPPLY
-#define MAX_X_ABS_ACCEL         230//275                        // Maximun motor acceleration in (steps/seg2)/1000. Max recommended value:280
-#define MAX_Y_ABS_ACCEL         100//140
-#define MAX_X_ABS_SPEED         24000//30000//32000                    // Maximun speed in steps/seg. Max absolute value: 32767!!
+#define MAX_X_ABS_ACCEL         240//275                        // Maximun motor acceleration in (steps/seg2)/1000. Max recommended value:280
+#define MAX_Y_ABS_ACCEL         110//140
+#define MAX_X_ABS_SPEED         29000//30000//32000                    // Maximun speed in steps/seg. Max absolute value: 32767!!
 #define MAX_Y_ABS_SPEED         14000//25000
 
 #define MIN_ACCEL         50						// make sure this is not 0
@@ -108,7 +108,7 @@
 #define PREDICT_TIME_THRESHOLD    500
 #define MIN_ABS_Y_SPEED           60
 #define MIN_ABS_X_SPEED           100
-#define MIN_PREDICT_TIME          220                   // used in Robot::robotStrategy()
+#define MIN_PREDICT_TIME          300                   // used in Robot::robotStrategy()
 #define STOP_COEF         1800//1800
 //========================================================================================================================================
 //////////////////////////////////

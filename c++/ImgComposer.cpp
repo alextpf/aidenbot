@@ -199,16 +199,25 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
 	int thickness = 1;
 	int lineType = 8;
 
-    // show puck speed/avg speed on screen
+	cv::putText( output, text, origin, cv::FONT_HERSHEY_SIMPLEX, 0.4, ORANGE, thickness, lineType );
+
+    // show puck speed speed on screen
     text = "Puck Speed: " + puckSpeed;
-    origin = cv::Point( 30, 30 );
+    origin = cv::Point( 30, 40 );
 
-	cv::putText( output, text, origin, cv::FONT_HERSHEY_SIMPLEX, 0.5, ORANGE, thickness, lineType );
+	cv::putText( output, text, origin, cv::FONT_HERSHEY_SIMPLEX, 0.4, ORANGE, thickness, lineType );
 
+	// show puck avg speed speed on screen
     text = "Puck Avg Speed: " + puckAvgSpeed;
-    origin = cv::Point( 30, 35 );
+    origin = cv::Point( 30, 55 );
 
-    cv::putText( output, text, origin, cv::FONT_HERSHEY_SIMPLEX, 0.5, ORANGE, thickness, lineType );
+    cv::putText( output, text, origin, cv::FONT_HERSHEY_SIMPLEX, 0.4, ORANGE, thickness, lineType );
+
+	// show frame time on screen
+	text = "Frame time: " + std::to_string( frameTime ) + " ms";
+	origin = cv::Point( 30, 70 );
+
+	cv::putText( output, text, origin, cv::FONT_HERSHEY_SIMPLEX, 0.4, ORANGE, thickness, lineType );
 
 	// show FPS on screen
 	text = "FPS = " + std::to_string( fps );

@@ -140,13 +140,13 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 			ownGoal, prevPuckPos, predPuckPos, bouncePos, desiredBotPos );
 
         // 3. decide whether to correct missing steps
-        CorrectMissingSteps( botFound );
+        const bool correctSteps = CorrectMissingSteps( botFound );
 
 		// 3. send message over serial port to Arduino
 		if ( puckFound && !ownGoal )
 		{
 			// send the message by com port over to Arduino
-			SendBotMessage();
+			SendBotMessage( correctSteps );
 #ifdef DEBUG_SERIAL
 			ReceiveMessage();
 #endif // DEBUG
@@ -192,7 +192,7 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 }//Process
 
 //=======================================================================
-void BotManager::CorrectMissingSteps( const bool botFound )
+bool BotManager::CorrectMissingSteps( const bool botFound )
 {
     bool tmp = false;
 
@@ -216,8 +216,8 @@ void BotManager::CorrectMissingSteps( const bool botFound )
                 std::abs( posDif.y ) < posErr;
     } //if( m_CurrTime > 0 )
 
-    m_CorrectMissingSteps = m_CorrectMissingSteps && tmp;
-}
+    return m_CorrectMissingSteps && tmp;
+}//CorrectMissingSteps
 
 //=======================================================================
 void BotManager::TestMotion()
@@ -232,35 +232,35 @@ void BotManager::TestMotion()
 		{
 		case 49://"1"
 			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_MAX_X, ROBOT_MAX_Y ) );
-			SendBotMessage();
+			SendBotMessage( false );
 			break;
 		case 50://"2"
 			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_MIN_X, ROBOT_MAX_Y ) );
-			SendBotMessage();
+			SendBotMessage( false );
 			break;
 		case 51://"3"
 			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_MIN_X, ROBOT_MIN_Y ) );
-			SendBotMessage();
+			SendBotMessage( false );
 			break;
 		case 52://"4"
 			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_MAX_X, ROBOT_MIN_Y ) );
-			SendBotMessage();
+			SendBotMessage( false );
 			break;
 		case 53://"5"
 			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_CENTER_X, ROBOT_MAX_Y ) );
-			SendBotMessage();
+			SendBotMessage( false );
 			break;
 		case 54://"6"
 			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_CENTER_X, ROBOT_MIN_Y ) );
-			SendBotMessage();
+			SendBotMessage( false );
 			break;
 		case 55://"7"
 			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_MAX_X, ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT ) );
-			SendBotMessage();
+			SendBotMessage( false );
 			break;
 		case 56://"8"
 			m_Robot.SetDesiredRobotPos( cv::Point( ROBOT_MIN_X, ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT ) );
-			SendBotMessage();
+			SendBotMessage( false );
 			break;
 		default:
 			break;
@@ -712,7 +712,7 @@ void BotManager::OnMouse( int event, int x, int y, int f, void* data )
 }//OnMouse
 
 //=======================================================================
-bool BotManager::SendBotMessage()
+bool BotManager::SendBotMessage( const bool correctSteps )
 {
 	// message lay out :
 	// 0, 1: Initial sync markers
@@ -743,7 +743,7 @@ bool BotManager::SendBotMessage()
 	message[5] = desiredBotPos.y & 0xFF;
 
 	// detected robot pos
-	const cv::Point detectedBotPos = m_CorrectMissingSteps ?
+	const cv::Point detectedBotPos = correctSteps ?
 		m_Camera.GetCurrBotPos() : cv::Point( -1, -1 );
 
 	// Pos X (high byte, low byte)

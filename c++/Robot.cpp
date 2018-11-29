@@ -65,8 +65,8 @@ void Robot::NewDataStrategy( Camera& cam )
 					// Puck is moving to our field directly, with no bounce; Direct impact
 					cv::Point predictPos = cam.GetCurrPredictPos();
 
-					if ( ( predictPos.x > ROBOT_MIN_X + PUCK_SIZE * 2 ) &&
-					 	 ( predictPos.x < ROBOT_MAX_X - PUCK_SIZE * 2 ) )
+					if ( ( predictPos.x > 0 /*ROBOT_MIN_X + PUCK_SIZE * 2*/ ) &&
+					 	 ( predictPos.x < TABLE_WIDTH /*ROBOT_MAX_X - PUCK_SIZE * 2*/ ) )
 					{
 						// Predicted position X is within table range
 						if ( cam.GetPuckAvgSpeed().y > MIN_PUCK_Y_SPEED1 )

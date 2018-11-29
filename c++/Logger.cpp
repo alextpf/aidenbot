@@ -59,19 +59,19 @@ void Logger::LogStatus(
 	logFile << dt << std::endl;
 	logFile << "fps: \n";
 	logFile << fps << std::endl;
-	logFile << "puck pos: \n";
+	logFile << "puck pos (img coord): \n";
 	logFile << puckPos.x << " " << puckPos.y << std::endl;
-	logFile << "bounce pos: \n";
+	logFile << "bounce pos (img coord): \n";
 	logFile << bouncePos.x << " " << bouncePos.y << std::endl;
-	logFile << "predict pos: \n";
+	logFile << "predict pos (img coord): \n";
 	logFile << predPos.x << " " << predPos.y << std::endl;
-	logFile << "previous pos: \n";
+	logFile << "previous pos (img coord): \n";
 	logFile << prevPos.x << " " << prevPos.y << std::endl;
-	logFile << "desired bot pos: \n";
+	logFile << "desired bot pos (img coord): \n";
 	logFile << botPos.x << " " << botPos.y << std::endl;
-	logFile << "detected bot pos: \n";
+	logFile << "detected bot pos (img coord): \n";
 	logFile << detectedBotPos.x << " " << detectedBotPos.y << std::endl;
-	logFile << "current puck speed: \n";
+	logFile << "current puck speed (table coord): \n";
 	logFile << puckSpeed.x << " " << puckSpeed.y << std::endl;
 	logFile << "predict time defence: \n";
 	logFile << predictTimeDefence << std::endl;
@@ -89,7 +89,7 @@ void Logger::LogStatus(
 	logFile << attackStatus << std::endl;
 	logFile << "attack time: \n";
 	logFile << attackTime << std::endl;
-	logFile << "puck avg speed: \n";
+	logFile << "puck avg speed (table coord): \n";
 	logFile << avgPuckSpeed.x << " " << avgPuckSpeed.y << std::endl;
     logFile << "correct missing steps? \n";
     if( correctMissingSteps )

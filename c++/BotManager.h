@@ -94,7 +94,7 @@ public:
 		m_CorrectMissingSteps = ok;
 	}
 
-    void CorrectMissingSteps( const bool botFound );
+    bool CorrectMissingSteps( const bool botFound );
 
 private:
 
@@ -102,7 +102,7 @@ private:
 	void FindTable( cv::Mat & input );
 
 	// send the message to Arduino over com port
-	bool SendBotMessage();
+	bool SendBotMessage( const bool correctSteps );
 
     // send the message to Arduino over com port
     void ReceiveMessage(); // debug tuse
