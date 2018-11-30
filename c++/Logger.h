@@ -39,7 +39,8 @@ public:
 		const unsigned int attackStatus,
 		const clock_t attackTime,
 		const cv::Point2f& avgPuckSpeed,
-        const bool correctMissingSteps ) const;
+        const bool correctMissingSteps,
+		const bool bailOut ) const;
 
 private:
 

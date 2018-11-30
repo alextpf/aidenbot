@@ -84,7 +84,7 @@ private:
 	//////////////////
 	// puck position
 	//////////////////
-	cv::Point		m_CurrPuckPos;        // current pos. mm. Corresponds to puckCoordX/Y.
+	cv::Point		m_CurrPuckPos;        // current pos. mm.  table coord. Corresponds to puckCoordX/Y.
 	cv::Point		m_PrevPuckPos;        // previous pos. mm. Corresponds to puckOldCoordX. Updated in reading from the camera, when new puck pos comes in
 	cv::Point		m_CurrPredictPos;     // predicted pos at defense line, mm, table coordinate
 	cv::Point		m_PrevPredictPos;
@@ -111,8 +111,8 @@ private:
 	//////////////////
 	// position
 	//////////////////
-	cv::Point		m_CurrBotPos;        // current pos. mm.
-	cv::Point		m_PrevBotPos;        // previous pos. mm.
+	cv::Point		m_CurrBotPos;        // current pos. mm. table coord
+	cv::Point		m_PrevBotPos;        // previous pos. mm. table coord
 
 	//////////////
 	// bot speed
@@ -130,7 +130,7 @@ private:
 	//////////////
 	int				m_PredictTimeDefence;
     int				m_PredictTimeAtBounce;
-	int				m_PredictTimeAttack;
+	int				m_PredictTimeAttack; // the estimated travel time from puck's current position to the attack line. if the time is small, defence, otherwise attack
 
 };// Camera
 

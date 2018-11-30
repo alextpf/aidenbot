@@ -60,7 +60,7 @@
 #define ROBOT_CENTER_Y  TABLE_LENGTH/2
 
 // Absolute Min and Max robot positions in mm (measured from center of robot pusher)
-#define ROBOT_MIN_X     60
+#define ROBOT_MIN_X     50
 #define ROBOT_MIN_Y     100 // Note: this can't be greater than ROBOT_INITIAL_POSITION_Y or "Robot defense and attack lines"
 #define ROBOT_MAX_X     TABLE_WIDTH-ROBOT_MIN_X
 #define ROBOT_MAX_Y     ROBOT_CENTER_Y-55 //=445
@@ -79,7 +79,7 @@
 #define ROBOT_DEFENSE_ATTACK_POSITION_MIN     140
 #define ROBOT_DEFENSE_ATTACK_POSITION_MAX     400
 
-#define PUCK_SIZE               22                        // PuckSize (puck radius in mm)
+#define PUCK_SIZE               27                        // PuckSize (puck radius in mm)
 #define PRE_ATTACK_DIST         4 * PUCK_SIZE
 
 //========================================================================================================================================
@@ -89,10 +89,10 @@
 
 // THIS VALUES DEPENDS ON YOUR ROBOT CONSTRUCTION (MOTORS, MECHANICS...)
 // RECOMMENDED VALUES FOR 12V POWER SUPPLY
-#define MAX_X_ABS_ACCEL         240//275                        // Maximun motor acceleration in (steps/seg2)/1000. Max recommended value:280
-#define MAX_Y_ABS_ACCEL         110//140
-#define MAX_X_ABS_SPEED         29000//30000//32000                    // Maximun speed in steps/seg. Max absolute value: 32767!!
-#define MAX_Y_ABS_SPEED         14000//25000
+#define MAX_X_ABS_ACCEL         250//275                        // Maximun motor acceleration in (steps/seg2)/1000. Max recommended value:280
+#define MAX_Y_ABS_ACCEL         120//140
+#define MAX_X_ABS_SPEED         30000//30000//32000                    // Maximun speed in steps/seg. Max absolute value: 32767!!
+#define MAX_Y_ABS_SPEED         15000//25000
 
 #define MIN_ACCEL         50						// make sure this is not 0
 #define MIN_SPEED         5000
@@ -110,7 +110,7 @@
 #define PREDICT_TIME_THRESHOLD    500
 #define MIN_ABS_Y_SPEED           60
 #define MIN_ABS_X_SPEED           100
-#define MIN_PREDICT_TIME          300                   // used in Robot::robotStrategy(). If the robot is slow (low speed limit), increase this value.
+#define MIN_PREDICT_TIME          120                   // used in Robot::robotStrategy().
 #define STOP_COEF         1800//1800
 //========================================================================================================================================
 //////////////////////////////////

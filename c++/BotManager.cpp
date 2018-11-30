@@ -102,7 +102,6 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 			cv::line( output, LowerLeft, LowerRight, GREEN, 2 );
 		}
 
-
 		// get time stamp
 		clock_t curr = clock();
 
@@ -179,7 +178,8 @@ void BotManager::Process(cv::Mat & input, cv::Mat & output)
 				m_Robot.GetAttackStatus(),
 				m_Robot.GetAttackTime(),
 				m_Camera.GetPuckAvgSpeed(),
-                m_CorrectMissingSteps );
+                m_CorrectMissingSteps,
+				bailOut);
 		}
 
 		// update time stamp and puck position
@@ -367,7 +367,7 @@ bool BotManager::FindPuck(
 			}
 
 			// do prediction work
-            m_Camera.CamProcess( dt, puckPos );
+            m_Camera.CamProcess( dt, m_Camera.GetCurrBotPos() /* table coord*/ );
 
 			prevPuckPos = m_Camera.GetPrevPuckPos(); // mm, table coordinate
 			prevPuckPos = m_TableFinder.TableToImgCoordinate( prevPuckPos );

@@ -169,7 +169,7 @@ bool Robot::RobotMoveDecision( Camera& cam )
 
     case BOT_STATUS::TURN_AROUND: // try to go around to the back of the puck ( since it's current at the back of the bot )
     {
-        const int thresh = 6 * PUCK_SIZE;
+        const int thresh = 4 * PUCK_SIZE;
         cv::Point backupPredictPos = cam.PredictPuckPos( 300 ); // predict puck's position after 300 ms
 
         // if puck and bot don't overlap vertically, back up straight
@@ -226,6 +226,12 @@ bool Robot::RobotMoveDecision( Camera& cam )
     }//TURN_AROUND
     break;
 
+	case BOT_STATUS::BAIL_OUT: // bail out
+	{
+		bailOut = true;
+	}
+	break;
+
 	case BOT_STATUS::DEFENCE: // Defense mode (only move on X axis on the defense line)
 	{
 		cv::Point pos = cam.GetCurrPredictPos();
@@ -250,9 +256,9 @@ bool Robot::RobotMoveDecision( Camera& cam )
 
 	case BOT_STATUS::DEFENCE_AND_ATTACK:
 	{
-		if ( cam.GetPredictTimeAttack() < MIN_PREDICT_TIME ) // If time is less than 150ms we start the attack
+		if ( cam.GetPredictTimeAttack() < MIN_PREDICT_TIME )
 		{
-            m_DesiredRobotPos.y = ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT + PUCK_SIZE * 4; // we need some override
+            m_DesiredRobotPos.y = ROBOT_DEFENSE_ATTACK_POSITION_DEFAULT + PRE_ATTACK_DIST; // we need some override
             m_DesiredRobotPos.x = cam.GetPredictXAttack();
 		}
 		else      // Defense position
@@ -371,13 +377,14 @@ bool Robot::RobotMoveDecision( Camera& cam )
             {
                 // Attack movement
                 // attack at the bounce point
-                m_DesiredRobotPos = bouncePos;
+                m_DesiredRobotPos.x = bouncePos.x;
+				m_DesiredRobotPos.y = bouncePos.y - PRE_ATTACK_DIST;
             }
             else  //it's not the time to attack yet
             {
                 // go to pre-attack position
                 m_DesiredRobotPos.x = bouncePos.x;
-                m_DesiredRobotPos.y = bouncePos.y - PRE_ATTACK_DIST;
+                m_DesiredRobotPos.y = bouncePos.y - PUCK_SIZE * 6;
 
                 m_DesiredYSpeed = static_cast<int>( MAX_Y_ABS_SPEED * 0.5 );
                 m_DesiredXSpeed = static_cast<int>( MAX_X_ABS_SPEED * 0.5 );

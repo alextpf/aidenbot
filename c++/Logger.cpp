@@ -50,7 +50,8 @@ void Logger::LogStatus(
 	const unsigned int attackStatus,
 	const clock_t attackTime,
 	const cv::Point2f& avgPuckSpeed,
-    const bool correctMissingSteps ) const
+    const bool correctMissingSteps,
+	const bool bailOut ) const
 {
 	std::ofstream logFile;
 	logFile.open( "Log.txt", std::ios_base::app ); // append
@@ -86,7 +87,7 @@ void Logger::LogStatus(
 	logFile << botXSpeed << " " << botYSpeed << std::endl;
 	logFile << "predict status ( -1 : error, 0 : No risk, 1. direct impact, 2. 1 bounce, 3: own goal ): \n";
 	logFile << predictStatus << std::endl;
-	logFile << "bot status ( 0: Init, 1: Defense, 2: Defense+Atack, 3: Atack (only when predict status = no risk), 4: attack at bounce point, 5: turn around ): \n";
+	logFile << "bot status ( 0: Init, 1: Defense, 2: Defense+Atack, 3: Atack (only when predict status = no risk), 4: attack at bounce point, 5: turn around, 6. bail out ): \n";
 	logFile << botStatus << std::endl;
 	logFile << "attack status (0: wait for attack, 1: ready to attack, 2: after firing attack ) only useful in BOT_STATUS::ATTACK mode: \n";
 	logFile << attackStatus << std::endl;
@@ -103,6 +104,16 @@ void Logger::LogStatus(
     {
         logFile << "no" << std::endl;
     }
+
+	logFile << "bail out at move decision? \n";
+	if ( bailOut )
+	{
+		logFile << "yes" << std::endl;
+	}
+	else
+	{
+		logFile << "no" << std::endl;
+	}
 
 	logFile.close();
 } // LogStatus

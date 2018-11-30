@@ -18,7 +18,7 @@ Camera::~Camera()
 {}
 
 //=========================================================
-void Camera::CamProcess( int dt /*ms*/, const cv::Point& botPos )
+void Camera::CamProcess( int dt /*ms*/, const cv::Point& botPos/* table coord*/ )
 {
 	// Speed calculation on each axis
 	cv::Point posDif = m_CurrPuckPos - m_PrevPuckPos;
@@ -174,7 +174,7 @@ void Camera::CamProcess( int dt /*ms*/, const cv::Point& botPos )
 } // CamProcess
 
 //====================================================================================================================
-bool Camera::IsOwnGoal(const cv::Point& botPos ) const
+bool Camera::IsOwnGoal(const cv::Point& botPos /* table coord*/) const
 {
     return  m_CurrPuckPos.y < botPos.y;
 } // IsOwnGoal

@@ -6,14 +6,14 @@
 #include <opencv2/video.hpp>
 #include <opencv2/imgproc.hpp>
 
-#include "D:\alex\aidenbot2\c++\VideoProcessor.h"
-#include "D:\alex\aidenbot2\c++\BotManager.h"
-#include "D:\alex\aidenbot2\c++\CheckHSV.h"
-#include "D:\alex\aidenbot2\c++\ImgComposer.h"
-//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\VideoProcessor.h"
-//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\BotManager.h"
-//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\CheckHSV.h"
-//#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\ImgComposer.h"
+//#include "D:\alex\aidenbot2\c++\VideoProcessor.h"
+//#include "D:\alex\aidenbot2\c++\BotManager.h"
+//#include "D:\alex\aidenbot2\c++\CheckHSV.h"
+//#include "D:\alex\aidenbot2\c++\ImgComposer.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\VideoProcessor.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\BotManager.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\CheckHSV.h"
+#include "C:\Users\alex_\Documents\Arduino\aidenbot\v2\aidenbot\c++\ImgComposer.h"
 
 using namespace cv;
 using namespace std;
@@ -57,16 +57,16 @@ int main()
 	//char inPath[] = "E:/alex/aidenbot2/data/";
 // C:/Users/alex_/Documents/Arduino/aidenbot/v2/aidenbot/data/webcam
 
-	//const char inPath[]		= "C:/tmp/data2/";
-	const char inPath[]		= "C:/tmp/results2/";
+	//const char inPath[]		= "C:/tmp/data3/";
+	const char inPath[]		= "C:/tmp/results3/";
 	//const char inPath[]		= "C:/Users/alex_/Documents/Arduino/aidenbot/v2/aidenbot/data/webcam/";
-	//const char outPath[]	= "C:/tmp/data2/";
-	const char outPath[] = "C:/tmp/results2/";
+	//const char outPath[]	= "C:/tmp/data3/";
+	const char outPath[] = "C:/tmp/results3/";
 	const char filename[]	= "pic";
 
 	const int webCamId		= 1; // 0: default (laptop's camera), 1: external connected cam
 	const int startFrame    = 0;// frame number we want to start at
-	const int endFrame		= 1300;
+	const int endFrame		= 1270;
 
 	//////////////////////
 	// Read from config

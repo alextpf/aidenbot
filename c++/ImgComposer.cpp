@@ -187,6 +187,10 @@ void ImgComposer::Process( cv::Mat & input, cv::Mat & output )
     std::getline( log, line ); // get description, skip
     std::getline( log, line );
 
+	// bail out?
+	std::getline( log, line ); // get description, skip
+	std::getline( log, line );
+
 	/////////////////
 	// Draw now
 	/////////////////
