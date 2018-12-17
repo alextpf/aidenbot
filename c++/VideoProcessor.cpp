@@ -112,11 +112,14 @@ bool VideoProcessor::SetInput( int id )
     m_Capture.release();
     m_Images.clear();
 
-	m_Capture.set( CV_CAP_PROP_FRAME_WIDTH, FRAME_WIDTH );
-	m_Capture.set( CV_CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT );
-
     // Open the video file
-    return m_Capture.open( id );
+    bool ok = m_Capture.open( id );
+
+    // note the setting of resolution has to come AFTER we open it!
+    ok = ok && m_Capture.set( CV_CAP_PROP_FRAME_WIDTH, FRAME_WIDTH );
+    ok = ok && m_Capture.set( CV_CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT );
+
+    return ok;
 }
 
 //=======================================================================
